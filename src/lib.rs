@@ -94,6 +94,14 @@ const SHOPPING1_BASE_Y: i32 = 140;
 /// validate each row against `xsize` and each slice against `zsize`.
 const STAIRSNORMAL_BASE_Y: i32 = 152;
 
+/// The twelfth part — the seven-layer large stone stair — is laid above the
+/// first stair at y=164..170, the next sealed band inside the dimension's 256
+/// height. It shares `/` = stone stairs with `stairsnormal`, so the in-game
+/// assertion is a **disjoint height band** (164..170, not the earlier 152..158)
+/// rather than a new block id: 36 `/` cells here versus 24 in the earlier part.
+/// Its footprint is 6x12; the decoder's generic bounds already validate it.
+const STAIRSBIG_BASE_Y: i32 = 164;
+
 #[derive(Default)]
 struct Mod;
 
@@ -112,6 +120,7 @@ struct CityGenerator {
     center001: Vec<runtime::Placement>,
     shopping1: Vec<runtime::Placement>,
     stairsnormal: Vec<runtime::Placement>,
+    stairsbig: Vec<runtime::Placement>,
     keys: HashMap<String, BlockKey>,
 }
 
@@ -164,6 +173,7 @@ impl ChunkGenerator for CityGenerator {
         self.write_part(chunk, &self.center001, CENTER001_BASE_Y);
         self.write_part(chunk, &self.shopping1, SHOPPING1_BASE_Y);
         self.write_part(chunk, &self.stairsnormal, STAIRSNORMAL_BASE_Y);
+        self.write_part(chunk, &self.stairsbig, STAIRSBIG_BASE_Y);
     }
 
     fn vanilla_stages(&self) -> VanillaStages {
@@ -279,6 +289,16 @@ impl Hooks for Mod {
             &variants,
         )
         .expect("the embedded stairsnormal part and merged palette decode");
+        // The twelfth part is the seven-layer large stone stair. Its `x`, `/`
+        // and `_` chars are exactly the three entries already carried verbatim
+        // in `STAIRSNORMAL_PALETTE_JSON`, so only its part bytes are new; it is
+        // laid at y=164..170, a band disjoint from the earlier stair's y=152..158.
+        let stairsbig = runtime::decode_city_with_variants(
+            runtime::STAIRSBIG_PART_JSON,
+            runtime::STAIRSNORMAL_PALETTE_JSON,
+            &variants,
+        )
+        .expect("the embedded stairsbig part and verbatim stair palette decode");
 
         // Request each distinct block id once. The registrar checks it against
         // the game's registry at load; an unknown id refuses the mod by name.
@@ -294,6 +314,7 @@ impl Hooks for Mod {
             .chain(center001.iter())
             .chain(shopping1.iter())
             .chain(stairsnormal.iter())
+            .chain(stairsbig.iter())
             .map(|p| p.block.clone())
             .collect();
         blocks.sort();
@@ -319,6 +340,7 @@ impl Hooks for Mod {
                 center001,
                 shopping1,
                 stairsnormal,
+                stairsbig,
                 keys,
             },
         );

@@ -12,8 +12,9 @@ second multi-layer building part as **0.1.2**, the horizontal rail line as **0.1
 the rail bend as **0.1.4**, the three-way rail split as **0.1.5**, the
 eighteen-layer rail descent as **0.1.6**, the twelve-layer first rail descent
 as **0.1.7**, the second six-layer building part as **0.1.8**, the six-layer
-city centre as **0.1.9**, the six-layer shopping-open front as **0.1.10** and the
-seven-layer stone stair as **0.1.11**.
+city centre as **0.1.9**, the six-layer shopping-open front as **0.1.10**, the
+seven-layer stone stair as **0.1.11** and the seven-layer large stone stair as
+**0.1.12**.
 
 ## What this version implements
 
@@ -142,10 +143,21 @@ seven-layer stone stair as **0.1.11**.
   generic decoder bounds already validate a non-16 footprint, so no new decoder
   form, SDK API or manifest key was needed.
 
-- **The other 197 parts, 38 buildings, 31 palettes, 15 multibuildings, the
+- **A twelfth, seven-layer large stone stair** (0.1.12): `parts/stairsbig.json`
+  (6x12, seven slices, 180 non-space cells: `x` 132, `/` 36, `_` 12, embedded
+  byte-identically from the jar, sha256 `ae9dc82a…`) is decoded against the
+  **same verbatim `STAIRSNORMAL_PALETTE_JSON`** — all three chars were already
+  declared by the earlier stair part, so only the part bytes are new. It is laid
+  at y=164..170, above the first stair. Because it shares the
+  `minecraft:stone_stairs` id, the in-game assertion fill-replaces that id in
+  the **disjoint** y=164..170 band (36 `/` cells, versus 24 in the earlier
+  part's y=152..158 band); vanilla noise fills nothing. No new decoder form,
+  SDK API or manifest key was needed.
+
+- **The other 196 parts, 38 buildings, 31 palettes, 15 multibuildings, the
   spheres/rail dungeons and Java-assembled structures** — still
   `blocked(no-city-data-decoder)` / `blocked(no-structure-type-for-cities)`:
-  this port decodes exactly eleven parts and the palette entries they use.
+  this port decodes exactly twelve parts and the palette entries they use.
 - **Replacing vanilla terrain in the Overworld** — `blocked(level_reset:R11)`:
   the Java mod's mixins replace vanilla levels; the pin has no `levels_reset`
   surface and R11 refuses the manifest key. This port generates cities only in

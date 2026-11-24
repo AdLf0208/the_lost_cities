@@ -1953,6 +1953,129 @@ pub const STAIRSNORMAL_PALETTE_JSON: &str = r#"{
   ]
 }"#;
 
+/// `parts/stairsbig.json` from the cached jar, verbatim (1,596 B, sha256
+/// `ae9dc82a2450c587cad447355021b5985549d4d17702de6e38b7b31a2cfe3a2c`):
+/// **6x12**, seven slices, 180 non-space cells (`x` 132, `/` 36, `_` 12). Its
+/// private `meta` array (`z1`/`z2` integers) is carried byte-identically and
+/// ignored by the decoder like any unknown key. Written as a raw string: no
+/// row contains the `"#` sequence that would end `r#"..."#`. All three chars
+/// are already declared verbatim in `STAIRSNORMAL_PALETTE_JSON`, so only the
+/// part bytes are new.
+pub const STAIRSBIG_PART_JSON: &str = r#"{
+  "meta": [
+    {
+      "integer": 4,
+      "key": "z1"
+    },
+    {
+      "integer": 11,
+      "key": "z2"
+    }
+  ],
+  "xsize": 6,
+  "zsize": 12,
+  "slices": [
+    [
+      "      ",
+      "      ",
+      "      ",
+      "      ",
+      "xxxxxx",
+      "xxxxx/",
+      "xxxxx/",
+      "xxxxx/",
+      "xxxxx/",
+      "xxxxx/",
+      "xxxxx/",
+      "xxxxxx"
+    ],
+    [
+      "      ",
+      "      ",
+      "      ",
+      "      ",
+      "xxxxx_",
+      "xxxx/ ",
+      "xxxx/ ",
+      "xxxx/ ",
+      "xxxx/ ",
+      "xxxx/ ",
+      "xxxx/ ",
+      "xxxxx_"
+    ],
+    [
+      "      ",
+      "      ",
+      "      ",
+      "      ",
+      "xxxx_ ",
+      "xxx/  ",
+      "xxx/  ",
+      "xxx/  ",
+      "xxx/  ",
+      "xxx/  ",
+      "xxx/  ",
+      "xxxx_ "
+    ],
+    [
+      "      ",
+      "      ",
+      "      ",
+      "      ",
+      "xxx_  ",
+      "xx/   ",
+      "xx/   ",
+      "xx/   ",
+      "xx/   ",
+      "xx/   ",
+      "xx/   ",
+      "xxx_  "
+    ],
+    [
+      "      ",
+      "      ",
+      "      ",
+      "      ",
+      "xx_   ",
+      "x/    ",
+      "x/    ",
+      "x/    ",
+      "x/    ",
+      "x/    ",
+      "x/    ",
+      "xx_   "
+    ],
+    [
+      "      ",
+      "      ",
+      "      ",
+      "      ",
+      "x_    ",
+      "/     ",
+      "/     ",
+      "/     ",
+      "/     ",
+      "/     ",
+      "/     ",
+      "x_    "
+    ],
+    [
+      "      ",
+      "      ",
+      "      ",
+      "      ",
+      "_     ",
+      "      ",
+      "      ",
+      "      ",
+      "      ",
+      "      ",
+      "      ",
+      "_     "
+    ]
+  ]
+}"#;
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -3173,6 +3296,138 @@ mod stairsnormal_tests {
             &variants,
         )
         .expect("the embedded shopping part decodes");
+        for (name, ps) in [
+            ("street", &street),
+            ("first building", &building),
+            ("horizontal line", &horizontal),
+            ("bend", &bend),
+            ("split", &split),
+            ("eighteen-layer descent", &down2),
+            ("first descent", &down1),
+            ("second building", &building12),
+            ("city centre", &center001),
+            ("shopping part", &shopping1),
+        ] {
+            assert!(
+                !ps.iter().any(|p| p.block == "minecraft:stone_stairs"),
+                "the {name} must not write a stone stair"
+            );
+        }
+    }
+}
+
+/// Slice 13: the twelfth part, the seven-layer large stone stair. These tests
+/// are written before the part data exists so the gap is proved red first:
+/// `STAIRSBIG_PART_JSON` is unresolved until the part bytes are carried from
+/// the jar. Its three chars (`x`, `/`, `_`) are already declared verbatim in
+/// `STAIRSNORMAL_PALETTE_JSON`, so no new palette entry or decoder form is
+/// needed — only the part bytes are new.
+#[cfg(test)]
+mod stairsbig_tests {
+    use super::*;
+
+    /// The jar's `parts/stairsbig.json` is 6x12 with seven slices, every row six
+    /// chars and every slice twelve rows — a non-16 footprint the generic bound
+    /// check must still accept. Its private `meta` key is ignored.
+    #[test]
+    fn embedded_stairsbig_part_has_seven_6x12_layers() {
+        let part =
+            Part::from_json(&parse_json(STAIRSBIG_PART_JSON).expect("jar stairsbig part parses"))
+                .expect("jar stairsbig part decodes");
+        assert_eq!(part.xsize, 6, "jar xsize");
+        assert_eq!(part.zsize, 12, "jar zsize");
+        assert_eq!(
+            part.slices.len(),
+            7,
+            "the large stair part has seven slices"
+        );
+        for (y, layer) in part.slices.iter().enumerate() {
+            assert_eq!(layer.len(), 12, "slice {y} has 12 rows");
+            for (z, row) in layer.iter().enumerate() {
+                assert_eq!(row.chars().count(), 6, "slice {y} row {z} is 6 chars");
+            }
+        }
+    }
+
+    /// The `/` char resolves to the exact stone-stairs id of
+    /// `palettes/default.json`, which this part shares with `stairsnormal`. The
+    /// in-game differential is therefore a disjoint height band (y=164..170),
+    /// not a new block id. Every count below is the artefact's per-part census
+    /// (180 non-space cells), not the whole filled window.
+    #[test]
+    fn stairsbig_chars_resolve_to_the_jar_stone_stairs() {
+        let variants = VariantTable::from_files(&[("stonebrick", STONEBRICK_VARIANT_JSON)])
+            .expect("the jar's stonebrick variant decodes");
+        let placements =
+            decode_city_with_variants(STAIRSBIG_PART_JSON, STAIRSNORMAL_PALETTE_JSON, &variants)
+                .expect("the embedded jar stairsbig part and verbatim stair palette decode");
+
+        let cell = placements
+            .iter()
+            .find(|p| p.dx == 5 && p.dy == 0 && p.dz == 5)
+            .expect("a / cell at (5,0,5)");
+        assert_eq!(
+            cell.block, "minecraft:stone_stairs",
+            "the / char is a stone stair"
+        );
+        assert_eq!(
+            cell.properties,
+            vec![
+                ("facing".to_string(), "west".to_string()),
+                ("half".to_string(), "bottom".to_string()),
+                ("shape".to_string(), "straight".to_string()),
+            ],
+            "the / char is palettes/default.json's west-facing stone stairs"
+        );
+
+        let count = |id: &str| placements.iter().filter(|p| p.block == id).count();
+        assert_eq!(count("minecraft:stone_stairs"), 36, "thirty-six / cells");
+        assert_eq!(count("minecraft:smooth_stone_slab"), 12, "twelve _ cells");
+        assert_eq!(placements.len(), 180, "132 x + 36 / + 12 _ cells");
+
+        // Differential: none of the first ten decoded parts writes a stone
+        // stair. The eleventh (stairsnormal) writes only 24, so a count above
+        // that in the disjoint y=164..170 band can only come from this part.
+        let street = decode_city(STREET_PART_JSON, STREET_PALETTE_JSON)
+            .expect("the embedded street part decodes");
+        let building =
+            decode_city_with_variants(BUILDING_PART_JSON, BUILDING_PALETTE_JSON, &variants)
+                .expect("the embedded first building part decodes");
+        let horizontal = decode_city_with_variants(RAILS_PART_JSON, RAILS_PALETTE_JSON, &variants)
+            .expect("the embedded horizontal rail part decodes");
+        let bend = decode_city_with_variants(RAILS_BEND_PART_JSON, RAILS_PALETTE_JSON, &variants)
+            .expect("the embedded rail bend part decodes");
+        let split =
+            decode_city_with_variants(RAILS_3SPLIT_PART_JSON, RAILS_PALETTE_JSON, &variants)
+                .expect("the embedded rail split part decodes");
+        let down2 = decode_city_with_variants(RAILS_DOWN2_PART_JSON, RAILS_PALETTE_JSON, &variants)
+            .expect("the embedded rail descent part decodes");
+        let down1 =
+            decode_city_with_variants(RAILS_DOWN1_PART_JSON, RAILS_DOWN1_PALETTE_JSON, &variants)
+                .expect("the embedded first descent part decodes");
+        let building12 =
+            decode_city_with_variants(BUILDING_1_2_PART_JSON, BUILDING_1_2_PALETTE_JSON, &variants)
+                .expect("the embedded second building part decodes");
+        let center001 =
+            decode_city_with_variants(CENTER00_1_PART_JSON, CENTER00_1_PALETTE_JSON, &variants)
+                .expect("the embedded city-centre part decodes");
+        let shopping1 = decode_city_with_variants(
+            SHOPPING_OPEN01_1_PART_JSON,
+            SHOPPING_OPEN01_1_PALETTE_JSON,
+            &variants,
+        )
+        .expect("the embedded shopping part decodes");
+        let stairsnormal =
+            decode_city_with_variants(STAIRSNORMAL_PART_JSON, STAIRSNORMAL_PALETTE_JSON, &variants)
+                .expect("the embedded stairsnormal part decodes");
+        assert_eq!(
+            stairsnormal
+                .iter()
+                .filter(|p| p.block == "minecraft:stone_stairs")
+                .count(),
+            24,
+            "the earlier stair part writes only 24 stone stairs"
+        );
         for (name, ps) in [
             ("street", &street),
             ("first building", &building),

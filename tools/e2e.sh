@@ -22,6 +22,7 @@
 #   CENTER001_SELFTEST=1 -> FAIL EXIT:1 (inverted quartz-stairs count of the city centre)
 #   SHOPPING1_SELFTEST=1 -> FAIL EXIT:1 (inverted cobblestone-wall count of the shopping part)
 #   STAIRS_SELFTEST=1   -> FAIL EXIT:1 (inverted stone-stairs count of the stair part)
+#   STAIRSBIG_SELFTEST=1 -> FAIL EXIT:1 (inverted stone-stairs count of the large stair)
 set -euo pipefail
 export LC_ALL=C
 
@@ -45,6 +46,7 @@ BUILDING12_SELFTEST=${BUILDING12_SELFTEST:-0}
 CENTER001_SELFTEST=${CENTER001_SELFTEST:-0}
 SHOPPING1_SELFTEST=${SHOPPING1_SELFTEST:-0}
 STAIRS_SELFTEST=${STAIRS_SELFTEST:-0}
+STAIRSBIG_SELFTEST=${STAIRSBIG_SELFTEST:-0}
 
 [ -n "$CTL" ] && [ -n "$GAME" ] || { echo "missing CTL/GAME: eval \"\$(ports/tools/launcher-game.sh env the_lost_cities)\"" >&2; exit 1; }
 [ -x "$CTL" ] || { echo "missing horizon-ctl: $CTL" >&2; exit 1; }
@@ -466,6 +468,37 @@ else
         || fail "the vanilla-noise control unexpectedly had $vanilla_stairs_count stone stair(s): $vanilla_stairs_reply"
 fi
 
+# Slice 13: the twelfth, seven-layer large stone stair is laid at
+# STAIRSBIG_BASE_Y=164 (spanning y=164..170, above the first stair at y=152..158).
+# It shares the `minecraft:stone_stairs` id with the earlier stair part, so the
+# differential is a DISJOINT HEIGHT BAND: the 36 `/` cells of this part are at
+# y=164..170 while the earlier part's 24 are at y=152..158 and its fill has
+# already replaced them. The same fill on the vanilla-noise Overworld must
+# report `No blocks were filled`; STAIRSBIG_SELFTEST inverts the count.
+say "seven-layer large stone stair authors stone stairs at the twelfth Y"
+stairsbig_reply=$(lc "fill 0 164 0 16 170 16 minecraft:air replace minecraft:stone_stairs" 2>&1 || true)
+stairsbig_chat=$(echo "$stairsbig_reply" | jq -r '.chat[0] // ""' 2>/dev/null || echo "")
+echo "stone-stairs large-stair-part fill: $(echo "$stairsbig_reply" | jq -c . 2>/dev/null | head -c 180)"
+stairsbig_count=$(echo "$stairsbig_chat" | grep -oE 'Successfully filled [0-9]+ block' | grep -oE '[0-9]+' || echo 0)
+stairsbig_count=${stairsbig_count:-0}
+echo "large-stair-part-authored stone-stairs count: $stairsbig_count"
+vanilla_stairsbig_reply=$(ctl command "fill 0 164 0 16 170 16 minecraft:air replace minecraft:stone_stairs" 2>&1 || true)
+vanilla_stairsbig_chat=$(echo "$vanilla_stairsbig_reply" | jq -r '.chat[0] // ""' 2>/dev/null || echo "")
+echo "vanilla-noise large-stair stone-stairs control: $(echo "$vanilla_stairsbig_reply" | jq -c . 2>/dev/null | head -c 180)"
+vanilla_stairsbig_count=$(echo "$vanilla_stairsbig_chat" | grep -oE 'Successfully filled [0-9]+ block' | grep -oE '[0-9]+' || echo 0)
+vanilla_stairsbig_count=${vanilla_stairsbig_count:-0}
+echo "vanilla-noise large-stair stone-stairs count: $vanilla_stairsbig_count"
+if [ "$STAIRSBIG_SELFTEST" = 1 ]; then
+    [ "$stairsbig_count" -eq 0 ] \
+        || fail "STAIRSBIG_SELFTEST: the part authored $stairsbig_count stone stair(s); the inverted assertion expected 0"
+    echo "STAIRSBIG_SELFTEST: no stone-stairs-authored blocks (unexpected)"
+else
+    [ "$stairsbig_count" -gt 0 ] \
+        || fail "the chunk generator authored no large-part stone stairs: $stairsbig_reply"
+    [ "$vanilla_stairsbig_count" -eq 0 ] \
+        || fail "the vanilla-noise control unexpectedly had $vanilla_stairsbig_count stone stair(s): $vanilla_stairsbig_reply"
+fi
+
 say "carried block tag #lostcities:notbreakable matches bedrock"
 end "setblock 50 80 50 minecraft:bedrock" >/dev/null
 ctl wait 5
@@ -515,4 +548,4 @@ echo "tags=$(find "$PORT/data/lostcities/tags" -name '*.json' | wc -l) " \
      "loot=$(find "$PORT/data/lostcities/loot_table" -name '*.json' | wc -l) " \
      "lang=$(find "$PORT/assets/lostcities/lang" -name '*.json' | wc -l)"
 
-echo "PASS: the lostcity dimension answered, all eleven decoded parts authored their own blocks in it (slabs, bookshelves, east_west rails, the bend's north_south rails, the split's north_east rails, the descent's ascending_east rails, the first descent's iron bars, the second building's quartz blocks, the city centre's quartz stairs, the shopping part's cobblestone walls and the stair part's stone stairs), #lostcities:notbreakable matched bedrock, and both carried loot tables yielded items"
+echo "PASS: the lostcity dimension answered, all twelve decoded parts authored their own blocks in it (slabs, bookshelves, east_west rails, the bend's north_south rails, the split's north_east rails, the descent's ascending_east rails, the first descent's iron bars, the second building's quartz blocks, the city centre's quartz stairs, the shopping part's cobblestone walls, the stair part's stone stairs and the large stair's stone stairs in its own height band), #lostcities:notbreakable matched bedrock, and both carried loot tables yielded items"
