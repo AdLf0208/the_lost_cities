@@ -13,6 +13,7 @@
 #   TAG_SELFTEST=1-> FAIL EXIT:1  (inverted tag assertion)
 #   CITY_SELFTEST=1 -> FAIL EXIT:1 (inverted generator-authored block count)
 #   BUILDING_SELFTEST=1 -> FAIL EXIT:1 (inverted bookshelf count of the six-layer part)
+#   RAILS_SELFTEST=1 -> FAIL EXIT:1 (inverted rail count of the horizontal rail line)
 set -euo pipefail
 export LC_ALL=C
 
@@ -27,6 +28,7 @@ SELFTEST=${SELFTEST:-0}
 TAG_SELFTEST=${TAG_SELFTEST:-0}
 CITY_SELFTEST=${CITY_SELFTEST:-0}
 BUILDING_SELFTEST=${BUILDING_SELFTEST:-0}
+RAILS_SELFTEST=${RAILS_SELFTEST:-0}
 
 [ -n "$CTL" ] && [ -n "$GAME" ] || { echo "missing CTL/GAME: eval \"\$(ports/tools/launcher-game.sh env the_lost_cities)\"" >&2; exit 1; }
 [ -x "$CTL" ] || { echo "missing horizon-ctl: $CTL" >&2; exit 1; }
@@ -173,6 +175,35 @@ else
         || fail "the vanilla-noise control unexpectedly had $vanilla_bldg_count bookshelf(s): $vanilla_bldg_reply"
 fi
 
+# Slice 4: the third, six-layer rail part is laid at RAILS_BASE_Y=54. Its `e`
+# char resolves to `minecraft:rail[shape=east_west]` in palettes/rails.json — the
+# artefact's id, not the brief's illustrative north_south example — and neither
+# the street nor the building writes a rail. The same fill on the vanilla-noise
+# Overworld must report `No blocks were filled`; RAILS_SELFTEST inverts it.
+say "six-layer horizontal rail line authors rails at the third Y"
+rails_reply=$(lc "fill 0 50 0 16 64 16 minecraft:air replace minecraft:rail" 2>&1 || true)
+rails_chat=$(echo "$rails_reply" | jq -r '.chat[0] // ""' 2>/dev/null || echo "")
+echo "rail fill: $(echo "$rails_reply" | jq -c . 2>/dev/null | head -c 180)"
+rails_count=$(echo "$rails_chat" | grep -oE 'Successfully filled [0-9]+ block' | grep -oE '[0-9]+' || echo 0)
+rails_count=${rails_count:-0}
+echo "rail-authored count: $rails_count"
+vanilla_rails_reply=$(ctl command "fill 0 50 0 16 64 16 minecraft:air replace minecraft:rail" 2>&1 || true)
+vanilla_rails_chat=$(echo "$vanilla_rails_reply" | jq -r '.chat[0] // ""' 2>/dev/null || echo "")
+echo "vanilla-noise rail control: $(echo "$vanilla_rails_reply" | jq -c . 2>/dev/null | head -c 180)"
+vanilla_rails_count=$(echo "$vanilla_rails_chat" | grep -oE 'Successfully filled [0-9]+ block' | grep -oE '[0-9]+' || echo 0)
+vanilla_rails_count=${vanilla_rails_count:-0}
+echo "vanilla-noise rail count: $vanilla_rails_count"
+if [ "$RAILS_SELFTEST" = 1 ]; then
+    [ "$rails_count" -eq 0 ] \
+        || fail "RAILS_SELFTEST: the rail part authored $rails_count rail(s); the inverted assertion expected 0"
+    echo "RAILS_SELFTEST: no rail-authored blocks (unexpected)"
+else
+    [ "$rails_count" -gt 0 ] \
+        || fail "the chunk generator authored no rails: $rails_reply"
+    [ "$vanilla_rails_count" -eq 0 ] \
+        || fail "the vanilla-noise control unexpectedly had $vanilla_rails_count rail(s): $vanilla_rails_reply"
+fi
+
 say "carried block tag #lostcities:notbreakable matches bedrock"
 end "setblock 50 80 50 minecraft:bedrock" >/dev/null
 ctl wait 5
@@ -222,4 +253,4 @@ echo "tags=$(find "$PORT/data/lostcities/tags" -name '*.json' | wc -l) " \
      "loot=$(find "$PORT/data/lostcities/loot_table" -name '*.json' | wc -l) " \
      "lang=$(find "$PORT/assets/lostcities/lang" -name '*.json' | wc -l)"
 
-echo "PASS: the lostcity dimension answered, both decoded parts authored their own blocks in it (slabs and bookshelves), #lostcities:notbreakable matched bedrock, and both carried loot tables yielded items"
+echo "PASS: the lostcity dimension answered, all three decoded parts authored their own blocks in it (slabs, bookshelves and rails), #lostcities:notbreakable matched bedrock, and both carried loot tables yielded items"

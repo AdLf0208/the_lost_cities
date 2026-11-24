@@ -1,14 +1,15 @@
 id = "the_lost_cities"
 name = "The Lost Cities"
-version = "0.1.2"
+version = "0.1.3"
 description = """Generate cities all over the world. This slice registers the lostcities:lostcity
 dimension from the jar's dimension_type values with a deterministic city chunk generator:
-two jar parts are decoded by a clean-room Rust decoder and laid at two heights — the street
-(parts/street_straight.json) at y=90 and a six-layer building (parts/building1_1.json) at y=72,
-whose # char resolves through a jar variant file and whose merged palette spans bricks_standard,
-common and the two glass groups selected by styles/standard.json. Block tags, chest loot tables
-and the language file are carried as before. The other 206 parts and Java-assembled structures
-remain blocked: the pin has no configured-feature registrar and R11 refuses a level reset."""
+three jar parts are decoded by a clean-room Rust decoder and laid at three heights — the street
+(parts/street_straight.json) at y=90, a six-layer building (parts/building1_1.json) at y=72 whose
+# char resolves through a jar variant file, and the six-layer horizontal rail line
+(parts/rails_horizontal.json) at y=54 whose e/f chars come verbatim from palettes/rails.json.
+Block tags, chest loot tables and the language file are carried as before. The other 205 parts
+and Java-assembled structures remain blocked: the pin has no configured-feature registrar and
+R11 refuses a level reset."""
 authors = ["McJty (upstream, MIT)", "AdLf0208 (port)"]
 api = "0.2"
 side = "both"

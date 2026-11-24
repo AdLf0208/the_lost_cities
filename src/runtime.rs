@@ -687,6 +687,133 @@ pub const BUILDING_PART_JSON: &str = "{\n  \"xsize\": 16,\n  \"zsize\": 16,\n  \
 /// these palette groups together, so this is the jar's own char -> block map.
 pub const BUILDING_PALETTE_JSON: &str = "{\"palette\": [{\"char\": \"#\", \"variant\": \"stonebrick\", \"damaged\": \"minecraft:iron_bars\"}, {\"char\": \"a\", \"block\": \"minecraft:glass\"}, {\"char\": \"@\", \"frompalette\": \"#\"}, {\"char\": \"1\", \"block\": \"minecraft:spawner\", \"mob\": \"easymobs\"}, {\"char\": \"T\", \"block\": \"minecraft:wall_torch[facing=north]\", \"torch\": true}, {\"char\": \"F\", \"blocks\": [{\"random\": 25, \"block\": \"minecraft:furnace[facing=north]\"}, {\"random\": 20, \"block\": \"minecraft:crafting_table\"}, {\"random\": 7, \"block\": \"minecraft:brewing_stand\"}, {\"random\": 6, \"block\": \"minecraft:anvil[facing=north]\"}, {\"random\": 5, \"block\": \"minecraft:cauldron\"}, {\"random\": 2, \"block\": \"minecraft:enchanting_table\"}, {\"random\": 1000, \"block\": \"minecraft:cobweb\"}]}, {\"char\": \"D\", \"block\": \"minecraft:dirt\"}, {\"char\": \"l\", \"block\": \"minecraft:ladder[facing=north]\"}, {\"char\": \"L\", \"block\": \"minecraft:bookshelf\"}, {\"char\": \"*\", \"block\": \"minecraft:potted_cactus\"}, {\"char\": \" \", \"block\": \"minecraft:air\"}]}";
 
+/// `parts/rails_horizontal.json` from the cached jar, verbatim: 16x16, six
+/// slices, `refpalette: "rails"`. The exact non-space chars are `T`, `e`, `f`,
+/// `g`, `y`, `~` — the same set the brief names, read from the artefact first.
+pub const RAILS_PART_JSON: &str = r#"{
+  "xsize": 16,
+  "zsize": 16,
+  "refpalette": "rails",
+  "slices": [
+    [
+      "y              y",
+      "y              y",
+      "y              y",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "y              y",
+      "y              y",
+      "y              y",
+      "y               "
+    ],
+    [
+      "y              y",
+      "y              y",
+      "y              y",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "eeeeeeefeeeeeeee",
+      "yyyyyyygyyyyyyyy",
+      "eeeeeeefeeeeeeee",
+      "yyyyyyygyyyyyyyy",
+      "eeeeeeefeeeeeeee",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "y              y",
+      "y              y",
+      "y              y",
+      "y               "
+    ],
+    [
+      "y              y",
+      "y              y",
+      "y              y",
+      "yyyyyyyyyyyyyyyy",
+      "~~~~~~~~~~~~~~~~",
+      "~~~~~~~~~~~~~~~~",
+      "~~~~~~~~~~~~~~~~",
+      "~~~~~~~~~~~~~~~~",
+      "~~~~~~~~~~~~~~~~",
+      "~~~~~~~~~~~~~~~~",
+      "~~~~~~~~~~~~~~~~",
+      "yyyyyyyyyyyyyyyy",
+      "y              y",
+      "y              y",
+      "y              y",
+      "y               "
+    ],
+    [
+      "y              y",
+      "y              y",
+      "y              y",
+      "yyyyyyyyyyyyyyyy",
+      "~~~~~~~~~~~~~~~~",
+      "~~~~~~~~~~~~~~~~",
+      "~~~~~~~~~~~~~~~~",
+      "~~~~~~~~~~~~~~~~",
+      "~~~~~~~~~~~~~~~~",
+      "~~~~~~~~~~~~~~~~",
+      "~~~~~~~~~~~~~~~~",
+      "yyyyyyyyyyyyyyyy",
+      "y              y",
+      "y              y",
+      "y              y",
+      "y               "
+    ],
+    [
+      "y              y",
+      "y              y",
+      "y              y",
+      "yyyyyyyyyyyyyyyy",
+      "~~~~~~~~T~~~~~~~",
+      "~~~~~~~~~~~~~~~~",
+      "~~~~~~~~~~~~~~~~",
+      "~~~~~~~~~~~~~~~~",
+      "~~~~~~~~~~~~~~~~",
+      "~~~~~~~~~~~~~~~~",
+      "~~~~~~~~~~~~~~~~",
+      "yyyyyyyyyyyyyyyy",
+      "y              y",
+      "y              y",
+      "y              y",
+      "y               "
+    ],
+    [
+      "y              y",
+      "y              y",
+      "y              y",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "y              y",
+      "y              y",
+      "y              y",
+      "y               "
+    ]
+  ]
+}"#;
+
+/// Merged palette for the rail part. Every entry is copied verbatim from its
+/// jar source: all twelve entries of `palettes/rails.json` (the part's
+/// `refpalette`), `y` from `palettes/default.json` (a `variant: stonebrick`),
+/// and `T`, `g`, `~`, space from `palettes/common.json`. The brief's example ids
+/// were wrong — the artefact says `e` is `rail[shape=east_west]` and `f` is
+/// `powered_rail[powered=true,shape=east_west]`; both are carried as written.
+pub const RAILS_PALETTE_JSON: &str = "{\"palette\": [{\"char\": \"k\",\"block\": \"minecraft:rail[shape=north_south]\"},{\"char\": \"e\",\"block\": \"minecraft:rail[shape=east_west]\"},{\"char\": \"j\",\"block\": \"minecraft:rail[shape=ascending_east]\"},{\"char\": \"q\",\"block\": \"minecraft:rail[shape=south_east]\"},{\"char\": \"s\",\"block\": \"minecraft:rail[shape=south_west]\"},{\"char\": \"r\",\"block\": \"minecraft:rail[shape=north_west]\"},{\"char\": \"n\",\"block\": \"minecraft:rail[shape=north_east]\"},{\"char\": \"m\",\"block\": \"minecraft:powered_rail[powered=true,shape=north_south]\"},{\"char\": \"E\",\"block\": \"minecraft:powered_rail[powered=true,shape=ascending_south]\"},{\"char\": \"H\",\"block\": \"minecraft:powered_rail[powered=true,shape=ascending_north]\"},{\"char\": \"f\",\"block\": \"minecraft:powered_rail[powered=true,shape=east_west]\"},{\"char\": \"i\",\"block\": \"minecraft:powered_rail[powered=true,shape=ascending_east]\"},{\"char\": \"y\",\"variant\": \"stonebrick\",\"damaged\": \"minecraft:iron_bars\"},{\"char\": \"T\",\"block\": \"minecraft:wall_torch[facing=north]\",\"torch\": true},{\"char\": \"g\",\"block\": \"minecraft:redstone_torch[lit=true]\"},{\"char\": \"~\",\"block\": \"minecraft:structure_void\"},{\"char\": \" \",\"block\": \"minecraft:air\"}]}";
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -910,6 +1037,86 @@ mod building_tests {
             placements.iter().map(|p| p.dy).max(),
             Some(5),
             "six slices span dy 0..5"
+        );
+    }
+}
+
+/// Slice 4: the third part, the horizontal rail line. Written before any rail
+/// data exists so the decoder gap is proved red first. Every id asserted below
+/// is read from the cached jar, not from the brief's illustrative char list.
+#[cfg(test)]
+mod rails_tests {
+    use super::*;
+
+    /// The jar's `parts/rails_horizontal.json` is 16x16 with six slices. This
+    /// is the bound the single-slice street never exercised in the rail family.
+    #[test]
+    fn embedded_rails_part_has_six_16x16_layers() {
+        let part = Part::from_json(&parse_json(RAILS_PART_JSON).expect("jar rail part parses"))
+            .expect("jar rail part decodes");
+        assert_eq!(part.xsize, 16, "jar xsize");
+        assert_eq!(part.zsize, 16, "jar zsize");
+        assert_eq!(part.slices.len(), 6, "the rail part has six slices");
+        for (y, layer) in part.slices.iter().enumerate() {
+            assert_eq!(layer.len(), 16, "slice {y} has 16 rows");
+            for (z, row) in layer.iter().enumerate() {
+                assert_eq!(row.chars().count(), 16, "slice {y} row {z} is 16 chars");
+            }
+        }
+    }
+
+    /// The rail chars resolve to the exact ids of `palettes/rails.json`. The
+    /// brief's list (`e` = north_south, `f` = plain east_west rail) is wrong;
+    /// the artefact says `e` = east_west rail and `f` = east_west powered rail.
+    #[test]
+    fn rail_chars_resolve_to_the_jar_rail_ids() {
+        let variants = VariantTable::from_files(&[("stonebrick", STONEBRICK_VARIANT_JSON)])
+            .expect("the jar's stonebrick variant decodes");
+        let placements = decode_city_with_variants(RAILS_PART_JSON, RAILS_PALETTE_JSON, &variants)
+            .expect("the embedded jar rail part and merged palette decode");
+        let rail = placements
+            .iter()
+            .find(|p| p.dx == 6 && p.dy == 1 && p.dz == 5)
+            .expect("the e char at (6,1,5)");
+        assert_eq!(rail.block, "minecraft:rail", "the e char is a rail");
+        assert_eq!(
+            rail.properties,
+            vec![("shape".to_string(), "east_west".to_string())],
+            "the e char is the east_west rail of palettes/rails.json"
+        );
+        let powered = placements
+            .iter()
+            .find(|p| p.dx == 7 && p.dy == 1 && p.dz == 5)
+            .expect("the f char at (7,1,5)");
+        assert_eq!(
+            powered.block, "minecraft:powered_rail",
+            "the f char is a powered rail"
+        );
+        assert_eq!(
+            powered.properties,
+            vec![
+                ("powered".to_string(), "true".to_string()),
+                ("shape".to_string(), "east_west".to_string())
+            ],
+            "the f char is the powered east_west rail of palettes/rails.json"
+        );
+        // The differential block id of the in-game assertion: 15 `e` cells in
+        // each of the three rail rows of slice 1, no other part writes a rail.
+        assert_eq!(
+            placements
+                .iter()
+                .filter(|p| p.block == "minecraft:rail")
+                .count(),
+            45,
+            "three rows of 15 east_west rails"
+        );
+        assert_eq!(
+            placements
+                .iter()
+                .filter(|p| p.block == "minecraft:powered_rail")
+                .count(),
+            3,
+            "one powered rail in each of the three rows"
         );
     }
 }

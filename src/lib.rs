@@ -29,15 +29,21 @@ const CITY_BASE_Y: i32 = 90;
 /// bookshelf, so the building's `L` char is the differential assertion.
 const BUILDING_BASE_Y: i32 = 72;
 
+/// The third part — the horizontal rail line — is laid below the building. Its
+/// six slices span y=54..59, inside the rail fill window (50..64); neither the
+/// street nor the building writes a rail, so `minecraft:rail` is differential.
+const RAILS_BASE_Y: i32 = 54;
+
 #[derive(Default)]
 struct Mod;
 
-/// The stateless city generator: the two decoded parts plus process-stable
+/// The stateless city generator: the three decoded parts plus process-stable
 /// block keys, requested once at registration. Two worldgen workers may fill
 /// neighbouring chunks at once, so nothing here is mutable.
 struct CityGenerator {
     street: Vec<runtime::Placement>,
     building: Vec<runtime::Placement>,
+    rails: Vec<runtime::Placement>,
     keys: HashMap<String, BlockKey>,
 }
 
@@ -81,6 +87,7 @@ impl ChunkGenerator for CityGenerator {
         }
         self.write_part(chunk, &self.street, CITY_BASE_Y);
         self.write_part(chunk, &self.building, BUILDING_BASE_Y);
+        self.write_part(chunk, &self.rails, RAILS_BASE_Y);
     }
 
     fn vanilla_stages(&self) -> VanillaStages {
@@ -106,12 +113,22 @@ impl Hooks for Mod {
             &variants,
         )
         .expect("the embedded building part and merged palette decode");
+        // The rail part's `y` char is the same jar `variant: stonebrick` entry,
+        // so the variant table built above resolves it too. Its `e`/`f` chars
+        // come from `palettes/rails.json` through the part's `refpalette`.
+        let rails = runtime::decode_city_with_variants(
+            runtime::RAILS_PART_JSON,
+            runtime::RAILS_PALETTE_JSON,
+            &variants,
+        )
+        .expect("the embedded rail part and merged palette decode");
 
         // Request each distinct block id once. The registrar checks it against
         // the game's registry at load; an unknown id refuses the mod by name.
         let mut blocks: Vec<String> = street
             .iter()
             .chain(building.iter())
+            .chain(rails.iter())
             .map(|p| p.block.clone())
             .collect();
         blocks.sort();
@@ -128,6 +145,7 @@ impl Hooks for Mod {
             CityGenerator {
                 street,
                 building,
+                rails,
                 keys,
             },
         );
