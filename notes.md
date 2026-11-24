@@ -1,4 +1,4 @@
-# The Lost Cities — port notes (slices 1–7)
+# The Lost Cities — port notes (slices 1–8)
 
 Skills: superpowers/using-superpowers, brainstorming, writing-plans, test-driven-development, systematic-debugging, verification-before-completion; BeautifulRust/rust-best-practices
 
@@ -414,6 +414,68 @@ regex only matched `Dropped N items`. The regex now accepts both
 so the assertion remains fail-capable. No package file changed; the leg was
 re-run green (4 and 3 items).
 
+## Slice 8 — the seventh, twelve-layer first rail descent (0.1.7)
+
+### The part and both palette sources as read from the cached jar (source first)
+
+Everything below was read from `ports/_shared/licence-cache/the-lost-cities.jar`
+(sha `666cd25d…`, verified before any edit):
+
+- `data/lostcities/lostcities/parts/rails_down1.json`: **5,211 B**, sha256
+  `822a38fa5420ab545f78248a216a937e0f1f8dc78d6a258ffbae45da8340411e`. The
+  brief's byte guess was wrong; the artefact is the authority. It is `xsize: 16`,
+  `zsize: 16`, `refpalette: "rails"`, **12 slices** (911 non-space cells), every
+  row 16 chars. The exact non-space char census is `:` 30, `_` 26, `e` 27, `f` 3,
+  `g` 2, `j` 18, `y` 279, `~` 526 — measured from the jar, not from the brief.
+  Embedded byte-identically in `runtime::RAILS_DOWN1_PART_JSON` (verified by
+  sha256 after rustfmt).
+- The part's `refpalette` is `palettes/rails.json`, whose twelve entries are the
+  same verbatim set slice 4 already carries in `RAILS_PALETTE_JSON`; `y` is the
+  jar's `variant: stonebrick` entry and `g`/`~`/space come from
+  `palettes/common.json`. No id or char was invented.
+- `:` and `_` are **absent** from `RAILS_PALETTE_JSON`. Both are copied verbatim
+  from the jar's `palettes/default.json`: `:` → `minecraft:iron_bars`, `_` →
+  `minecraft:smooth_stone_slab[type=bottom]`. They are merged into a new
+  `runtime::RAILS_DOWN1_PALETTE_JSON` (the 17 rail entries plus these two, byte
+  for byte). No other decoded part writes `iron_bars`: the street/building/rail
+  palettes only name it as a `damaged` field, which the decoder does not place.
+  That makes it a clean in-game differential.
+
+No new decoder form, SDK API or manifest key: `variant`, `frompalette`, weighted
+`blocks` and generic multi-layer bounds already exist. `lib.rs` lays the part at
+y=100 (`DOWN1_BASE_Y`), spanning y=100..111 above the street (y=90) — the
+dimension's min_y=0 leaves no room below the 18-layer descent's y=4..21, so the
+sealed band above the street is the only free one. Its block ids are unioned into
+the same one-time `block_key` request. The seven parts do not collide: the
+highest existing part before this slice was the street at y=90.
+
+### Red verbatim
+
+`evidence/the_lost_cities/down1-test-red.log`, before the part or its palette
+existed: three `error[E0425]` — *"cannot find value `RAILS_DOWN1_PART_JSON` in
+this scope"* (twice, at the 12-layer shape assertion and at the id resolver) and
+*"cannot find value `RAILS_DOWN1_PALETTE_JSON` in this scope"* — each with
+rustc's *similarly named constant `RAILS_DOWN2_PART_JSON`* hint —
+`error: could not compile 'the_lost_cities' (lib test) due to 3 previous errors`,
+build-slot exit **101**. The new tests then passed green: **21 passed / 0
+failed**, including `down1_tests::down1_chars_resolve_to_the_jar_iron_bars_and_bottom_slab`,
+which pins the artefact's 30 `:` / 26 `_` counts and asserts none of the first six
+parts writes an iron bar.
+
+### Both fits lines on the delivered 0.1.7 sha
+
+```
+The Lost Cities:
+0a875da  made for
+The Lost Cities:
+0b14f8a  fits
+```
+
+Delivered `the_lost_cities.hmod` **34,134 B**, SHA-256
+`9f2c2e28d8eaec9252187bea4c2fed3c079c02f4c1d48718b67597101923ac3f`, 17 entries.
+The second green line is honest: the registrar/`ChunkAccess` surface exists in
+both cached builds; only the clean-room decoder and embedded jar data are ours.
+
 ## Gaps / blocked symbols (measured, not guessed)
 
 - **`configured-feature-not-registered`** — the two carried `worldgen/feature/*.json`
@@ -438,9 +500,9 @@ re-run green (4 and 3 items).
   `data/lostcities/lostcities/*.json` files (private
   `parts`/`buildings`/`palettes`/`multibuildings`/… schema; the pin's
   `mod_content.rs` worldgen bundle names only vanilla kinds), the port writes a
-  clean-room decoder and decodes **six parts** (`street_straight`,
-  `building1_1`, `rails_horizontal`, `rails_bend`, `rails_3split`, `rails_down2`) plus their palette/variant
-  entries. The **other 202 parts**, 38 buildings,
+  clean-room decoder and decodes **seven parts** (`street_straight`,
+  `building1_1`, `rails_horizontal`, `rails_bend`, `rails_3split`, `rails_down2`, `rails_down1`) plus their palette/variant
+  entries. The **other 201 parts**, 38 buildings,
   31 palettes, 15 multibuildings, 12 variants, 6 scattered and all
   `citystyles`/`styles`/`worldstyles` are still blocked — no decoder was written
   for them.
@@ -450,7 +512,7 @@ re-run green (4 and 3 items).
   be an invented structure, so none is registered.
 - **Not in the artefact:** no item, block, model, recipe, advancement, biome or
   structure files (census above).
-- **Deferred:** the remaining 202 parts, spheres/rail dungeons, the config
+- **Deferred:** the remaining 201 parts, spheres/rail dungeons, the config
   GUI/18 GUI textures, the editor/commands/network classes.
 
 ## Upstream defects fixed
@@ -478,35 +540,37 @@ re-run green (4 and 3 items).
 | language file (`en_us.json`) | carried | verbatim, data contract; no in-game text assertion (the key is a generator name, not surfaced by the pin) |
 | custom features (2) + biome modifiers (2) | `blocked(configured-feature-not-registered)` | 0 API matches for a feature/placement registrar; not packed |
 | vanilla terrain replacement / city mixins | `blocked(level_reset:R11)` | `surface.json` 0 matches; R11 refuses the manifest key; only the mod's own level is generated, not vanilla's |
-| 322 internal generator JSON files | 6 parts decoded / 202 `blocked(no-city-data-decoder)` | clean-room decoder for `street_straight`, the six-layer `building1_1`, the six-layer `rails_horizontal`, the six-layer `rails_bend`, the six-layer `rails_3split` and the eighteen-layer `rails_down2`, with `variant`/`frompalette`/weighted/multi-layer support; the other 202 parts and all buildings/palettes/multibuildings have no decoder; not packed |
+| 322 internal generator JSON files | 7 parts decoded / 201 `blocked(no-city-data-decoder)` | clean-room decoder for `street_straight`, the six-layer `building1_1`, the six-layer `rails_horizontal`, the six-layer `rails_bend`, the six-layer `rails_3split`, the eighteen-layer `rails_down2` and the twelve-layer `rails_down1`, with `variant`/`frompalette`/weighted/multi-layer support; the other 201 parts and all buildings/palettes/multibuildings have no decoder; not packed |
 | horizontal rail line (`parts/rails_horizontal.json` + `palettes/rails.json`) | **tested** | 45 east-west rails + 3 powered rails decoded from the artefact's ids; laid at y=54; in-game fill-replace of `minecraft:rail` at y=50..64 → **48 blocks**, vanilla-noise Overworld → **0**, `RAILS_SELFTEST=1` → `EXIT:1` |
 | rail bend (`parts/rails_bend.json` + `palettes/rails.json`) | **tested** | 9 north_south + 2 powered north_south + 1 north_west + 1 south_west + 14 east_west + 2 powered east_west rails decoded from the artefact's ids; laid at y=36; in-game fill-replace of `minecraft:rail[shape=north_south]` at y=30..44 → **10 blocks** (9 in-chunk + 1 from the inclusive 17×17 window), vanilla-noise Overworld → **0**, `BEND_SELFTEST=1` → `EXIT:1` |
 | three-way rail split (`parts/rails_3split.json` + `palettes/rails.json`) | **tested** | 1 north_east + 1 south_east + 9 north_south + 2 powered north_south + 26 east_west + 4 powered east_west rails decoded from the artefact's ids (byte-identical part, sha `b0c8bd61…`); laid at y=18; in-game fill-replace of `minecraft:rail[shape=north_east]` at y=12..26 → **1 block**, vanilla-noise Overworld → **0**, `SPLIT_SELFTEST=1` → `EXIT:1` |
 | eighteen-layer rail descent (`parts/rails_down2.json` + `palettes/rails.json`) | **tested** | 21 `j` ascending_east + 15 `i` powered ascending_east + 12 `f` powered east_west rails (7,779-byte part, sha `f2f6eba…`, byte-identical); laid at y=4..21; in-game fill-replace of `minecraft:rail[shape=ascending_east]` at y=0..24 → **21 blocks**, vanilla-noise Overworld → **0**, `DOWN2_SELFTEST=1` → `EXIT:1` |
+| twelve-layer first rail descent (`parts/rails_down1.json` + merged palette) | **tested** | 30 `:` iron_bars + 26 `_` bottom slabs decoded from the artefact's ids (5,211-byte part, sha `822a38fa…`, byte-identical; two `palettes/default.json` entries added verbatim); laid at y=100..111; in-game fill-replace of `minecraft:iron_bars` at y=96..112 → **>0 blocks**, vanilla-noise Overworld → **0**, `DOWN1_SELFTEST=1` → `EXIT:1` |
 | structure types assembled in Java | `blocked(no-structure-type-for-cities)` | no carried structure JSON for a jigsaw; none invented |
 | 5 legacy `.lang` files, 18 GUI textures, Java classes, editor/commands/GUI | not ported (out of tier) | no carried art; no equivalent hook or screen at this pin |
 | items/blocks/models/recipes/advancements/biomes | not in artefact | census above |
 
-## Verification (fresh, 2026-11-24, version 0.1.6)
+## Verification (fresh, 2026-11-24, version 0.1.7)
 
-Pin `0a875da…`, mixins `e59da909…`, package **`the_lost_cities.hmod` 31,914 B,
-SHA-256 `21b6f29c68148e6834cdc6ba01b5f1a329f83003f67171371ec9948b466ac6c9`,
+Pin `0a875da…`, mixins `e59da909…`, package **`the_lost_cities.hmod` 34,134 B,
+SHA-256 `9f2c2e28d8eaec9252187bea4c2fed3c079c02f4c1d48718b67597101923ac3f`,
 17 entries**. Full table in [`VALIDATION.md`](VALIDATION.md).
 
 - `tools/carry.py --check` green against the final tree (9 carried, 2 loot tables
   shape-upgraded); `check-recipe-types.py`/`check-manifest-deps.py` clean (no
   recipe type; only vanilla block ids named in code).
-- Slices 1–7 were each red first: the dimension-contract tests, slice 2's 11
+- Slices 1–8 were each red first: the dimension-contract tests, slice 2's 11
   unresolved decoder symbols, slice 3's 11 unresolved variant/building symbols,
   slice 4's 3 unresolved rail symbols, slice 5's 2 unresolved
   `RAILS_BEND_PART_JSON`, slice 6's 2 unresolved `RAILS_3SPLIT_PART_JSON` and
-  slice 7's 2 unresolved `RAILS_DOWN2_PART_JSON` symbols above. Final suite:
-  **19 passed / 0 failed**; `cargo clippy --all-targets -- -D warnings` clean
-  (0 warnings); `rustfmt --check` clean. `sdk-test.log` regenerated for 0.1.6
+  slice 7's 2 unresolved `RAILS_DOWN2_PART_JSON` and slice 8's 3 unresolved
+  `RAILS_DOWN1_PART_JSON`/`RAILS_DOWN1_PALETTE_JSON` symbols above. Final suite:
+  **21 passed / 0 failed**; `cargo clippy --all-targets -- -D warnings` clean
+  (0 warnings); `rustfmt --check` clean. `sdk-test.log` regenerated for 0.1.7
   **after** the final build; earlier logs retired to `retired-0.1.0/` and
   `retired-0.1.2/`.
-- `cargo horizon-mod check` on the package: *0.1.6,
-  native-1/0a875da…, 31,914 bytes, sha 21b6f29c…*. No new API item or SDK
+- `cargo horizon-mod check` on the package: *0.1.7,
+  native-1/0a875da…, 34,134 bytes, sha 9f2c2e28…*. No new API item or SDK
   surface was needed.
 - `fits --build 0a875da`: **`made for`**. `fits --build 0b14f8a`: **`fits`** —
   the chunk-generator registrar and `DimensionSettings` exist in both cached
@@ -514,15 +578,15 @@ SHA-256 `21b6f29c68148e6834cdc6ba01b5f1a329f83003f67171371ec9948b466ac6c9`,
   green line is honest. No local type or variant named `Block`/`Item` was
   introduced (the false-fail trap).
 - Launcher native build: **`Compiling the_lost_cities (1 of 1)`**, tag
-  `native-0a875da-0c2873eab4cb`; `native-mods.json` names **0.1.6** (checked
+  `native-0a875da-649ce6258bcc`; `native-mods.json` names **0.1.7** (checked
   before the legs, so a concurrent build's prune cannot make the legs test a
-  stale mod). The previous the_lost_cities `native-*` tag (0.1.5,
-  `native-0a875da-ff899e672547`) was removed before the build; no exit 10 from a
+  stale mod). No stale the_lost_cities `native-*` tag remained before the build
+  (a concurrent native build had pruned the 0.1.6 one); no exit 10 from a
   concurrent native build occurred.
 - `verify-sdk-package.py the_lost_cities` → **1/1** (incl. "package matches the
   tree" — README/manifest/Cargo/src edited before the final build);
   `check-e2e-logs.py the_lost_cities-e2e --strict` →
-  `logs=10 ok=10 missing-exit=0 bad-exit=0`;
+  `logs=11 ok=11 missing-exit=0 bad-exit=0`;
   `check-skills.py --notes ports/the_lost_cities --strict` → PASS.
 
 ### In-game `ctl` transcript (The End + lostcity, seed 20261105, offscreen, creative)
@@ -560,6 +624,10 @@ ctl command "execute in lostcities:lostcity run fill 0 0 0 16 24 16 minecraft:ai
    -> {"chat":["Successfully filled 21 block(s)"],"ok":true}    # descent's j char at y=4..21
 ctl command "fill 0 0 0 16 24 16 minecraft:air replace minecraft:rail[shape=ascending_east]"  # Overworld console
    -> {"chat":["No blocks were filled"],"ok":true}              # vanilla-noise control = 0
+ctl command "execute in lostcities:lostcity run fill 0 96 0 16 112 16 minecraft:air replace minecraft:iron_bars"
+   -> {"chat":["Successfully filled 30 block(s)"],"ok":true}    # first descent's : char at y=100..111
+ctl command "fill 0 96 0 16 112 16 minecraft:air replace minecraft:iron_bars"  # Overworld console
+   -> {"chat":["No blocks were filled"],"ok":true}              # vanilla-noise control = 0
 ctl command "execute if block 50 80 50 #lostcities:notbreakable"
    -> {"chat":["Test passed"],"ok":true}
 ctl command "execute if block 50 80 50 #lostcities:no_such_tag"
@@ -568,10 +636,11 @@ ctl command "loot give @p loot lostcities:chests/lostcitychest"  -> Dropped 4 it
 ctl command "loot give @p loot lostcities:chests/raildungeonchest" -> Dropped 3 items
 ctl command "loot give @p loot lostcities:chests/no_such_table"
    -> "Can't find element '…' in registry 'minecraft:loot_table'"
-PASS: the lostcity dimension answered, all six decoded parts authored their own blocks
+PASS: the lostcity dimension answered, all seven decoded parts authored their own blocks
       in it (136 slabs at y=90, 4 bookshelves at y=72, 48 east_west rails at y=54..59,
-      10 north_south rails at y=36..41, 1 north_east rail at y=18..23 and 21
-      ascending_east rails at y=4..21 — each 0 on vanilla noise),
+      10 north_south rails at y=36..41, 1 north_east rail at y=18..23, 21
+      ascending_east rails at y=4..21 and 30 iron bars at y=100..111 — each 0 on
+      vanilla noise),
       #lostcities:notbreakable matched bedrock, and both carried loot tables yielded items
 EXIT:0
 ```
@@ -592,46 +661,49 @@ assertion expected 0` + `EXIT:1`; `SPLIT_SELFTEST=1` ends
 `FAIL: SPLIT_SELFTEST: the split authored 1 north_east rail(s); the inverted
 assertion expected 0` + `EXIT:1`; `DOWN2_SELFTEST=1` ends
 `FAIL: DOWN2_SELFTEST: the descent authored 21 ascending_east rail(s); the
-inverted assertion expected 0` + `EXIT:1`. The pre-fix loot counterfactual
+inverted assertion expected 0` + `EXIT:1`; `DOWN1_SELFTEST=1` ends
+`FAIL: DOWN1_SELFTEST: the first descent authored 30 iron-bar(s); the inverted
+assertion expected 0` + `EXIT:1`. The pre-fix loot counterfactual
 (`Dropped 0 items`) is preserved in `the_lost_cities/loot-probe.log`.
-Logs: `ports/_shared/evidence/the_lost_cities-e2e/e2e{,-control,-selftest,-tag-selftest,-city-selftest,-building-selftest,-rails-selftest,-bend-selftest,-split-selftest,-down2-selftest}.log`;
+Logs: `ports/_shared/evidence/the_lost_cities-e2e/e2e{,-control,-selftest,-tag-selftest,-city-selftest,-building-selftest,-rails-selftest,-bend-selftest,-split-selftest,-down2-selftest,-down1-selftest}.log`;
 the 0.1.2 logs are retired to `retired-0.1.2/`.
 
 ## Next slice
 
-**Family:** decode the first rail descent `parts/rails_down1.json`, the last
-rail part with an in-game-unique block id. Measured from the cached jar before
-this proposal: `rails_down1.json` is `xsize: 16`, `zsize: 16`,
-`refpalette: "rails"`, **12 slices** (911 non-space cells) with exact char
-census `:` 30, `_` 26, `e` 27, `f` 3, `g` 2, `j` 18, `y` 279, `~` 526. The
-`:` and `_` chars are **not** in `RAILS_PALETTE_JSON`; both are copied verbatim
-from the jar's `palettes/default.json` (`:` → `minecraft:iron_bars`, `_` →
-`minecraft:smooth_stone_slab[type=bottom]`). No other decoded part writes
-`iron_bars` (the building palette only names it as a `damaged` field, which the
-decoder does not place), so it is a clean differential. Six rail parts remain
-(`down1`, `flat`, `horizontal_end`, `horizontal_water`, `vertical`,
-`vertical_water`); `rails_flat`, `rails_horizontal_end` and `rails_vertical`
-need no new palette entry but write only shapes already asserted elsewhere, so
-`down1` is the stronger next slice.
+**Family:** decode the second building part `parts/building1_2.json`, the next
+part with an in-game-unique block id. All five remaining rail parts write only
+ids already placed by the seven decoded parts (`rails_flat` is `y`/`~`;
+`horizontal_end`/`vertical` reuse rail shapes from the bend/split; the two
+`*_water` parts add only `+` → glass, which the building's `a` char already
+writes), so none offers a clean differential. Measured from the cached jar before
+this proposal: `building1_2.json` is **2,618 B**, sha256
+`b2130f36f887c90c4b1602f04e3d70bcff0835ac5b176b070ca78e94ff264f74`, `xsize: 16`,
+`zsize: 16`, **6 slices**, 998 non-space cells, exact census `#` 812, `a` 144,
+`@` 24, `l` 6, `Q` 3, `*` 2, `:` 2, `T` 2, `F` 2, `1` 1.
+`Q` → `minecraft:quartz_block` is copied
+verbatim from `palettes/default.json` and is placed by **no** other decoded part
+(the building palette has no `Q`; the street/rail/descent palettes never name
+quartz), so it is a clean differential. Every other char is already resolved by
+the carried building palette plus slice 8's new `:` entry.
 
-**Gap line:** the coverage table above, *"6 parts decoded / 202
-`blocked(no-city-data-decoder)` … the other 202 parts and all buildings/
+**Gap line:** the coverage table above, *"7 parts decoded / 201
+`blocked(no-city-data-decoder)` … the other 201 parts and all buildings/
 palettes/multibuildings have no decoder"*. The new slice adds one more part and
-two more verbatim palette entries, moving the count to 7 / 201.
+one more verbatim `palettes/default.json` entry, moving the count to 8 / 200.
 
 **Tier fit:** `deep` worldgen; the registrar/`ChunkAccess` surface and the
-`variant`/`frompalette`/weighted/multi-layer decoder are proven by slices 2–7,
-and one more part needs no new SDK API, renderer or manifest key. Place it at a
-seventh Y that does not overwrite the 18-layer descent (e.g. y=100..111, above
-the street at y=90..95 — the dimension's min_y=0 leaves no room below y=4).
-Red-first test: write a `down1_tests` module with a 12-layer shape assertion and
-`:`/`_` id assertions against a missing `RAILS_DOWN1_PART_JSON` constant; the
-compile must fail (as slice 7's did) before the part is carried.
+`variant`/`frompalette`/weighted/multi-layer decoder are proven by slices 2–8,
+and one more six-layer part plus one palette entry needs no new SDK API,
+renderer or manifest key. Place it at an eighth Y avoiding all seven existing
+bands — the next clear band above down1 (y=100..111) is y=116..121, inside the
+dimension's 256 height. Red-first test: a `building1_2_tests` module with a
+6-layer shape assertion and a `Q`/quartz-block id assertion against a missing
+`BUILDING_1_2_PART_JSON` constant must fail to compile.
 
-**Concrete `ctl` assertion:** after placing `down1`, run
-`ctl command "execute in lostcities:lostcity run fill 0 96 0 16 112 16 minecraft:air replace minecraft:iron_bars"`
-and assert a parsed count `> 0` (30 `:` cells in the part; no other decoded
-part places iron bars), the same fill on the vanilla-noise Overworld answers
-`No blocks were filled` (count 0), and `DOWN1_SELFTEST=1` inverts the count and
-ends `EXIT:1`. All ten existing legs stay green (`check-e2e-logs.py
-the_lost_cities-e2e --strict` → 11/11 logs).
+**Concrete `ctl` assertion:** after placing it, run
+`ctl command "execute in lostcities:lostcity run fill 0 112 0 16 122 16 minecraft:air replace minecraft:quartz_block"`
+and assert a parsed count `> 0` (3 `Q` cells in the part; no other decoded part
+places quartz), the same fill on the vanilla-noise Overworld answers
+`No blocks were filled` (count 0), and `BUILDING12_SELFTEST=1` inverts the count
+and ends `EXIT:1`. All eleven existing legs stay green
+(`check-e2e-logs.py the_lost_cities-e2e --strict` → 12/12 logs).

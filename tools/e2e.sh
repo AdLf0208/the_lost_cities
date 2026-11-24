@@ -17,6 +17,7 @@
 #   BEND_SELFTEST=1  -> FAIL EXIT:1 (inverted north_south rail count of the bend)
 #   SPLIT_SELFTEST=1 -> FAIL EXIT:1 (inverted north_east rail count of the 3split)
 #   DOWN2_SELFTEST=1 -> FAIL EXIT:1 (inverted ascending_east rail count of the descent)
+#   DOWN1_SELFTEST=1 -> FAIL EXIT:1 (inverted iron-bar count of the first descent)
 set -euo pipefail
 export LC_ALL=C
 
@@ -35,6 +36,7 @@ RAILS_SELFTEST=${RAILS_SELFTEST:-0}
 BEND_SELFTEST=${BEND_SELFTEST:-0}
 SPLIT_SELFTEST=${SPLIT_SELFTEST:-0}
 DOWN2_SELFTEST=${DOWN2_SELFTEST:-0}
+DOWN1_SELFTEST=${DOWN1_SELFTEST:-0}
 
 [ -n "$CTL" ] && [ -n "$GAME" ] || { echo "missing CTL/GAME: eval \"\$(ports/tools/launcher-game.sh env the_lost_cities)\"" >&2; exit 1; }
 [ -x "$CTL" ] || { echo "missing horizon-ctl: $CTL" >&2; exit 1; }
@@ -302,6 +304,37 @@ else
         || fail "the vanilla-noise control unexpectedly had $vanilla_down2_count ascending_east rail(s): $vanilla_down2_reply"
 fi
 
+# Slice 8: the seventh, twelve-layer first rail descent is laid at
+# DOWN1_BASE_Y=100 (spanning y=100..111, above the street at y=90). Its `:`
+# char resolves to `minecraft:iron_bars` in palettes/default.json — a block no
+# other decoded part writes (their palettes only name iron bars as a `damaged`
+# field, which the decoder never places). So an iron-bar count at y=96..112 can
+# only come from this part. The same fill on the vanilla-noise Overworld must
+# report `No blocks were filled`; DOWN1_SELFTEST inverts it.
+say "twelve-layer first rail descent authors iron bars at the seventh Y"
+down1_reply=$(lc "fill 0 96 0 16 112 16 minecraft:air replace minecraft:iron_bars" 2>&1 || true)
+down1_chat=$(echo "$down1_reply" | jq -r '.chat[0] // ""' 2>/dev/null || echo "")
+echo "iron-bar first descent fill: $(echo "$down1_reply" | jq -c . 2>/dev/null | head -c 180)"
+down1_count=$(echo "$down1_chat" | grep -oE 'Successfully filled [0-9]+ block' | grep -oE '[0-9]+' || echo 0)
+down1_count=${down1_count:-0}
+echo "first-descent-authored iron-bar count: $down1_count"
+vanilla_down1_reply=$(ctl command "fill 0 96 0 16 112 16 minecraft:air replace minecraft:iron_bars" 2>&1 || true)
+vanilla_down1_chat=$(echo "$vanilla_down1_reply" | jq -r '.chat[0] // ""' 2>/dev/null || echo "")
+echo "vanilla-noise iron-bar control: $(echo "$vanilla_down1_reply" | jq -c . 2>/dev/null | head -c 180)"
+vanilla_down1_count=$(echo "$vanilla_down1_chat" | grep -oE 'Successfully filled [0-9]+ block' | grep -oE '[0-9]+' || echo 0)
+vanilla_down1_count=${vanilla_down1_count:-0}
+echo "vanilla-noise iron-bar count: $vanilla_down1_count"
+if [ "$DOWN1_SELFTEST" = 1 ]; then
+    [ "$down1_count" -eq 0 ] \
+        || fail "DOWN1_SELFTEST: the first descent authored $down1_count iron-bar(s); the inverted assertion expected 0"
+    echo "DOWN1_SELFTEST: no first-descent-authored iron bars (unexpected)"
+else
+    [ "$down1_count" -gt 0 ] \
+        || fail "the chunk generator authored no iron bars: $down1_reply"
+    [ "$vanilla_down1_count" -eq 0 ] \
+        || fail "the vanilla-noise control unexpectedly had $vanilla_down1_count iron-bar(s): $vanilla_down1_reply"
+fi
+
 say "carried block tag #lostcities:notbreakable matches bedrock"
 end "setblock 50 80 50 minecraft:bedrock" >/dev/null
 ctl wait 5
@@ -351,4 +384,4 @@ echo "tags=$(find "$PORT/data/lostcities/tags" -name '*.json' | wc -l) " \
      "loot=$(find "$PORT/data/lostcities/loot_table" -name '*.json' | wc -l) " \
      "lang=$(find "$PORT/assets/lostcities/lang" -name '*.json' | wc -l)"
 
-echo "PASS: the lostcity dimension answered, all six decoded parts authored their own blocks in it (slabs, bookshelves, east_west rails, the bend's north_south rails, the split's north_east rails and the descent's ascending_east rails), #lostcities:notbreakable matched bedrock, and both carried loot tables yielded items"
+echo "PASS: the lostcity dimension answered, all seven decoded parts authored their own blocks in it (slabs, bookshelves, east_west rails, the bend's north_south rails, the split's north_east rails, the descent's ascending_east rails and the first descent's iron bars), #lostcities:notbreakable matched bedrock, and both carried loot tables yielded items"

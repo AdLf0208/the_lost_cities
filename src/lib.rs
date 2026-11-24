@@ -54,10 +54,18 @@ const SPLIT_BASE_Y: i32 = 18;
 /// south_east, so an `ascending_east` count in the level is the in-game assertion.
 const DOWN2_BASE_Y: i32 = 4;
 
+/// The seventh part — the twelve-layer first rail descent — is laid above the
+/// street (y=90), at y=100..111. The dimension's min_y=0 leaves no room below
+/// the 18-layer descent's y=4..21, so the only free sealed band is above it.
+/// Its `:` char resolves to `minecraft:iron_bars`, which no other decoded part
+/// writes (their palettes only name iron bars as a `damaged` field), so an
+/// iron-bar count at y=96..112 is the in-game assertion.
+const DOWN1_BASE_Y: i32 = 100;
+
 #[derive(Default)]
 struct Mod;
 
-/// The stateless city generator: the six decoded parts plus process-stable
+/// The stateless city generator: the seven decoded parts plus process-stable
 /// block keys, requested once at registration. Two worldgen workers may fill
 /// neighbouring chunks at once, so nothing here is mutable.
 struct CityGenerator {
@@ -67,6 +75,7 @@ struct CityGenerator {
     bend: Vec<runtime::Placement>,
     split: Vec<runtime::Placement>,
     down2: Vec<runtime::Placement>,
+    down1: Vec<runtime::Placement>,
     keys: HashMap<String, BlockKey>,
 }
 
@@ -114,6 +123,7 @@ impl ChunkGenerator for CityGenerator {
         self.write_part(chunk, &self.bend, BEND_BASE_Y);
         self.write_part(chunk, &self.split, SPLIT_BASE_Y);
         self.write_part(chunk, &self.down2, DOWN2_BASE_Y);
+        self.write_part(chunk, &self.down1, DOWN1_BASE_Y);
     }
 
     fn vanilla_stages(&self) -> VanillaStages {
@@ -177,6 +187,16 @@ impl Hooks for Mod {
             &variants,
         )
         .expect("the embedded rail descent part and merged palette decode");
+        // The first descent reuses the same jar `palettes/rails.json` entries —
+        // in particular `j`, the ascending_east rail — and the same stonebrick
+        // variant. Its `:`/`_` chars are the two `palettes/default.json` entries
+        // absent from the plain rail palette, carried in a merged palette below.
+        let down1 = runtime::decode_city_with_variants(
+            runtime::RAILS_DOWN1_PART_JSON,
+            runtime::RAILS_DOWN1_PALETTE_JSON,
+            &variants,
+        )
+        .expect("the embedded first descent part and merged palette decode");
 
         // Request each distinct block id once. The registrar checks it against
         // the game's registry at load; an unknown id refuses the mod by name.
@@ -187,6 +207,7 @@ impl Hooks for Mod {
             .chain(bend.iter())
             .chain(split.iter())
             .chain(down2.iter())
+            .chain(down1.iter())
             .map(|p| p.block.clone())
             .collect();
         blocks.sort();
@@ -207,6 +228,7 @@ impl Hooks for Mod {
                 bend,
                 split,
                 down2,
+                down1,
                 keys,
             },
         );

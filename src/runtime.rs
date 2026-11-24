@@ -1399,6 +1399,247 @@ pub const RAILS_DOWN2_PART_JSON: &str = r#"{
   ]
 }"#;
 
+/// `parts/rails_down1.json` from the cached jar, verbatim (5,211 B,
+/// sha256 `822a38fa5420ab545f78248a216a937e0f1f8dc78d6a258ffbae45da8340411e`): 16x16, **twelve** slices, `refpalette: "rails"`. Its exact
+/// non-space char census is `:` 30, `_` 26, `e` 27, `f` 3, `g` 2, `j` 18,
+/// `y` 279, `~` 526 (911 cells). `:` and `_` are absent from
+/// `palettes/rails.json`; both are copied verbatim from the jar's
+/// `palettes/default.json` into `RAILS_DOWN1_PALETTE_JSON` below. No id or
+/// char was invented — the bytes below are the artefact's, checked by sha256.
+pub const RAILS_DOWN1_PART_JSON: &str = r#"{
+  "xsize": 16,
+  "zsize": 16,
+  "refpalette": "rails",
+  "slices": [
+    [
+      "                ",
+      "                ",
+      "                ",
+      "y               ",
+      "y               ",
+      "y               ",
+      "y               ",
+      "y               ",
+      "y               ",
+      "y               ",
+      "y               ",
+      "y               ",
+      "                ",
+      "                ",
+      "                ",
+      "                "
+    ],
+    [
+      "                ",
+      "                ",
+      "                ",
+      "yy              ",
+      "yy              ",
+      "jy              ",
+      "yy              ",
+      "jy              ",
+      "yy              ",
+      "jy              ",
+      "yy              ",
+      "yy              ",
+      "                ",
+      "                ",
+      "                ",
+      "                "
+    ],
+    [
+      "                ",
+      "                ",
+      "                ",
+      "yyy             ",
+      "~yy             ",
+      "~jy             ",
+      "~yy             ",
+      "~jy             ",
+      "~yy             ",
+      "~jy             ",
+      "~yy             ",
+      "yyy             ",
+      "                ",
+      "                ",
+      "                ",
+      "                "
+    ],
+    [
+      "                ",
+      "                ",
+      "                ",
+      "yyyy            ",
+      "~~yy            ",
+      "~~jy            ",
+      "~~yy            ",
+      "~~jy            ",
+      "~~yy            ",
+      "~~jy            ",
+      "~~yy            ",
+      "yyyy            ",
+      "                ",
+      "                ",
+      "                ",
+      "                "
+    ],
+    [
+      "                ",
+      "                ",
+      "                ",
+      "yyyyy           ",
+      "~~~yy           ",
+      "~~~jy           ",
+      "~~~yy           ",
+      "~~~jy           ",
+      "~~~yy           ",
+      "~~~jy           ",
+      "~~~yy           ",
+      "yyyyy           ",
+      "                ",
+      "                ",
+      "                ",
+      "                "
+    ],
+    [
+      "                ",
+      "                ",
+      "                ",
+      "yyyyyy          ",
+      "~~~~yy          ",
+      "~~~~jy          ",
+      "~~~~yy y        ",
+      "~~~~jy          ",
+      "~~~~yy y        ",
+      "~~~~jy          ",
+      "~~~~yy          ",
+      "yyyyyy          ",
+      "                ",
+      "                ",
+      "                ",
+      "                "
+    ],
+    [
+      "                ",
+      "                ",
+      "                ",
+      "yyyyyyy         ",
+      "y~~~~yyyyyyyyyyy",
+      "y~~~~jyyyyyyyyyy",
+      "y~~~~yygyyyyyyyy",
+      "y~~~~jyyyyyyyyyy",
+      "y~~~~yygyyyyyyyy",
+      "y~~~~jyyyyyyyyyy",
+      "y~~~~yyyyyyyyyyy",
+      "yyyyyyy         ",
+      "                ",
+      "                ",
+      "                ",
+      "                "
+    ],
+    [
+      "               y",
+      "               y",
+      "               y",
+      " yyyyyy        y",
+      " y~~~~yyyyyyyyyy",
+      " y~~~~efeeeeeeee",
+      " y~~~~yyyyyyyyyy",
+      " y~~~~efeeeeeeee",
+      " y~~~~yyyyyyyyyy",
+      " y~~~~efeeeeeeee",
+      " y~~~~yyyyyyyyyy",
+      " yyyyyy        y",
+      "               y",
+      "               y",
+      "               y",
+      "               y"
+    ],
+    [
+      "                ",
+      "                ",
+      "                ",
+      " y::::y         ",
+      " :~~~~~~~~~~~~~~",
+      " :~~~~~~~~~~~~~~",
+      " :~~~~~~~~~~~~~~",
+      " :~~~~~~~~~~~~~~",
+      " :~~~~~~~~~~~~~~",
+      " :~~~~~~~~~~~~~~",
+      " :~~~~~~~~~~~~~~",
+      " y::::y         ",
+      "                ",
+      "                ",
+      "                ",
+      "                "
+    ],
+    [
+      "                ",
+      "                ",
+      "                ",
+      " y::::y         ",
+      " :~~~~~~~~~~~~~~",
+      " :~~~~~~~~~~~~~~",
+      " :~~~~~~~~~~~~~~",
+      " :~~~~~~~~~~~~~~",
+      " :~~~~~~~~~~~~~~",
+      " :~~~~~~~~~~~~~~",
+      " :~~~~~~~~~~~~~~",
+      " y::::y         ",
+      "                ",
+      "                ",
+      "                ",
+      "                "
+    ],
+    [
+      "                ",
+      "                ",
+      "                ",
+      " y~~~~y         ",
+      " ~~~~~~~~~~~~~~~",
+      " ~~~~~~~~~~~~~~~",
+      " ~~~~~~~~~~~~~~~",
+      " ~~~~~~~~~~~~~~~",
+      " ~~~~~~~~~~~~~~~",
+      " ~~~~~~~~~~~~~~~",
+      " ~~~~~~~~~~~~~~~",
+      " y~~~~y         ",
+      "                ",
+      "                ",
+      "                ",
+      "                "
+    ],
+    [
+      "                ",
+      "                ",
+      "                ",
+      " ______         ",
+      " _~~~~_~~~~~~~~~",
+      " _~~~~_~~~~~~~~~",
+      " _~~~~_~~~~~~~~~",
+      " _~~~~_~~~~~~~~~",
+      " _~~~~_~~~~~~~~~",
+      " _~~~~_~~~~~~~~~",
+      " _~~~~_~~~~~~~~~",
+      " ______         ",
+      "                ",
+      "                ",
+      "                ",
+      "                "
+    ]
+  ]
+}"#;
+
+/// Merged palette for the first rail descent: every entry of the part's
+/// `refpalette` (`palettes/rails.json`, carried verbatim in
+/// `RAILS_PALETTE_JSON` above), plus the two entries the earlier rail parts
+/// never needed, copied byte-for-byte from `palettes/default.json`:
+/// `:` -> `minecraft:iron_bars` and `_` ->
+/// `minecraft:smooth_stone_slab[type=bottom]`. `y` is the same jar
+/// `variant: stonebrick` entry and `g`/`~`/space come from `palettes/common.json`
+/// through the existing rail palette. No id or char was invented.
+pub const RAILS_DOWN1_PALETTE_JSON: &str = "{\"palette\":[{\"char\":\"k\",\"block\":\"minecraft:rail[shape=north_south]\"},{\"char\":\"e\",\"block\":\"minecraft:rail[shape=east_west]\"},{\"char\":\"j\",\"block\":\"minecraft:rail[shape=ascending_east]\"},{\"char\":\"q\",\"block\":\"minecraft:rail[shape=south_east]\"},{\"char\":\"s\",\"block\":\"minecraft:rail[shape=south_west]\"},{\"char\":\"r\",\"block\":\"minecraft:rail[shape=north_west]\"},{\"char\":\"n\",\"block\":\"minecraft:rail[shape=north_east]\"},{\"char\":\"m\",\"block\":\"minecraft:powered_rail[powered=true,shape=north_south]\"},{\"char\":\"E\",\"block\":\"minecraft:powered_rail[powered=true,shape=ascending_south]\"},{\"char\":\"H\",\"block\":\"minecraft:powered_rail[powered=true,shape=ascending_north]\"},{\"char\":\"f\",\"block\":\"minecraft:powered_rail[powered=true,shape=east_west]\"},{\"char\":\"i\",\"block\":\"minecraft:powered_rail[powered=true,shape=ascending_east]\"},{\"char\":\"y\",\"variant\":\"stonebrick\",\"damaged\":\"minecraft:iron_bars\"},{\"char\":\"T\",\"block\":\"minecraft:wall_torch[facing=north]\",\"torch\":true},{\"char\":\"g\",\"block\":\"minecraft:redstone_torch[lit=true]\"},{\"char\":\"~\",\"block\":\"minecraft:structure_void\"},{\"char\":\" \",\"block\":\"minecraft:air\"},{\"char\":\":\",\"block\":\"minecraft:iron_bars\"},{\"char\":\"_\",\"block\":\"minecraft:smooth_stone_slab[type=bottom]\"}]}";
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -2089,6 +2330,116 @@ mod down2_tests {
                 !has_ascending_east(ps),
                 "the {name} must not write an ascending_east rail"
             );
+        }
+    }
+}
+
+/// Slice 8: the seventh part, the twelve-layer first rail descent. These tests
+/// are written before the part data exists so the gap is proved red first:
+/// `RAILS_DOWN1_PART_JSON` and `RAILS_DOWN1_PALETTE_JSON` are unresolved until
+/// the part and its two extra palette entries are carried verbatim from the
+/// cached jar. Every id and count below is read from the artefact — in
+/// particular `:` = `minecraft:iron_bars` and `_` =
+/// `minecraft:smooth_stone_slab[type=bottom]` from `palettes/default.json`, two
+/// entries none of the earlier palettes place.
+#[cfg(test)]
+mod down1_tests {
+    use super::*;
+
+    /// The jar's `parts/rails_down1.json` is 16x16 with twelve slices, all rows
+    /// the declared width — the same bound check as the other parts, but a
+    /// different layer count from both the six-layer parts and the 18-layer
+    /// descent laid below it.
+    #[test]
+    fn embedded_down1_part_has_twelve_16x16_layers() {
+        let part =
+            Part::from_json(&parse_json(RAILS_DOWN1_PART_JSON).expect("jar down1 part parses"))
+                .expect("jar down1 part decodes");
+        assert_eq!(part.xsize, 16, "jar xsize");
+        assert_eq!(part.zsize, 16, "jar zsize");
+        assert_eq!(part.slices.len(), 12, "the first descent has twelve slices");
+        for (y, layer) in part.slices.iter().enumerate() {
+            assert_eq!(layer.len(), 16, "slice {y} has 16 rows");
+            for (z, row) in layer.iter().enumerate() {
+                assert_eq!(row.chars().count(), 16, "slice {y} row {z} is 16 chars");
+            }
+        }
+    }
+
+    /// The descent's `:` and `_` chars resolve to the exact ids of
+    /// `palettes/default.json` — the two entries absent from the carried rail
+    /// palette. `iron_bars` is placed by no other decoded part (its palettes
+    /// only name it as a `damaged` field, which the decoder does not place), so
+    /// it is the clean in-game differential. Every count is the artefact's
+    /// per-part census, not the whole filled window.
+    #[test]
+    fn down1_chars_resolve_to_the_jar_iron_bars_and_bottom_slab() {
+        let variants = VariantTable::from_files(&[("stonebrick", STONEBRICK_VARIANT_JSON)])
+            .expect("the jar's stonebrick variant decodes");
+        let placements =
+            decode_city_with_variants(RAILS_DOWN1_PART_JSON, RAILS_DOWN1_PALETTE_JSON, &variants)
+                .expect("the embedded jar down1 part and merged palette decode");
+
+        let cell = |dx: usize, dy: usize, dz: usize| -> (String, Vec<(String, String)>) {
+            let p = placements
+                .iter()
+                .find(|p| p.dx == dx && p.dy == dy && p.dz == dz)
+                .expect("a down1 cell at the expected coordinate");
+            (p.block.clone(), p.properties.clone())
+        };
+        let (id, props) = cell(1, 8, 4);
+        assert_eq!(id, "minecraft:iron_bars", "the : char is iron bars");
+        assert!(
+            props.is_empty(),
+            "the : char has no state properties in palettes/default.json"
+        );
+        let (id, props) = cell(1, 11, 3);
+        assert_eq!(
+            id, "minecraft:smooth_stone_slab",
+            "the _ char is a smooth stone slab"
+        );
+        assert_eq!(
+            props,
+            vec![("type".to_string(), "bottom".to_string())],
+            "the _ char is the bottom slab of palettes/default.json"
+        );
+
+        // Exact per-part census of the artefact's 911 non-space cells: 30 `:`,
+        // 26 `_`, 27 `e`, 3 `f`, 2 `g`, 18 `j`, 279 `y`, 526 `~`.
+        let count = |id: &str| placements.iter().filter(|p| p.block == id).count();
+        assert_eq!(count("minecraft:iron_bars"), 30, "thirty : cells");
+        assert_eq!(
+            count("minecraft:smooth_stone_slab"),
+            26,
+            "twenty-six _ cells"
+        );
+
+        // Differential: no other decoded part writes iron bars, so an in-game
+        // iron-bar count at the seventh Y can only come from this part.
+        let has_bars = |ps: &[Placement]| ps.iter().any(|p| p.block == "minecraft:iron_bars");
+        let street = decode_city(STREET_PART_JSON, STREET_PALETTE_JSON)
+            .expect("the embedded street part decodes");
+        let building =
+            decode_city_with_variants(BUILDING_PART_JSON, BUILDING_PALETTE_JSON, &variants)
+                .expect("the embedded building part decodes");
+        let horizontal = decode_city_with_variants(RAILS_PART_JSON, RAILS_PALETTE_JSON, &variants)
+            .expect("the embedded horizontal rail part decodes");
+        let bend = decode_city_with_variants(RAILS_BEND_PART_JSON, RAILS_PALETTE_JSON, &variants)
+            .expect("the embedded rail bend part decodes");
+        let split =
+            decode_city_with_variants(RAILS_3SPLIT_PART_JSON, RAILS_PALETTE_JSON, &variants)
+                .expect("the embedded rail split part decodes");
+        let down2 = decode_city_with_variants(RAILS_DOWN2_PART_JSON, RAILS_PALETTE_JSON, &variants)
+            .expect("the embedded rail descent part decodes");
+        for (name, ps) in [
+            ("street", &street),
+            ("building", &building),
+            ("horizontal line", &horizontal),
+            ("bend", &bend),
+            ("split", &split),
+            ("eighteen-layer descent", &down2),
+        ] {
+            assert!(!has_bars(ps), "the {name} must not write an iron bar");
         }
     }
 }
