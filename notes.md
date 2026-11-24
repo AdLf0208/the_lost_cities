@@ -1,4 +1,4 @@
-# The Lost Cities — port notes (slices 1–2)
+# The Lost Cities — port notes (slices 1–3)
 
 Skills: superpowers/using-superpowers, brainstorming, writing-plans, test-driven-development, systematic-debugging, verification-before-completion; BeautifulRust/rust-best-practices
 
@@ -154,6 +154,65 @@ The Lost Cities:
 Delivered `the_lost_cities.hmod` **22,266 B**, SHA-256
 `ae8b3ab10fb9992b7a54d738e93fd79a356bf57508b1339701171ed367929777`, 17 entries.
 
+## Slice 3 — the second, six-layer building part (0.1.2)
+
+### The part and its variant/palette as read from the jar (source first)
+
+Everything below was read from the cached jar
+(`ports/_shared/licence-cache/the-lost-cities.jar`, sha `666cd25d…`) before any
+code was written; the brief's illustrative char list was not trusted:
+
+- `data/lostcities/lostcities/parts/building1_1.json`: `xsize: 16`, `zsize: 16`,
+  **6 slices**. The exact non-space char set is `#` `a` `@` `F` `D` `L` `l` `1`
+  `*` `T` (the brief omitted `T` and the space cells; the artefact wins). Slice 0
+  and slices 4–5 are all `#`; slices 1–3 are the walls (`a`/`@`/`#`), the `L`
+  bookshelf, `l` ladder, `F` weighted furniture, `D` dirt, `1` spawner, `*` potted
+  cactus and `T` wall torch. Embedded verbatim as `runtime::BUILDING_PART_JSON`.
+- `data/lostcities/lostcities/palettes/bricks_standard.json`: char `#` is
+  **`{"variant": "stonebrick"}`**, not a `block`. Its
+  `data/lostcities/lostcities/variants/stonebrick.json` is a weighted list
+  (`cracked_stone_bricks` 9, `mossy_stone_bricks` 8, `stone_bricks` 1000);
+  embedded verbatim as `runtime::STONEBRICK_VARIANT_JSON`.
+- `data/lostcities/lostcities/palettes/common.json` supplies `1`/`T`/`F`/`D`/
+  `l`/`L`/`*`/space verbatim — in particular `L` → `minecraft:bookshelf`, the
+  char the in-game assertion replaces.
+- `a` and `@` are **not** in those two palettes. `styles/standard.json`
+  selects `common`, `default`, one `bricks_*` and one `glass_full*`/`glass_pane*`
+  and one `glass_side_variant_*` palette *together*, so the port carries the
+  exact `a` → `minecraft:glass` entry from `palettes/glass_full.json` and the
+  exact `@` → `{"frompalette": "#"}` entry from
+  `palettes/glass_side_variant_bricks.json` into the merged
+  `runtime::BUILDING_PALETTE_JSON` (every entry byte-copied from its jar source,
+  comment citing each). No block id or char was invented.
+
+The decoder grew two `PaletteEntry` forms — `Variant(name)` resolved through the
+variant table, and `FromPalette(ch)` followed with a cycle bound — plus a
+`VariantTable::from_files` reader and six-layer bound checks in `Part::from_json`.
+`lib.rs` lays the street at y=90 and the building at y=72 (`BUILDING_BASE_Y`),
+requesting the union of block keys from both parts once. No new SDK API or
+manifest key: the registrar and `ChunkAccess` surface is slice 2's.
+
+**Red verbatim** (`evidence/the_lost_cities/building-test-red.log`, before the
+variant/part data existed): 11 `error[E0425]/[E0433]` — *"cannot find value
+`STONEBRICK_VARIANT_JSON` in this scope"*, *"cannot find value `BUILDING_PART_JSON`
+in this scope"*, *"cannot find value `BUILDING_PALETTE_JSON` in this scope"*,
+*"cannot find type `VariantTable` in this scope"*, *"cannot find function
+`decode_city_with_variants` in this scope"* (plus the one-cell test fixtures) —
+`error: could not compile ... due to 11 previous errors`.
+
+### Both fits lines on the delivered 0.1.2 sha
+
+```
+The Lost Cities:
+0a875da  made for
+The Lost Cities:
+0b14f8a  fits
+```
+Delivered `the_lost_cities.hmod` **25,576 B**, SHA-256
+`9e3220960cc2fd173026339ccf79048f3e09a5dbe202c8119d5c44eefa6057db`, 17 entries.
+The second green line is honest: the registrar/`ChunkAccess` API exists in both
+cached builds; only the clean-room decoder and its embedded jar data are ours.
+
 ## Gaps / blocked symbols (measured, not guessed)
 
 - **`configured-feature-not-registered`** — the two carried `worldgen/feature/*.json`
@@ -177,18 +236,19 @@ Delivered `the_lost_cities.hmod` **22,266 B**, SHA-256
 - **`blocked(no-city-data-decoder)`** — of the 322
   `data/lostcities/lostcities/*.json` files (private
   `parts`/`buildings`/`palettes`/`multibuildings`/… schema; the pin's
-  `mod_content.rs` worldgen bundle names only vanilla kinds), slice 2 writes a
-  clean-room decoder and decodes **one part** (`street_straight`) + two palette
-  entries. The **other 207 parts**, 38 buildings, 31 palettes, 15 multibuildings,
-  13 variants, 6 scattered and all `citystyles`/`styles`/`worldstyles` are still
-  blocked — no decoder was written for them.
+  `mod_content.rs` worldgen bundle names only vanilla kinds), the port writes a
+  clean-room decoder and decodes **two parts** (`street_straight`, `building1_1`)
+  plus their palette/variant entries. The **other 206 parts**, 38 buildings,
+  31 palettes, 15 multibuildings, 12 variants, 6 scattered and all
+  `citystyles`/`styles`/`worldstyles` are still blocked — no decoder was written
+  for them.
 - **`blocked(no-structure-type-for-cities)`** — `StructuresRegistrar` exists, but
   the jar has **no** `worldgen/structure/*.json` for a jigsaw the SDK could start;
   the cities are assembled by Java code. Registering an empty `StructureType` would
   be an invented structure, so none is registered.
 - **Not in the artefact:** no item, block, model, recipe, advancement, biome or
   structure files (census above).
-- **Deferred:** the remaining 207 parts, spheres/rail dungeons, the config
+- **Deferred:** the remaining 206 parts, spheres/rail dungeons, the config
   GUI/18 GUI textures, the editor/commands/network classes.
 
 ## Upstream defects fixed
@@ -216,37 +276,41 @@ Delivered `the_lost_cities.hmod` **22,266 B**, SHA-256
 | language file (`en_us.json`) | carried | verbatim, data contract; no in-game text assertion (the key is a generator name, not surfaced by the pin) |
 | custom features (2) + biome modifiers (2) | `blocked(configured-feature-not-registered)` | 0 API matches for a feature/placement registrar; not packed |
 | vanilla terrain replacement / city mixins | `blocked(level_reset:R11)` | `surface.json` 0 matches; R11 refuses the manifest key; only the mod's own level is generated, not vanilla's |
-| 322 internal generator JSON files | 1 part decoded / 207 `blocked(no-city-data-decoder)` | clean-room decoder for `street_straight` + `S`/`b` palette entries; the other 207 parts and all buildings/palettes/multibuildings have no decoder; not packed |
+| 322 internal generator JSON files | 2 parts decoded / 206 `blocked(no-city-data-decoder)` | clean-room decoder for `street_straight` and the six-layer `building1_1` with `variant`/`frompalette`/weighted/multi-layer support; the other 206 parts and all buildings/palettes/multibuildings have no decoder; not packed |
 | structure types assembled in Java | `blocked(no-structure-type-for-cities)` | no carried structure JSON for a jigsaw; none invented |
 | 5 legacy `.lang` files, 18 GUI textures, Java classes, editor/commands/GUI | not ported (out of tier) | no carried art; no equivalent hook or screen at this pin |
 | items/blocks/models/recipes/advancements/biomes | not in artefact | census above |
 
-## Verification (fresh, 2026-11-24, version 0.1.1)
+## Verification (fresh, 2026-11-24, version 0.1.2)
 
-Pin `0a875da…`, mixins `e59da909…`, package **`the_lost_cities.hmod` 22,266 B,
-SHA-256 `ae8b3ab10fb9992b7a54d738e93fd79a356bf57508b1339701171ed367929777`,
+Pin `0a875da…`, mixins `e59da909…`, package **`the_lost_cities.hmod` 25,576 B,
+SHA-256 `9e3220960cc2fd173026339ccf79048f3e09a5dbe202c8119d5c44eefa6057db`,
 17 entries**. Full table in [`VALIDATION.md`](VALIDATION.md).
 
 - `tools/carry.py --check` green against the final tree (9 carried, 2 loot tables
   shape-upgraded); `check-recipe-types.py`/`check-manifest-deps.py` clean (no
   recipe type; only vanilla block ids named in code).
-- Slice 1's two dimension-contract tests were red first; slice 2's decoder tests
-  were red first (11 unresolved symbols above, then 256-vs-128 expectation).
-  Final suite: **8 passed / 0 failed**; `cargo clippy --all-targets -- -D warnings`
-  clean (0 warnings); `rustfmt --check` clean. `sdk-test.log` regenerated for
-  0.1.1 **after** the final build; the 0.1.0 logs retired to `retired-0.1.0/`.
-- `cargo horizon-mod check` (source): *131 API items, Made for 0a875da*. Package
-  check: *0.1.1, native-1/0a875da…, 22,266 bytes, sha ae8b3ab1…*.
+- Slices 1–3 were each red first: the dimension-contract tests, slice 2's 11
+  unresolved decoder symbols, and slice 3's 11 unresolved variant/building symbols
+  above. Final suite: **11 passed / 0 failed**; `cargo clippy --all-targets -- -D
+  warnings` clean (0 warnings); `rustfmt --check` clean. `sdk-test.log`
+  regenerated for 0.1.2 **after** the final build; earlier logs retired to
+  `retired-0.1.0/`.
+- `cargo horizon-mod check` (source): *132 API items, Made for 0a875da*. Package
+  check: *0.1.2, native-1/0a875da…, 25,576 bytes, sha 9e322096…*.
 - `fits --build 0a875da`: **`made for`**. `fits --build 0b14f8a`: **`fits`** —
   the chunk-generator registrar and `DimensionSettings` exist in both cached
-  builds (only the new Rust decoder is ours), so the second green line is honest.
+  builds (only the new Rust decoder and embedded jar data are ours), so the
+  second green line is honest.
 - Launcher native build: **`Compiling the_lost_cities (1 of 1)`**, tag
-  `native-0a875da-cae68fb44f23`; `native-mods.json` names **0.1.1** (checked before
-  the legs, so a concurrent build's prune cannot make the legs test a stale mod).
+  `native-0a875da-53d2bf5d1aad`; `native-mods.json` names **0.1.2** (checked
+  before the legs, so a concurrent build's prune cannot make the legs test a
+  stale mod). Four stale the_lost_cities `native-*` tags (0.1.0/0.1.1) were
+  removed before the build.
 - `verify-sdk-package.py the_lost_cities` → **1/1** (incl. "package matches the
-  tree" — README/manifest edited before the final build);
+  tree" — README/manifest/Cargo/src edited before the final build);
   `check-e2e-logs.py the_lost_cities-e2e --strict` →
-  `logs=5 ok=5 missing-exit=0 bad-exit=0`;
+  `logs=6 ok=6 missing-exit=0 bad-exit=0`;
   `check-skills.py --notes ports/the_lost_cities --strict` → PASS.
 
 ### In-game `ctl` transcript (The End + lostcity, seed 20261105, offscreen, creative)
@@ -264,6 +328,10 @@ ctl command "execute in lostcities:lostcity run fill 0 60 0 16 90 16 minecraft:a
    -> {"chat":["Successfully filled 136 block(s)"],"ok":true}   # generator-authored
 ctl command "fill 0 60 0 16 90 16 minecraft:air replace minecraft:smooth_stone_slab"  # Overworld console
    -> {"chat":["No blocks were filled"],"ok":true}              # vanilla-noise control = 0
+ctl command "execute in lostcities:lostcity run fill 0 70 0 16 84 16 minecraft:air replace minecraft:bookshelf"
+   -> {"chat":["Successfully filled 4 block(s)"],"ok":true}     # six-layer building's L char
+ctl command "fill 0 70 0 16 84 16 minecraft:air replace minecraft:bookshelf"  # Overworld console
+   -> {"chat":["No blocks were filled"],"ok":true}              # vanilla-noise control = 0
 ctl command "execute if block 50 80 50 #lostcities:notbreakable"
    -> {"chat":["Test passed"],"ok":true}
 ctl command "execute if block 50 80 50 #lostcities:no_such_tag"
@@ -272,9 +340,9 @@ ctl command "loot give @p loot lostcities:chests/lostcitychest"  -> Dropped 3–
 ctl command "loot give @p loot lostcities:chests/raildungeonchest" -> Dropped 3–4 items
 ctl command "loot give @p loot lostcities:chests/no_such_table"
    -> "Can't find element '…' in registry 'minecraft:loot_table'"
-PASS: the lostcity dimension answered, #lostcities:notbreakable matched bedrock,
-      both carried loot tables yielded items, and the generator authored 136 slabs
-      where vanilla noise authored 0
+PASS: the lostcity dimension answered, both decoded parts authored their own blocks
+      in it (136 slabs at y=90 and 4 bookshelves at y=72 vs 0 each on vanilla noise),
+      #lostcities:notbreakable matched bedrock, and both carried loot tables yielded items
 EXIT:0
 ```
 
@@ -284,34 +352,41 @@ Fail-capable legs: the same leg on the **unmodded control game** ends
 `FAIL: SELFTEST: the dimension answered` + `EXIT:1`; `TAG_SELFTEST=1` ends
 `FAIL: TAG_SELFTEST: the tag matched` + `EXIT:1`; `CITY_SELFTEST=1` ends
 `FAIL: CITY_SELFTEST: the generator authored 136 slab(s); the inverted assertion
-expected 0` + `EXIT:1`. The pre-fix loot counterfactual (`Dropped 0 items`) is
-preserved in `the_lost_cities/loot-probe.log`.
-Logs: `ports/_shared/evidence/the_lost_cities-e2e/e2e{,-control,-selftest,-tag-selftest,-city-selftest}.log`.
+expected 0` + `EXIT:1`; `BUILDING_SELFTEST=1` ends
+`FAIL: BUILDING_SELFTEST: the building authored 4 bookshelf(s); the inverted
+assertion expected 0` + `EXIT:1`. The pre-fix loot counterfactual (`Dropped 0
+items`) is preserved in `the_lost_cities/loot-probe.log`.
+Logs: `ports/_shared/evidence/the_lost_cities-e2e/e2e{,-control,-selftest,-tag-selftest,-city-selftest,-building-selftest}.log`.
 
 ## Next slice
 
-**Family:** decode a **second, multi-slice building part** —
-`parts/building1_1.json` (16×16, **6 slices**, chars `#`/`a`/`@`/`F`/`D`/`L`/`l`/`1`/`*`)
-— and place it at a second Y alongside the street, using palettes
-`bricks_standard` + `common`.
+**Family:** decode a **third part from a new material family — the horizontal
+rail line** `parts/rails_horizontal.json` (16×16, 6 slices, chars `T`/`e`/`f`/
+`g`/`y`/`~`) and place it at a third Y (e.g. 54) alongside the street and the
+building. Read verbatim from the jar: `palettes/rails.json` maps `e` →
+`minecraft:rail[shape=north_south]` and `f` →
+`minecraft:rail[shape=east_west]` (plus 10 more rail/powered-rail chars); `T`/
+`g`/`~` come from `common`, `y` is the `variant: stonebrick` entry of `default`.
+No new decoder form is needed — this reuses `variant`/`frompalette`/weighted/
+multi-layer support with a new palette file — but it adds a distinct generated
+structure and a new differential block id.
 
-**Gap line:** from the coverage table above, *"1 part decoded / 207
-`blocked(no-city-data-decoder)` … the other 207 parts and all buildings/palettes/
-multibuildings have no decoder"*. The generic decoder already written handles
-`slices`, weighted `blocks` and `id[prop=val]`; this part additionally needs the
-`{"variant": "stonebrick"}` entry form (`bricks_standard.json` char `#`), which
-resolves through the jar's `styles`/variant files and is not yet handled.
+**Gap line:** the coverage table above, *"2 parts decoded / 206
+`blocked(no-city-data-decoder)` … the other 206 parts and all buildings/palettes/
+multibuildings have no decoder"*. The rails family (12 rail parts plus the
+monorail/station parts) is the most-depended-on unmapped street furniture.
 
-**Tier fit:** `deep` worldgen; the registrar and `ChunkAccess` surface is already
-proven by slice 2, so this is pure decoder extension (variant resolution) plus
-one more generator placement — no new API, renderer or manifest key. It grows the
-same clean-room decoder with red-first tests for the variant entry and multi-layer
-bounds, then a second `build_terrain` placement at a different Y.
+**Tier fit:** `deep` worldgen; the registrar and `ChunkAccess` surface is proven,
+the decoder handles every form the rails palette uses, and this is one more
+`build_terrain` placement at a new Y — no new API, renderer or manifest key.
+Red-first tests: the part's six-layer bounds and that `e`/`f` resolve to the two
+jar rail ids (red against the current merged palette, which has no rail chars).
 
-**Concrete `ctl` assertion:** after placing the building part, run
-`ctl command "execute in lostcities:lostcity run fill 0 70 0 16 84 16 minecraft:air replace minecraft:bookshelf"`
-(the `L` char of `palettes/common.json` resolves to `minecraft:bookshelf`, which
-the street part never writes) and assert the parsed count `> 0`; the same fill on
-the vanilla-noise Overworld must answer `No blocks were filled` (count 0);
-`BUILDING_SELFTEST=1` inverts the count and must end `EXIT:1`. The four existing
-legs plus `CITY_SELFTEST` stay green.
+**Concrete `ctl` assertion:** after placing the rail part, run
+`ctl command "execute in lostcities:lostcity run fill 0 50 0 16 64 16 minecraft:air replace minecraft:rail"`
+(the rail ids are `minecraft:rail[shape=…]`, which the street and building parts
+never write) and assert the parsed count `> 0`; the same fill on the
+vanilla-noise Overworld must answer `No blocks were filled` (count 0);
+`RAILS_SELFTEST=1` inverts the count and must end `EXIT:1`. The six existing legs
+(`e2e`, control, `SELFTEST`, `TAG_SELFTEST`, `CITY_SELFTEST`,
+`BUILDING_SELFTEST`) stay green.

@@ -20,28 +20,37 @@ mod runtime;
 /// `lostcities:lostcity`; it is manifest-owned, so the pin accepts it.
 const CITY_GENERATOR: &str = "lostcities:lostcity";
 
-/// The y at which the one decoded part is laid. Above the Overworld noise
-/// surface, so a vanilla-noise control at this y finds no city blocks.
+/// The y at which the street part is laid. Above the Overworld noise surface,
+/// so a vanilla-noise control at this y finds no city blocks.
 const CITY_BASE_Y: i32 = 90;
+
+/// The second building part is laid below the street. Its six slices span
+/// y=72..77, inside the in-game fill window (70..84); the street never writes a
+/// bookshelf, so the building's `L` char is the differential assertion.
+const BUILDING_BASE_Y: i32 = 72;
 
 #[derive(Default)]
 struct Mod;
 
-/// The stateless city generator: decoded placements plus process-stable block
-/// keys, requested once at registration. Two worldgen workers may fill
+/// The stateless city generator: the two decoded parts plus process-stable
+/// block keys, requested once at registration. Two worldgen workers may fill
 /// neighbouring chunks at once, so nothing here is mutable.
 struct CityGenerator {
-    placements: Vec<runtime::Placement>,
+    street: Vec<runtime::Placement>,
+    building: Vec<runtime::Placement>,
     keys: HashMap<String, BlockKey>,
 }
 
-impl ChunkGenerator for CityGenerator {
-    fn build_terrain(&self, chunk: &mut dyn ChunkAccess) {
-        if chunk.level() != CITY_GENERATOR {
-            return;
-        }
+impl CityGenerator {
+    /// Write one decoded part into the chunk at its own base y.
+    fn write_part(
+        &self,
+        chunk: &mut dyn ChunkAccess,
+        placements: &[runtime::Placement],
+        base_y: i32,
+    ) {
         let pos = chunk.pos();
-        for place in &self.placements {
+        for place in placements {
             let Some(&key) = self.keys.get(&place.block) else {
                 continue;
             };
@@ -57,16 +66,26 @@ impl ChunkGenerator for CityGenerator {
             };
             let world = [
                 pos.x.saturating_mul(16).saturating_add(place.dx as i32),
-                CITY_BASE_Y.saturating_add(place.dy as i32),
+                base_y.saturating_add(place.dy as i32),
                 pos.z.saturating_mul(16).saturating_add(place.dz as i32),
             ];
             chunk.set_block(world, state);
         }
     }
+}
+
+impl ChunkGenerator for CityGenerator {
+    fn build_terrain(&self, chunk: &mut dyn ChunkAccess) {
+        if chunk.level() != CITY_GENERATOR {
+            return;
+        }
+        self.write_part(chunk, &self.street, CITY_BASE_Y);
+        self.write_part(chunk, &self.building, BUILDING_BASE_Y);
+    }
 
     fn vanilla_stages(&self) -> VanillaStages {
-        // The part is the level's whole terrain: no vanilla surface, carvers,
-        // structures or features are applied over it.
+        // The parts are the level's whole terrain: no vanilla surface, carvers,
+        // structures or features are applied over them.
         VanillaStages::default()
     }
 }
@@ -74,13 +93,27 @@ impl ChunkGenerator for CityGenerator {
 #[mod_api::horizon_mod]
 impl Hooks for Mod {
     fn register(&self, registrar: &mut dyn Registrar, _context: &RegistrationContext) {
-        let placements =
-            runtime::decode_city(runtime::STREET_PART_JSON, runtime::STREET_PALETTE_JSON)
-                .expect("the embedded jar part and palette decode");
+        let street = runtime::decode_city(runtime::STREET_PART_JSON, runtime::STREET_PALETTE_JSON)
+            .expect("the embedded street part and palette decode");
+        // The building's `#` char is a `variant` palette entry; resolve it
+        // through the jar's variants/stonebrick.json before decoding.
+        let variants =
+            runtime::VariantTable::from_files(&[("stonebrick", runtime::STONEBRICK_VARIANT_JSON)])
+                .expect("the embedded jar variant decodes");
+        let building = runtime::decode_city_with_variants(
+            runtime::BUILDING_PART_JSON,
+            runtime::BUILDING_PALETTE_JSON,
+            &variants,
+        )
+        .expect("the embedded building part and merged palette decode");
 
         // Request each distinct block id once. The registrar checks it against
         // the game's registry at load; an unknown id refuses the mod by name.
-        let mut blocks: Vec<String> = placements.iter().map(|p| p.block.clone()).collect();
+        let mut blocks: Vec<String> = street
+            .iter()
+            .chain(building.iter())
+            .map(|p| p.block.clone())
+            .collect();
         blocks.sort();
         blocks.dedup();
         let keys = blocks
@@ -90,7 +123,14 @@ impl Hooks for Mod {
                 (id, key)
             })
             .collect();
-        registrar.register_chunk_generator(CITY_GENERATOR, CityGenerator { placements, keys });
+        registrar.register_chunk_generator(
+            CITY_GENERATOR,
+            CityGenerator {
+                street,
+                building,
+                keys,
+            },
+        );
 
         // The dimension type's values come from the jar's dimension_type file
         // (`runtime::dimension()`); only the generator and the biome source

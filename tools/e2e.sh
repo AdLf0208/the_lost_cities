@@ -12,6 +12,7 @@
 #   SELFTEST=1    -> FAIL EXIT:1  (inverted dimension assertion)
 #   TAG_SELFTEST=1-> FAIL EXIT:1  (inverted tag assertion)
 #   CITY_SELFTEST=1 -> FAIL EXIT:1 (inverted generator-authored block count)
+#   BUILDING_SELFTEST=1 -> FAIL EXIT:1 (inverted bookshelf count of the six-layer part)
 set -euo pipefail
 export LC_ALL=C
 
@@ -25,6 +26,7 @@ E2E_TMP=${E2E_TMP:-/tmp/opencode}
 SELFTEST=${SELFTEST:-0}
 TAG_SELFTEST=${TAG_SELFTEST:-0}
 CITY_SELFTEST=${CITY_SELFTEST:-0}
+BUILDING_SELFTEST=${BUILDING_SELFTEST:-0}
 
 [ -n "$CTL" ] && [ -n "$GAME" ] || { echo "missing CTL/GAME: eval \"\$(ports/tools/launcher-game.sh env the_lost_cities)\"" >&2; exit 1; }
 [ -x "$CTL" ] || { echo "missing horizon-ctl: $CTL" >&2; exit 1; }
@@ -142,6 +144,35 @@ else
         || fail "the vanilla-noise control unexpectedly had $vanilla_count slab(s): $vanilla_reply"
 fi
 
+# Slice 3: the second, six-layer building part is laid at BUILDING_BASE_Y=72.
+# Its `L` char resolves to `minecraft:bookshelf` in the merged jar palette, which
+# the street part never writes; fill-replacing that id in the generator's level
+# must report a count > 0. The same fill on the vanilla-noise Overworld is the
+# control (no bookshelves in natural terrain), and BUILDING_SELFTEST inverts it.
+say "six-layer building part authors bookshelves at the second Y"
+bldg_reply=$(lc "fill 0 70 0 16 84 16 minecraft:air replace minecraft:bookshelf" 2>&1 || true)
+bldg_chat=$(echo "$bldg_reply" | jq -r '.chat[0] // ""' 2>/dev/null || echo "")
+echo "building bookshelf fill: $(echo "$bldg_reply" | jq -c . 2>/dev/null | head -c 180)"
+bldg_count=$(echo "$bldg_chat" | grep -oE 'Successfully filled [0-9]+ block' | grep -oE '[0-9]+' || echo 0)
+bldg_count=${bldg_count:-0}
+echo "building-authored bookshelf count: $bldg_count"
+vanilla_bldg_reply=$(ctl command "fill 0 70 0 16 84 16 minecraft:air replace minecraft:bookshelf" 2>&1 || true)
+vanilla_bldg_chat=$(echo "$vanilla_bldg_reply" | jq -r '.chat[0] // ""' 2>/dev/null || echo "")
+echo "vanilla-noise bookshelf control: $(echo "$vanilla_bldg_reply" | jq -c . 2>/dev/null | head -c 180)"
+vanilla_bldg_count=$(echo "$vanilla_bldg_chat" | grep -oE 'Successfully filled [0-9]+ block' | grep -oE '[0-9]+' || echo 0)
+vanilla_bldg_count=${vanilla_bldg_count:-0}
+echo "vanilla-noise bookshelf count: $vanilla_bldg_count"
+if [ "$BUILDING_SELFTEST" = 1 ]; then
+    [ "$bldg_count" -eq 0 ] \
+        || fail "BUILDING_SELFTEST: the building authored $bldg_count bookshelf(s); the inverted assertion expected 0"
+    echo "BUILDING_SELFTEST: no building-authored bookshelves (unexpected)"
+else
+    [ "$bldg_count" -gt 0 ] \
+        || fail "the chunk generator authored no building bookshelves: $bldg_reply"
+    [ "$vanilla_bldg_count" -eq 0 ] \
+        || fail "the vanilla-noise control unexpectedly had $vanilla_bldg_count bookshelf(s): $vanilla_bldg_reply"
+fi
+
 say "carried block tag #lostcities:notbreakable matches bedrock"
 end "setblock 50 80 50 minecraft:bedrock" >/dev/null
 ctl wait 5
@@ -191,4 +222,4 @@ echo "tags=$(find "$PORT/data/lostcities/tags" -name '*.json' | wc -l) " \
      "loot=$(find "$PORT/data/lostcities/loot_table" -name '*.json' | wc -l) " \
      "lang=$(find "$PORT/assets/lostcities/lang" -name '*.json' | wc -l)"
 
-echo "PASS: the lostcity dimension answered, #lostcities:notbreakable matched bedrock, and both carried loot tables yielded items"
+echo "PASS: the lostcity dimension answered, both decoded parts authored their own blocks in it (slabs and bookshelves), #lostcities:notbreakable matched bedrock, and both carried loot tables yielded items"

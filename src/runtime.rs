@@ -388,7 +388,11 @@ impl Part {
 
     /// Resolve every non-space cell into a placement. A char with no palette
     /// entry is an error: a silent skip would drop part of the city.
-    pub fn placements(&self, palette: &Palette) -> Result<Vec<Placement>, String> {
+    pub fn placements(
+        &self,
+        palette: &Palette,
+        variants: &VariantTable,
+    ) -> Result<Vec<Placement>, String> {
         let mut out = Vec::new();
         for (y, layer) in self.slices.iter().enumerate() {
             for (z, row) in layer.iter().enumerate() {
@@ -398,10 +402,10 @@ impl Part {
                     }
                     let salt =
                         ((x as u64) << 42) ^ ((y as u64) << 28) ^ ((z as u64) << 8) ^ (ch as u64);
-                    let block = palette.resolve(ch, salt).ok_or_else(|| {
+                    let block = palette.resolve(ch, salt, variants).ok_or_else(|| {
                         format!("part: char '{ch}' at ({x},{y},{z}) has no palette entry")
                     })?;
-                    let (id, properties) = split_block(block);
+                    let (id, properties) = split_block(&block);
                     out.push(Placement {
                         dx: x,
                         dy: y,
@@ -416,11 +420,14 @@ impl Part {
     }
 }
 
-/// How one palette char resolves: one block, or a weighted choice of blocks.
+/// How one palette char resolves: one block, a weighted choice of blocks, a
+/// named jar variant, or another char's resolved block (`frompalette`).
 #[derive(Clone, Debug, PartialEq)]
 pub enum PaletteEntry {
     Single(String),
     Weighted(Vec<(u32, String)>),
+    Variant(String),
+    FromPalette(char),
 }
 
 /// The `palette` array of one palette file, keyed by its single-character id.
@@ -449,54 +456,123 @@ impl Palette {
             if let Some(block) = item.get("block").and_then(Json::as_str) {
                 entries.push((ch, PaletteEntry::Single(block.to_string())));
             } else if let Some(blocks) = item.get("blocks").and_then(Json::as_arr) {
-                let mut choices = Vec::with_capacity(blocks.len());
-                for choice in blocks {
-                    let weight = choice
-                        .get("random")
-                        .and_then(Json::as_usize)
-                        .ok_or("palette: a weighted entry has no random weight")?;
-                    let block = choice
-                        .get("block")
-                        .and_then(Json::as_str)
-                        .ok_or("palette: a weighted entry has no block")?;
-                    choices.push((weight as u32, block.to_string()));
+                entries.push((ch, PaletteEntry::Weighted(read_choices(blocks)?)));
+            } else if let Some(name) = item.get("variant").and_then(Json::as_str) {
+                entries.push((ch, PaletteEntry::Variant(name.to_string())));
+            } else if let Some(from) = item.get("frompalette").and_then(Json::as_str) {
+                let mut fc = from.chars();
+                let fch = fc.next().ok_or("palette: empty frompalette")?;
+                if fc.next().is_some() {
+                    return Err(format!(
+                        "palette: frompalette '{from}' is not one character"
+                    ));
                 }
-                if choices.is_empty() {
-                    return Err(format!("palette: char '{ch}' has an empty weighted list"));
-                }
-                entries.push((ch, PaletteEntry::Weighted(choices)));
+                entries.push((ch, PaletteEntry::FromPalette(fch)));
             } else {
-                return Err(format!("palette: char '{ch}' has neither block nor blocks"));
+                return Err(format!(
+                    "palette: char '{ch}' has neither block, blocks, variant nor frompalette"
+                ));
             }
         }
         Ok(Self { entries })
     }
 
-    /// Resolve `ch` to a block id, using `salt` for a stable weighted pick.
-    pub fn resolve(&self, ch: char, salt: u64) -> Option<&str> {
+    /// Resolve `ch` to a block id, using `salt` for a stable weighted or variant
+    /// pick. A `frompalette` entry follows another char, with a cycle bound.
+    pub fn resolve(&self, ch: char, salt: u64, variants: &VariantTable) -> Option<String> {
+        self.resolve_inner(ch, salt, variants, 0)
+    }
+
+    fn resolve_inner(
+        &self,
+        ch: char,
+        salt: u64,
+        variants: &VariantTable,
+        depth: u8,
+    ) -> Option<String> {
+        if depth > 8 {
+            return None;
+        }
         let entry = self
             .entries
             .iter()
             .find(|(c, _)| *c == ch)
             .map(|(_, e)| e)?;
         match entry {
-            PaletteEntry::Single(block) => Some(block),
-            PaletteEntry::Weighted(choices) => {
-                let total: u64 = choices.iter().map(|(w, _)| u64::from(*w)).sum();
-                if total == 0 {
-                    return choices.first().map(|(_, b)| b.as_str());
-                }
-                let mut pick =
-                    (0xcbf2_9ce4_8422_2325_u64 ^ salt).wrapping_mul(0x0100_0000_01b3) % total;
-                for (weight, block) in choices {
-                    if pick < u64::from(*weight) {
-                        return Some(block);
-                    }
-                    pick -= u64::from(*weight);
-                }
-                choices.last().map(|(_, b)| b.as_str())
+            PaletteEntry::Single(block) => Some(block.clone()),
+            PaletteEntry::Weighted(choices) => pick_weighted(choices, salt).map(str::to_string),
+            PaletteEntry::Variant(name) => variants.pick(name, salt).map(str::to_string),
+            PaletteEntry::FromPalette(other) => {
+                self.resolve_inner(*other, salt, variants, depth + 1)
             }
         }
+    }
+}
+
+/// Read the jar's `{"random": N, "block": "..."}` weighted-block lists.
+fn read_choices(blocks: &[Json]) -> Result<Vec<(u32, String)>, String> {
+    let mut choices = Vec::with_capacity(blocks.len());
+    for choice in blocks {
+        let weight = choice
+            .get("random")
+            .and_then(Json::as_usize)
+            .ok_or("palette: a weighted entry has no random weight")?;
+        let block = choice
+            .get("block")
+            .and_then(Json::as_str)
+            .ok_or("palette: a weighted entry has no block")?;
+        choices.push((weight as u32, block.to_string()));
+    }
+    if choices.is_empty() {
+        return Err("palette: a weighted list is empty".to_string());
+    }
+    Ok(choices)
+}
+
+/// A deterministic pick from a jar weighted-block list.
+fn pick_weighted(choices: &[(u32, String)], salt: u64) -> Option<&str> {
+    let total: u64 = choices.iter().map(|(w, _)| u64::from(*w)).sum();
+    if total == 0 {
+        return choices.first().map(|(_, b)| b.as_str());
+    }
+    let mut pick = (0xcbf2_9ce4_8422_2325_u64 ^ salt).wrapping_mul(0x0100_0000_01b3) % total;
+    for (weight, block) in choices {
+        if pick < u64::from(*weight) {
+            return Some(block);
+        }
+        pick -= u64::from(*weight);
+    }
+    choices.last().map(|(_, b)| b.as_str())
+}
+
+/// The jar's `variants/<name>.json` files: each is a `{"blocks": [...]}` list,
+/// keyed here by the file name a palette's `variant` field refers to.
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct VariantTable {
+    entries: Vec<(String, Vec<(u32, String)>)>,
+}
+
+impl VariantTable {
+    pub fn from_files(files: &[(&str, &str)]) -> Result<Self, String> {
+        let mut entries = Vec::with_capacity(files.len());
+        for (name, json) in files {
+            let value = parse_json(json)?;
+            let blocks = value
+                .get("blocks")
+                .and_then(Json::as_arr)
+                .ok_or_else(|| format!("variant '{name}': missing blocks array"))?;
+            entries.push(((*name).to_string(), read_choices(blocks)?));
+        }
+        Ok(Self { entries })
+    }
+
+    fn pick(&self, name: &str, salt: u64) -> Option<&str> {
+        let choices = self
+            .entries
+            .iter()
+            .find(|(n, _)| n == name)
+            .map(|(_, c)| c)?;
+        pick_weighted(choices, salt)
     }
 }
 
@@ -528,11 +604,21 @@ pub fn split_block(text: &str) -> (&str, Vec<(String, String)>) {
     }
 }
 
-/// Decode one part with one palette into worldgen placements.
+/// Decode one part with one palette into worldgen placements. The street part
+/// has no variant entries, so an empty variant table is enough here.
 pub fn decode_city(part_json: &str, palette_json: &str) -> Result<Vec<Placement>, String> {
+    decode_city_with_variants(part_json, palette_json, &VariantTable::default())
+}
+
+/// Decode a part whose palette may contain `variant`/`frompalette` entries.
+pub fn decode_city_with_variants(
+    part_json: &str,
+    palette_json: &str,
+    variants: &VariantTable,
+) -> Result<Vec<Placement>, String> {
     let part = Part::from_json(&parse_json(part_json)?)?;
     let palette = Palette::from_json(&parse_json(palette_json)?)?;
-    part.placements(&palette)
+    part.placements(&palette, variants)
 }
 
 /// `parts/street_straight.json` from the cached jar, verbatim: a 16x16 single
@@ -578,6 +664,28 @@ pub const STREET_PALETTE_JSON: &str = r#"{
     }
   ]
 }"#;
+
+/// `variants/stonebrick.json` from the cached jar, verbatim. A `variant`
+/// palette entry resolves through this weighted stone-brick list.
+pub const STONEBRICK_VARIANT_JSON: &str = "{\n  \"blocks\": [\n    {\n      \"random\": 9,\n      \"block\": \"minecraft:cracked_stone_bricks\"\n    },\n    {\n      \"random\": 8,\n      \"block\": \"minecraft:mossy_stone_bricks\"\n    },\n    {\n      \"random\": 1000,\n      \"block\": \"minecraft:stone_bricks\"\n    }\n  ]\n}";
+
+/// A one-cell part exercising only the `variant` entry form (bricks_standard
+/// char `#`), for the red-first variant-resolution test.
+#[cfg(test)]
+pub const VARIANT_PART_JSON: &str = "{\"xsize\": 1, \"zsize\": 1, \"slices\": [[\"#\"]]}";
+/// The `#` entry of `palettes/bricks_standard.json`, verbatim.
+#[cfg(test)]
+pub const VARIANT_PALETTE_JSON: &str = "{\"palette\": [{\"char\": \"#\", \"variant\": \"stonebrick\", \"damaged\": \"minecraft:iron_bars\"}]}";
+
+/// `parts/building1_1.json` from the cached jar, verbatim: 16x16, six slices.
+pub const BUILDING_PART_JSON: &str = "{\n  \"xsize\": 16,\n  \"zsize\": 16,\n  \"slices\": [\n    [\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\",\n      \"#######l########\",\n      \"##########1#####\",\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\"\n    ],\n    [\n      \"#aa@aaaaaaaa@aa#\",\n      \"a  #        #  a\",\n      \"a  #F       #  a\",\n      \"@  #F      L#  @\",\n      \"a  #D      L#  a\",\n      \"a  #        #  a\",\n      \"a              a\",\n      \"a  #        #  a\",\n      \"a  #        #  a\",\n      \"a  #   l    #  a\",\n      \"a  ##########  a\",\n      \"a              a\",\n      \"@              @\",\n      \"a              a\",\n      \"a     F        a\",\n      \"#aa@aaaaaaaa@aa#\"\n    ],\n    [\n      \"#aa@aaaaaaaa@aa#\",\n      \"a  #        #  a\",\n      \"a  #        #  a\",\n      \"@  #       L#  @\",\n      \"a  #*      L#  a\",\n      \"a  #        #  a\",\n      \"a              a\",\n      \"a  #        #  a\",\n      \"a  #        #  a\",\n      \"a  #   l    #  a\",\n      \"a  ##########  a\",\n      \"a       T      a\",\n      \"@              @\",\n      \"a              a\",\n      \"a              a\",\n      \"#aa@aaaaaaaa@aa#\"\n    ],\n    [\n      \"#aa@aaaaaaaa@aa#\",\n      \"a  #        #  a\",\n      \"a  #        #  a\",\n      \"@  #        #  @\",\n      \"a  #        #  a\",\n      \"a  #        #  a\",\n      \"a  #        #  a\",\n      \"a  #        #  a\",\n      \"a  #        #  a\",\n      \"a  #   l    #  a\",\n      \"a  ##########  a\",\n      \"a              a\",\n      \"@              @\",\n      \"a              a\",\n      \"a              a\",\n      \"#aa@aaaaaaaa@aa#\"\n    ],\n    [\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\",\n      \"#######l########\",\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\"\n    ],\n    [\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\",\n      \"#######l########\",\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\"\n    ]\n  ]\n}";
+
+/// Merged palette for the building part. Every entry is copied verbatim from
+/// its jar source: `#` from bricks_standard (a `variant`), `a` from glass_full,
+/// `@` from glass_side_variant_bricks (`frompalette: "#"`), and `1`/`T`/`F`/
+/// `D`/`l`/`L`/`*`/space from common. `styles/standard.json` selects exactly
+/// these palette groups together, so this is the jar's own char -> block map.
+pub const BUILDING_PALETTE_JSON: &str = "{\"palette\": [{\"char\": \"#\", \"variant\": \"stonebrick\", \"damaged\": \"minecraft:iron_bars\"}, {\"char\": \"a\", \"block\": \"minecraft:glass\"}, {\"char\": \"@\", \"frompalette\": \"#\"}, {\"char\": \"1\", \"block\": \"minecraft:spawner\", \"mob\": \"easymobs\"}, {\"char\": \"T\", \"block\": \"minecraft:wall_torch[facing=north]\", \"torch\": true}, {\"char\": \"F\", \"blocks\": [{\"random\": 25, \"block\": \"minecraft:furnace[facing=north]\"}, {\"random\": 20, \"block\": \"minecraft:crafting_table\"}, {\"random\": 7, \"block\": \"minecraft:brewing_stand\"}, {\"random\": 6, \"block\": \"minecraft:anvil[facing=north]\"}, {\"random\": 5, \"block\": \"minecraft:cauldron\"}, {\"random\": 2, \"block\": \"minecraft:enchanting_table\"}, {\"random\": 1000, \"block\": \"minecraft:cobweb\"}]}, {\"char\": \"D\", \"block\": \"minecraft:dirt\"}, {\"char\": \"l\", \"block\": \"minecraft:ladder[facing=north]\"}, {\"char\": \"L\", \"block\": \"minecraft:bookshelf\"}, {\"char\": \"*\", \"block\": \"minecraft:potted_cactus\"}, {\"char\": \" \", \"block\": \"minecraft:air\"}]}";
 
 #[cfg(test)]
 mod tests {
@@ -712,8 +820,15 @@ mod decoder_tests {
     fn weighted_palette_choice_is_deterministic() {
         let p = Palette::from_json(&parse_json(WEIGHTED_PAL).expect("test JSON parses"))
             .expect("weighted palette parses");
+        let variants = VariantTable::default();
         for salt in 0..64 {
-            assert_eq!(p.resolve('a', salt), p.resolve('a', salt));
+            let pick = p
+                .resolve('a', salt, &variants)
+                .expect("weighted char resolves");
+            assert!(
+                pick == "minecraft:stone" || pick == "minecraft:dirt",
+                "unexpected weighted pick: {pick}"
+            );
         }
     }
 
@@ -722,5 +837,79 @@ mod decoder_tests {
         let (id, props) = split_block("minecraft:redstone_torch[lit=true]");
         assert_eq!(id, "minecraft:redstone_torch");
         assert_eq!(props, vec![("lit".to_string(), "true".to_string())]);
+    }
+}
+
+/// Slice 3: the second, multi-slice building part and the `variant` palette
+/// entry form. Both are read from the cached jar; the tests are written before
+/// the decoder/data exist so the gap is proved red first.
+#[cfg(test)]
+mod building_tests {
+    use super::*;
+
+    /// The jar's `variants/stonebrick.json` resolves a `variant` entry to a
+    /// weighted choice of stone-brick family blocks — not a literal id.
+    #[test]
+    fn variant_entry_resolves_through_the_variant_table() {
+        let variants = VariantTable::from_files(&[("stonebrick", STONEBRICK_VARIANT_JSON)])
+            .expect("the jar's stonebrick variant decodes");
+        let placements =
+            decode_city_with_variants(VARIANT_PART_JSON, VARIANT_PALETTE_JSON, &variants)
+                .expect("a 'variant' palette entry resolves");
+        assert_eq!(placements.len(), 1, "one cell, one block");
+        assert!(
+            matches!(
+                placements[0].block.as_str(),
+                "minecraft:stone_bricks"
+                    | "minecraft:cracked_stone_bricks"
+                    | "minecraft:mossy_stone_bricks"
+            ),
+            "the variant must resolve to a stone-brick family block, got {}",
+            placements[0].block
+        );
+    }
+
+    /// The embedded building part is measured from the jar: 16x16 footprint,
+    /// six slices, all rows the declared width. This is the multi-layer bound
+    /// the single-slice street part never exercised.
+    #[test]
+    fn embedded_building_part_has_six_16x16_layers() {
+        let part = Part::from_json(&parse_json(BUILDING_PART_JSON).expect("jar part parses"))
+            .expect("jar part decodes");
+        assert_eq!(part.xsize, 16, "jar xsize");
+        assert_eq!(part.zsize, 16, "jar zsize");
+        assert_eq!(part.slices.len(), 6, "the building has six slices");
+        for (y, layer) in part.slices.iter().enumerate() {
+            assert_eq!(layer.len(), 16, "slice {y} has 16 rows");
+            for (z, row) in layer.iter().enumerate() {
+                assert_eq!(row.chars().count(), 16, "slice {y} row {z} is 16 chars");
+            }
+        }
+    }
+
+    /// The full building decodes with the merged jar palette: it contains the
+    /// `L` -> bookshelf char (the in-game assertion), and placements span all
+    /// six layers (dy 0 through 5).
+    #[test]
+    fn embedded_building_decodes_with_bookshelf_across_six_layers() {
+        let variants = VariantTable::from_files(&[("stonebrick", STONEBRICK_VARIANT_JSON)])
+            .expect("the jar's stonebrick variant decodes");
+        let placements =
+            decode_city_with_variants(BUILDING_PART_JSON, BUILDING_PALETTE_JSON, &variants)
+                .expect("the embedded jar building and merged palette decode");
+        assert!(
+            placements.iter().any(|p| p.block == "minecraft:bookshelf"),
+            "the L char must resolve to the palette's bookshelf"
+        );
+        assert_eq!(
+            placements.iter().map(|p| p.dy).min(),
+            Some(0),
+            "the first layer is layer 0"
+        );
+        assert_eq!(
+            placements.iter().map(|p| p.dy).max(),
+            Some(5),
+            "six slices span dy 0..5"
+        );
     }
 }
