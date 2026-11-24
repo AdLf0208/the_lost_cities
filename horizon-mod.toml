@@ -1,0 +1,20 @@
+id = "the_lost_cities"
+name = "The Lost Cities"
+version = "0.1.0"
+description = """Generate cities all over the world. This first slice carries The Lost Cities'
+block tags, chest loot tables and language file, and registers the lostcities:lostcity
+dimension from the jar's dimension_type values. City terrain generation is not yet
+expressible: the pin has no configured-feature registrar and R11 refuses a level reset."""
+authors = ["McJty (upstream, MIT)", "AdLf0208 (port)"]
+api = "0.2"
+side = "both"
+capabilities = ["registries"]
+# The registry id is the campaign's port id; the jar's content namespace is
+# `lostcities`, so it must be listed for the carried tags/loot to load and for
+# the dimension registration to name the mod's own id.
+namespaces = ["lostcities"]
+
+[native]
+game = "26.3"
+horizon = "0a875da91dbb0fdcb7ba8c42c11341aa229af51a"
+mixins = "e59da9094f0c2fdda6c627fe9eff22dec6a906f0"

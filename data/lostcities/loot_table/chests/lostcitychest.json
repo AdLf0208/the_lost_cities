@@ -1,0 +1,74 @@
+{
+  "pools": [
+    {
+      "entries": [
+        {
+          "modifier": [
+            {
+              "count": {
+                "max": 1,
+                "min": 0,
+                "type": "minecraft:uniform"
+              },
+              "type": "minecraft:set_count"
+            }
+          ],
+          "name": "minecraft:diamond_sword",
+          "type": "minecraft:item",
+          "weight": 2
+        },
+        {
+          "modifier": [
+            {
+              "count": {
+                "max": 5,
+                "min": 1,
+                "type": "minecraft:uniform"
+              },
+              "type": "minecraft:set_count"
+            }
+          ],
+          "name": "minecraft:gold_ingot",
+          "type": "minecraft:item",
+          "weight": 5
+        },
+        {
+          "modifier": [
+            {
+              "count": {
+                "max": 5,
+                "min": 1,
+                "type": "minecraft:uniform"
+              },
+              "type": "minecraft:set_count"
+            }
+          ],
+          "name": "minecraft:diamond",
+          "type": "minecraft:item",
+          "weight": 5
+        },
+        {
+          "modifier": [
+            {
+              "count": {
+                "max": 3,
+                "min": 1,
+                "type": "minecraft:uniform"
+              },
+              "type": "minecraft:set_count"
+            }
+          ],
+          "name": "minecraft:emerald",
+          "type": "minecraft:item",
+          "weight": 5
+        }
+      ],
+      "name": "lostcities:lostcitychest",
+      "rolls": {
+        "max": 4,
+        "min": 2,
+        "type": "minecraft:uniform"
+      }
+    }
+  ]
+}

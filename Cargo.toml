@@ -1,0 +1,14 @@
+[package]
+# Port of The Lost Cities 26.3-12.0.2 (McJtyMods/LostCities, MIT), Minecraft 26.3.
+# Clean-room Rust rewrite of the mod's observed behaviour; first publication at 0.1.0.
+name = "the_lost_cities"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+description = "The Lost Cities for Horizon: carried tags/loot and the lostcity dimension"
+publish = false
+
+[dependencies]
+# The pinned SDK's API crate only (registry rule R9: no other dependency, no [workspace],
+# no packed Cargo.lock).
+horizon-mod-api = { path = ".horizon/sdk/api/crates/horizon-mod-api" }

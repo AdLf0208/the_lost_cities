@@ -1,0 +1,162 @@
+#!/usr/bin/env bash
+# In-game check for The Lost Cities slice 1: the registered lostcity dimension,
+# the carried block tag, and the registry differential. Run through the slot:
+#
+#   eval "$(ports/tools/launcher-game.sh env the_lost_cities)"
+#   BUILD_LOCAL=1 ports/tools/build-slot.sh run --job TLC \
+#       --port ports/the_lost_cities --step e2e -- bash -lc '<eval> && tools/e2e.sh'
+#
+# Legs:
+#   default       -> PASS EXIT:0  (dimension exists and accepts a block; tag matches bedrock)
+#   GAME=$CONTROL -> FAIL EXIT:1  (the unmodded game knows neither the dimension nor the tag)
+#   SELFTEST=1    -> FAIL EXIT:1  (inverted dimension assertion)
+#   TAG_SELFTEST=1-> FAIL EXIT:1  (inverted tag assertion)
+set -euo pipefail
+export LC_ALL=C
+
+CAMPAIGN=/home/adlf/Desktop/all_the_mods_10_rust_rewrite
+PORT=$CAMPAIGN/ports/the_lost_cities
+CTL=${CTL:-}
+GAME=${GAME:-}
+RES=${RES:-${HORIZON_RES:-/home/adlf/Desktop/horizon/.local/horizon-client/26.3}}
+SOCK=${SOCK:-/tmp/opencode/the_lost_cities-e2e.sock}
+E2E_TMP=${E2E_TMP:-/tmp/opencode}
+SELFTEST=${SELFTEST:-0}
+TAG_SELFTEST=${TAG_SELFTEST:-0}
+
+[ -n "$CTL" ] && [ -n "$GAME" ] || { echo "missing CTL/GAME: eval \"\$(ports/tools/launcher-game.sh env the_lost_cities)\"" >&2; exit 1; }
+[ -x "$CTL" ] || { echo "missing horizon-ctl: $CTL" >&2; exit 1; }
+[ -x "$GAME" ] || { echo "missing horizon-client: $GAME" >&2; exit 1; }
+[ -d "$RES/assets" ] || { echo "missing prepared resources: $RES" >&2; exit 1; }
+
+say() { echo "== $* =="; }
+fail() { echo "FAIL: $*" >&2; exit 1; }
+
+SCRATCH=$(mktemp -d "$E2E_TMP/tlc-home.XXXXXX")
+export HORIZON_HOME=$SCRATCH/game
+export HORIZON_LAUNCHER_HOME=$SCRATCH/launcher
+export XDG_DATA_HOME=$SCRATCH/data
+export XDG_CONFIG_HOME=$SCRATCH/config
+export HORIZON_NO_AUDIO=1
+mkdir -p "$(dirname "$SOCK")" "$SCRATCH"
+rm -f "$SOCK"
+cd "$SCRATCH"
+
+ctl() { "$CTL" --socket "$SOCK" "$@"; }
+end() { ctl command "execute in minecraft:the_end run $1"; }
+lc() { ctl command "execute in lostcities:lostcity run $1"; }
+
+cleanup() {
+    rc=$?
+    ctl quit >/dev/null 2>&1 || true
+    sleep 1
+    rm -rf "$SCRATCH" || true
+    echo "EXIT:$rc"
+}
+trap cleanup EXIT
+
+say "launch (offscreen, creative, The End, seed 20261105)"
+if ! "$CTL" --socket "$SOCK" launch \
+    --game "$GAME" --world LostCitiesE2E --seed 20261105 --creative --offscreen --wait \
+    --game-dir "$SCRATCH/game" --resources "$RES" \
+    > "$SCRATCH/launch.json" 2> "$SCRATCH/launch.err"; then
+    echo "launch reply: $(cat "$SCRATCH/launch.json" 2>/dev/null)" >&2
+    tail -25 "$SCRATCH/game/logs/latest.log" >&2 || true
+    fail "the game did not launch"
+fi
+jq -c '{dimension, creative, ok: .launch.ok}' "$SCRATCH/launch.json" || true
+ctl wait-ready 180 || fail "the game did not become ready"
+
+# A carried tag whose members cannot resolve must not be a silent data refusal.
+LOG=$(ctl logs --lines 8000 2>/dev/null || true)
+for bad in "Couldn't parse data file" "invalid world generation field" "Unknown recipe type"; do
+    if grep -qi "$bad" <<<"$LOG"; then
+        grep -i "$bad" <<<"$LOG" >&2
+        fail "the level opened with '$bad' in the log"
+    fi
+done
+echo "the level opened without a data-file refusal"
+
+say "The End arena (stone floor at y=79)"
+end "forceload add -16 -16 96 80" >/dev/null
+end "tp @s 8.5 80 8.5" >/dev/null
+ctl wait 40
+end "fill -16 79 -16 80 79 80 minecraft:stone" >/dev/null
+for y in 80 81 82 83 84 85 86 87 88 89 90; do end "fill -16 $y -16 80 $y 80 minecraft:air" >/dev/null; done
+end "gamerule spawn_mobs false" >/dev/null
+ctl wait 5
+
+say "registered dimension lostcities:lostcity (only the package supplies it)"
+dim_reply=$(lc "say LC_DIM_PRESENT" 2>&1 || true)
+dim_chat=$(echo "$dim_reply" | jq -r '.chat[0] // ""' 2>/dev/null || echo "")
+echo "dimension reply: $(echo "$dim_reply" | jq -c . 2>/dev/null | head -c 180)"
+if [ "$SELFTEST" = 1 ]; then
+    grep -q 'LC_DIM_PRESENT' <<<"$dim_chat" \
+        && fail "SELFTEST: the dimension answered; the inverted assertion expected no answer"
+    echo "SELFTEST: no dimension reply (unexpected)"
+else
+    grep -q 'LC_DIM_PRESENT' <<<"$dim_chat" \
+        || fail "the registered dimension did not answer: $dim_reply"
+fi
+# The dimension is a real level, not only a name: a block written in it is read
+# back. A brand-new level has no loaded chunks, so force-load one first.
+lc "forceload add -1 -1 1 1" >/dev/null || fail "forceload in lostcity failed"
+ctl wait 40
+lc "setblock 0 70 0 minecraft:stone" >/dev/null || fail "setblock in lostcity failed"
+ctl wait 5
+block_reply=$(lc "fill 0 70 0 0 70 0 minecraft:air replace minecraft:stone" 2>&1 || true)
+block_chat=$(echo "$block_reply" | jq -r '.chat[0] // ""' 2>/dev/null || echo "")
+echo "dimension block reply: $block_chat"
+[ "$SELFTEST" = 1 ] || grep -q 'Successfully filled 1 block' <<<"$block_chat" \
+    || fail "the dimension level did not hold the written stone: $block_reply"
+
+say "carried block tag #lostcities:notbreakable matches bedrock"
+end "setblock 50 80 50 minecraft:bedrock" >/dev/null
+ctl wait 5
+tag_reply=$(ctl command "execute if block 50 80 50 #lostcities:notbreakable" 2>&1 || true)
+tag_chat=$(echo "$tag_reply" | jq -r '.chat[0] // ""' 2>/dev/null || echo "")
+echo "tag reply: $(echo "$tag_reply" | jq -c . 2>/dev/null | head -c 160)"
+if [ "$TAG_SELFTEST" = 1 ]; then
+    grep -q 'Test passed' <<<"$tag_chat" \
+        && fail "TAG_SELFTEST: the tag matched; the inverted assertion expected no match"
+    echo "TAG_SELFTEST: no match (unexpected)"
+else
+    grep -q 'Test passed' <<<"$tag_chat" \
+        || fail "the carried tag did not match bedrock: $tag_reply"
+fi
+# Differential: an unknown tag is refused by the registry. `ctl command`
+# answers ok:true for a refused command, so the chat text is the assertion.
+unknown=$(ctl command "execute if block 50 80 50 #lostcities:no_such_tag" 2>&1 || true)
+unknown_chat=$(echo "$unknown" | jq -r '.chat[0] // ""' 2>/dev/null || echo "")
+echo "unknown tag differential: $unknown_chat"
+grep -q 'Unknown block tag' <<<"$unknown_chat" \
+    || fail "an unknown tag id was not refused: $unknown"
+
+say "carried loot tables yield items (26.3 entry shape)"
+inv_before=$(ctl inventory 2>/dev/null | jq -r '[.slots[]? | select(.id != null)] | length' 2>/dev/null || echo 0)
+echo "inventory before loot: $inv_before"
+loot_reply=$(ctl command "loot give @p loot lostcities:chests/lostcitychest" 2>&1 || true)
+loot_chat=$(echo "$loot_reply" | jq -r '.chat[0] // ""' 2>/dev/null || echo "")
+echo "lostcitychest: $loot_chat"
+grep -qE 'Dropped [1-9][0-9]* items' <<<"$loot_chat" \
+    || fail "the carried city chest yielded no items (the 1.21.1 entry shape defect): $loot_reply"
+loot2_reply=$(ctl command "loot give @p loot lostcities:chests/raildungeonchest" 2>&1 || true)
+loot2_chat=$(echo "$loot2_reply" | jq -r '.chat[0] // ""' 2>/dev/null || echo "")
+echo "raildungeonchest: $loot2_chat"
+grep -qE 'Dropped [1-9][0-9]* items' <<<"$loot2_chat" \
+    || fail "the carried rail dungeon chest yielded no items: $loot2_reply"
+ctl wait 3 >/dev/null
+inv_after=$(ctl inventory 2>/dev/null | jq -r '[.slots[]? | select(.id != null)] | length' 2>/dev/null || echo 0)
+echo "inventory after loot: $inv_after (informational: creative-mode loot give drops at feet)"
+unknown_loot=$(ctl command "loot give @p loot lostcities:chests/no_such_table" 2>&1 || true)
+unknown_loot_chat=$(echo "$unknown_loot" | jq -r '.chat[0] // ""' 2>/dev/null || echo "")
+echo "unknown loot differential: $unknown_loot_chat"
+grep -q "Can't find element" <<<"$unknown_loot_chat" \
+    || fail "an unknown loot table id was not refused: $unknown_loot"
+
+say "carried data summary"
+echo "tags=$(find "$PORT/data/lostcities/tags" -name '*.json' | wc -l) " \
+     "loot=$(find "$PORT/data/lostcities/loot_table" -name '*.json' | wc -l) " \
+     "lang=$(find "$PORT/assets/lostcities/lang" -name '*.json' | wc -l)"
+
+echo "PASS: the lostcity dimension answered, #lostcities:notbreakable matched bedrock, and both carried loot tables yielded items"
