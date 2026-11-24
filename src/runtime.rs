@@ -1675,6 +1675,145 @@ pub const CENTER00_1_PART_JSON: &str = "{\n  \"xsize\": 16,\n  \"zsize\": 16,\n 
 /// shape=straight]`. No id or char was invented.
 pub const CENTER00_1_PALETTE_JSON: &str = "{\"palette\": [{\"char\": \"#\", \"variant\": \"stonebrick\", \"damaged\": \"minecraft:iron_bars\"}, {\"char\": \"a\", \"block\": \"minecraft:glass\"}, {\"char\": \"@\", \"frompalette\": \"#\"}, {\"char\": \"1\", \"block\": \"minecraft:spawner\", \"mob\": \"easymobs\"}, {\"char\": \"T\", \"block\": \"minecraft:wall_torch[facing=north]\", \"torch\": true}, {\"char\": \"F\", \"blocks\": [{\"random\": 25, \"block\": \"minecraft:furnace[facing=north]\"}, {\"random\": 20, \"block\": \"minecraft:crafting_table\"}, {\"random\": 7, \"block\": \"minecraft:brewing_stand\"}, {\"random\": 6, \"block\": \"minecraft:anvil[facing=north]\"}, {\"random\": 5, \"block\": \"minecraft:cauldron\"}, {\"random\": 2, \"block\": \"minecraft:enchanting_table\"}, {\"random\": 1000, \"block\": \"minecraft:cobweb\"}]}, {\"char\": \"D\", \"block\": \"minecraft:dirt\"}, {\"char\": \"l\", \"block\": \"minecraft:ladder[facing=north]\"}, {\"char\": \"L\", \"block\": \"minecraft:bookshelf\"}, {\"char\": \"*\", \"block\": \"minecraft:potted_cactus\"}, {\"char\": \" \", \"block\": \"minecraft:air\"}, {\"char\": \"Q\", \"block\": \"minecraft:quartz_block\", \"damaged\": \"minecraft:iron_bars\"}, {\"char\": \"S\", \"block\": \"minecraft:smooth_stone_slab[type=double]\", \"damaged\": \"minecraft:iron_bars\"}, {\"char\": \")\", \"block\": \"minecraft:quartz_stairs[facing=south,half=bottom,shape=straight]\"}]}";
 
+/// `parts/shopping_open01_1.json` from the cached jar, verbatim (2,697 B, sha256
+/// `c16f5ff65b9a32b168b8c5bb5edfbdaa970a994bc1434f4a35679b30b4a4ed5d`):
+/// 16x16, six slices, a private `meta` key the decoder ignores. Its only non-space
+/// char is `w` (12 cells at x=1, z=0 or 14, y=0..5); every other cell is air.
+/// Written as a raw string: no row contains the `"#` sequence that would end it.
+pub const SHOPPING_OPEN01_1_PART_JSON: &str = r#"{
+  "meta": [
+    {
+      "key": "dontconnect",
+      "boolean": true
+    }
+  ],
+  "xsize": 16,
+  "zsize": 16,
+  "slices": [
+    [
+      " w              ",
+      "                ",
+      "                ",
+      "                ",
+      "                ",
+      "                ",
+      "                ",
+      "                ",
+      "                ",
+      "                ",
+      "                ",
+      "                ",
+      "                ",
+      "                ",
+      " w              ",
+      "                "
+    ],
+    [
+      " w              ",
+      "                ",
+      "                ",
+      "                ",
+      "                ",
+      "                ",
+      "                ",
+      "                ",
+      "                ",
+      "                ",
+      "                ",
+      "                ",
+      "                ",
+      "                ",
+      " w              ",
+      "                "
+    ],
+    [
+      " w              ",
+      "                ",
+      "                ",
+      "                ",
+      "                ",
+      "                ",
+      "                ",
+      "                ",
+      "                ",
+      "                ",
+      "                ",
+      "                ",
+      "                ",
+      "                ",
+      " w              ",
+      "                "
+    ],
+    [
+      " w              ",
+      "                ",
+      "                ",
+      "                ",
+      "                ",
+      "                ",
+      "                ",
+      "                ",
+      "                ",
+      "                ",
+      "                ",
+      "                ",
+      "                ",
+      "                ",
+      " w              ",
+      "                "
+    ],
+    [
+      " w              ",
+      "                ",
+      "                ",
+      "                ",
+      "                ",
+      "                ",
+      "                ",
+      "                ",
+      "                ",
+      "                ",
+      "                ",
+      "                ",
+      "                ",
+      "                ",
+      " w              ",
+      "                "
+    ],
+    [
+      " w              ",
+      "                ",
+      "                ",
+      "                ",
+      "                ",
+      "                ",
+      "                ",
+      "                ",
+      "                ",
+      "                ",
+      "                ",
+      "                ",
+      "                ",
+      "                ",
+      " w              ",
+      "                "
+    ]
+  ]
+}"#;
+
+/// Merged palette for the shopping-open part: the single `w` entry copied
+/// verbatim from the jar's `palettes/default.json` (`minecraft:cobblestone_wall`).
+/// No other decoded part writes a cobblestone wall, so it is the clean in-game
+/// differential. Spaces are air and are skipped by the decoder; no id invented.
+pub const SHOPPING_OPEN01_1_PALETTE_JSON: &str = r#"{
+  "palette": [
+    {
+      "char": "w",
+      "block": "minecraft:cobblestone_wall"
+    }
+  ]
+}"#;
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -2683,6 +2822,114 @@ mod center00_1_tests {
             assert!(
                 !ps.iter().any(|p| p.block == "minecraft:quartz_stairs"),
                 "the {name} must not write a quartz stair"
+            );
+        }
+    }
+}
+
+/// Slice 11: the tenth part, the six-layer shopping-open front. These tests are
+/// written before the part data exists so the gap is proved red first:
+/// `SHOPPING_OPEN01_1_PART_JSON` and `SHOPPING_OPEN01_1_PALETTE_JSON` are
+/// unresolved until the part and its verbatim `palettes/default.json` entry are
+/// carried from the jar. Every id and count below is read from the artefact — in
+/// particular `w` = `minecraft:cobblestone_wall`, which no other decoded part
+/// writes (its palettes never name a wall).
+#[cfg(test)]
+mod shopping_open01_1_tests {
+    use super::*;
+
+    /// The jar's `parts/shopping_open01_1.json` is 16x16 with six slices, all
+    /// rows the declared width — the same bound check as the other six-layer
+    /// parts. It carries a private `meta` key the decoder ignores.
+    #[test]
+    fn embedded_shopping1_part_has_six_16x16_layers() {
+        let part = Part::from_json(
+            &parse_json(SHOPPING_OPEN01_1_PART_JSON).expect("jar shopping_open01_1 part parses"),
+        )
+        .expect("jar shopping_open01_1 part decodes");
+        assert_eq!(part.xsize, 16, "jar xsize");
+        assert_eq!(part.zsize, 16, "jar zsize");
+        assert_eq!(part.slices.len(), 6, "the shopping part has six slices");
+        for (y, layer) in part.slices.iter().enumerate() {
+            assert_eq!(layer.len(), 16, "slice {y} has 16 rows");
+            for (z, row) in layer.iter().enumerate() {
+                assert_eq!(row.chars().count(), 16, "slice {y} row {z} is 16 chars");
+            }
+        }
+    }
+
+    /// The part's twelve `w` cells (x=1, z=0 or 14, y=0..5) resolve to the
+    /// exact `minecraft:cobblestone_wall` id of `palettes/default.json`, a block
+    /// no other decoded part writes, so an in-game cobblestone-wall count at
+    /// the tenth Y can only come from this part. Every count is the artefact's
+    /// per-part census, not the whole filled window.
+    #[test]
+    fn shopping1_chars_resolve_to_the_jar_cobblestone_wall() {
+        let variants = VariantTable::from_files(&[("stonebrick", STONEBRICK_VARIANT_JSON)])
+            .expect("the jar's stonebrick variant decodes");
+        let placements = decode_city_with_variants(
+            SHOPPING_OPEN01_1_PART_JSON,
+            SHOPPING_OPEN01_1_PALETTE_JSON,
+            &variants,
+        )
+        .expect("the embedded jar shopping part and merged palette decode");
+
+        let cell = placements
+            .iter()
+            .find(|p| p.dx == 1 && p.dy == 0 && p.dz == 0)
+            .expect("a w cell at (1,0,0)");
+        assert_eq!(
+            cell.block, "minecraft:cobblestone_wall",
+            "the w char is a cobblestone wall"
+        );
+        assert!(
+            cell.properties.is_empty(),
+            "the w char has no state properties in palettes/default.json"
+        );
+
+        let count = |id: &str| placements.iter().filter(|p| p.block == id).count();
+        assert_eq!(count("minecraft:cobblestone_wall"), 12, "twelve w cells");
+        assert_eq!(placements.len(), 12, "only the twelve w cells are placed");
+
+        // Differential: none of the first nine decoded parts writes a cobblestone
+        // wall, so the in-game fill at the tenth Y cannot be confused by them.
+        let street = decode_city(STREET_PART_JSON, STREET_PALETTE_JSON)
+            .expect("the embedded street part decodes");
+        let building =
+            decode_city_with_variants(BUILDING_PART_JSON, BUILDING_PALETTE_JSON, &variants)
+                .expect("the embedded first building part decodes");
+        let horizontal = decode_city_with_variants(RAILS_PART_JSON, RAILS_PALETTE_JSON, &variants)
+            .expect("the embedded horizontal rail part decodes");
+        let bend = decode_city_with_variants(RAILS_BEND_PART_JSON, RAILS_PALETTE_JSON, &variants)
+            .expect("the embedded rail bend part decodes");
+        let split =
+            decode_city_with_variants(RAILS_3SPLIT_PART_JSON, RAILS_PALETTE_JSON, &variants)
+                .expect("the embedded rail split part decodes");
+        let down2 = decode_city_with_variants(RAILS_DOWN2_PART_JSON, RAILS_PALETTE_JSON, &variants)
+            .expect("the embedded rail descent part decodes");
+        let down1 =
+            decode_city_with_variants(RAILS_DOWN1_PART_JSON, RAILS_DOWN1_PALETTE_JSON, &variants)
+                .expect("the embedded first descent part decodes");
+        let building12 =
+            decode_city_with_variants(BUILDING_1_2_PART_JSON, BUILDING_1_2_PALETTE_JSON, &variants)
+                .expect("the embedded second building part decodes");
+        let center001 =
+            decode_city_with_variants(CENTER00_1_PART_JSON, CENTER00_1_PALETTE_JSON, &variants)
+                .expect("the embedded city-centre part decodes");
+        for (name, ps) in [
+            ("street", &street),
+            ("first building", &building),
+            ("horizontal line", &horizontal),
+            ("bend", &bend),
+            ("split", &split),
+            ("eighteen-layer descent", &down2),
+            ("first descent", &down1),
+            ("second building", &building12),
+            ("city centre", &center001),
+        ] {
+            assert!(
+                !ps.iter().any(|p| p.block == "minecraft:cobblestone_wall"),
+                "the {name} must not write a cobblestone wall"
             );
         }
     }

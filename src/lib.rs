@@ -78,6 +78,13 @@ const BUILDING12_BASE_Y: i32 = 116;
 /// assertion.
 const CENTER001_BASE_Y: i32 = 128;
 
+/// The tenth part — the six-layer shopping-open front — is laid above the city
+/// centre at y=140..145, the next sealed band inside the dimension's 256 height.
+/// Its `w` char resolves to `minecraft:cobblestone_wall` from
+/// `palettes/default.json`, which no other decoded part writes, so a
+/// cobblestone-wall count at y=136..150 is the in-game assertion.
+const SHOPPING1_BASE_Y: i32 = 140;
+
 #[derive(Default)]
 struct Mod;
 
@@ -94,6 +101,7 @@ struct CityGenerator {
     down1: Vec<runtime::Placement>,
     building12: Vec<runtime::Placement>,
     center001: Vec<runtime::Placement>,
+    shopping1: Vec<runtime::Placement>,
     keys: HashMap<String, BlockKey>,
 }
 
@@ -144,6 +152,7 @@ impl ChunkGenerator for CityGenerator {
         self.write_part(chunk, &self.down1, DOWN1_BASE_Y);
         self.write_part(chunk, &self.building12, BUILDING12_BASE_Y);
         self.write_part(chunk, &self.center001, CENTER001_BASE_Y);
+        self.write_part(chunk, &self.shopping1, SHOPPING1_BASE_Y);
     }
 
     fn vanilla_stages(&self) -> VanillaStages {
@@ -239,6 +248,16 @@ impl Hooks for Mod {
             &variants,
         )
         .expect("the embedded city-centre part and merged palette decode");
+        // The tenth part is the six-layer shopping-open front. Its only char is
+        // `w`, the verbatim `palettes/default.json` entry `minecraft:cobblestone_wall`
+        // carried in its merged palette; no decoder form, SDK API or manifest key
+        // is new. Its twelve cells occupy y=140..145 above the city centre.
+        let shopping1 = runtime::decode_city_with_variants(
+            runtime::SHOPPING_OPEN01_1_PART_JSON,
+            runtime::SHOPPING_OPEN01_1_PALETTE_JSON,
+            &variants,
+        )
+        .expect("the embedded shopping-open part and merged palette decode");
 
         // Request each distinct block id once. The registrar checks it against
         // the game's registry at load; an unknown id refuses the mod by name.
@@ -252,6 +271,7 @@ impl Hooks for Mod {
             .chain(down1.iter())
             .chain(building12.iter())
             .chain(center001.iter())
+            .chain(shopping1.iter())
             .map(|p| p.block.clone())
             .collect();
         blocks.sort();
@@ -275,6 +295,7 @@ impl Hooks for Mod {
                 down1,
                 building12,
                 center001,
+                shopping1,
                 keys,
             },
         );

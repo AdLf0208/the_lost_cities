@@ -11,8 +11,8 @@ publication at version **0.1.0**; the city-generator slice shipped as **0.1.1**,
 second multi-layer building part as **0.1.2**, the horizontal rail line as **0.1.3**,
 the rail bend as **0.1.4**, the three-way rail split as **0.1.5**, the
 eighteen-layer rail descent as **0.1.6**, the twelve-layer first rail descent
-as **0.1.7**, the second six-layer building part as **0.1.8** and the six-layer
-city centre as **0.1.9**.
+as **0.1.7**, the second six-layer building part as **0.1.8**, the six-layer
+city centre as **0.1.9** and the six-layer shopping-open front as **0.1.10**.
 
 ## What this version implements
 
@@ -117,12 +117,22 @@ city centre as **0.1.9**.
     literal because each brick row begins `"#`, which would close a raw
     `r#"..."#` string. No new decoder form, SDK API or manifest key.
 
+- **A tenth, six-layer shopping-open front** (0.1.10): `parts/shopping_open01_1.json`
+    (16x16, six slices, 12 non-space cells, embedded byte-identically from the
+    cached jar, sha256 `c16f5ff…`) is decoded with a palette carrying the single
+    `w` → `minecraft:cobblestone_wall` entry copied verbatim from
+    `palettes/default.json`. Its private `meta` key is ignored by the decoder like
+    any other unknown key. It is laid at y=140..145, above the city centre.
+    Cobblestone walls are written by no other decoded part, so the in-game
+    assertion fill-replaces `minecraft:cobblestone_wall` at y=136..150; vanilla
+    noise fills nothing. No new decoder form, SDK API or manifest key.
+
 ## What it does **not** implement
 
-- **The other 199 parts, 38 buildings, 31 palettes, 15 multibuildings, the
+- **The other 198 parts, 38 buildings, 31 palettes, 15 multibuildings, the
   spheres/rail dungeons and Java-assembled structures** — still
   `blocked(no-city-data-decoder)` / `blocked(no-structure-type-for-cities)`:
-  this port decodes exactly nine parts and the palette entries they use.
+  this port decodes exactly ten parts and the palette entries they use.
 - **Replacing vanilla terrain in the Overworld** — `blocked(level_reset:R11)`:
   the Java mod's mixins replace vanilla levels; the pin has no `levels_reset`
   surface and R11 refuses the manifest key. This port generates cities only in

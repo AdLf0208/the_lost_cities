@@ -20,6 +20,7 @@
 #   DOWN1_SELFTEST=1 -> FAIL EXIT:1 (inverted iron-bar count of the first descent)
 #   BUILDING12_SELFTEST=1 -> FAIL EXIT:1 (inverted quartz count of the second building)
 #   CENTER001_SELFTEST=1 -> FAIL EXIT:1 (inverted quartz-stairs count of the city centre)
+#   SHOPPING1_SELFTEST=1 -> FAIL EXIT:1 (inverted cobblestone-wall count of the shopping part)
 set -euo pipefail
 export LC_ALL=C
 
@@ -41,6 +42,7 @@ DOWN2_SELFTEST=${DOWN2_SELFTEST:-0}
 DOWN1_SELFTEST=${DOWN1_SELFTEST:-0}
 BUILDING12_SELFTEST=${BUILDING12_SELFTEST:-0}
 CENTER001_SELFTEST=${CENTER001_SELFTEST:-0}
+SHOPPING1_SELFTEST=${SHOPPING1_SELFTEST:-0}
 
 [ -n "$CTL" ] && [ -n "$GAME" ] || { echo "missing CTL/GAME: eval \"\$(ports/tools/launcher-game.sh env the_lost_cities)\"" >&2; exit 1; }
 [ -x "$CTL" ] || { echo "missing horizon-ctl: $CTL" >&2; exit 1; }
@@ -401,6 +403,36 @@ else
         || fail "the vanilla-noise control unexpectedly had $vanilla_c001_count quartz staircase(s): $vanilla_c001_reply"
 fi
 
+# Slice 11: the tenth, six-layer shopping-open front is laid at
+# SHOPPING1_BASE_Y=140 (spanning y=140..145, above the city centre at y=128..133).
+# Its `w` char resolves to `minecraft:cobblestone_wall` in palettes/default.json —
+# a block no other decoded part writes — so a cobblestone-wall count at y=136..150
+# can only come from this part. The same fill on the vanilla-noise Overworld must
+# report `No blocks were filled`; SHOPPING1_SELFTEST inverts it.
+say "six-layer shopping-open part authors cobblestone walls at the tenth Y"
+shop1_reply=$(lc "fill 0 136 0 16 150 16 minecraft:air replace minecraft:cobblestone_wall" 2>&1 || true)
+shop1_chat=$(echo "$shop1_reply" | jq -r '.chat[0] // ""' 2>/dev/null || echo "")
+echo "cobblestone-wall shopping-part fill: $(echo "$shop1_reply" | jq -c . 2>/dev/null | head -c 180)"
+shop1_count=$(echo "$shop1_chat" | grep -oE 'Successfully filled [0-9]+ block' | grep -oE '[0-9]+' || echo 0)
+shop1_count=${shop1_count:-0}
+echo "shopping-part-authored cobblestone-wall count: $shop1_count"
+vanilla_shop1_reply=$(ctl command "fill 0 136 0 16 150 16 minecraft:air replace minecraft:cobblestone_wall" 2>&1 || true)
+vanilla_shop1_chat=$(echo "$vanilla_shop1_reply" | jq -r '.chat[0] // ""' 2>/dev/null || echo "")
+echo "vanilla-noise cobblestone-wall control: $(echo "$vanilla_shop1_reply" | jq -c . 2>/dev/null | head -c 180)"
+vanilla_shop1_count=$(echo "$vanilla_shop1_chat" | grep -oE 'Successfully filled [0-9]+ block' | grep -oE '[0-9]+' || echo 0)
+vanilla_shop1_count=${vanilla_shop1_count:-0}
+echo "vanilla-noise cobblestone-wall count: $vanilla_shop1_count"
+if [ "$SHOPPING1_SELFTEST" = 1 ]; then
+    [ "$shop1_count" -eq 0 ] \
+        || fail "SHOPPING1_SELFTEST: the part authored $shop1_count cobblestone wall(s); the inverted assertion expected 0"
+    echo "SHOPPING1_SELFTEST: no cobblestone-wall-authored blocks (unexpected)"
+else
+    [ "$shop1_count" -gt 0 ] \
+        || fail "the chunk generator authored no cobblestone walls: $shop1_reply"
+    [ "$vanilla_shop1_count" -eq 0 ] \
+        || fail "the vanilla-noise control unexpectedly had $vanilla_shop1_count cobblestone wall(s): $vanilla_shop1_reply"
+fi
+
 say "carried block tag #lostcities:notbreakable matches bedrock"
 end "setblock 50 80 50 minecraft:bedrock" >/dev/null
 ctl wait 5
@@ -450,4 +482,4 @@ echo "tags=$(find "$PORT/data/lostcities/tags" -name '*.json' | wc -l) " \
      "loot=$(find "$PORT/data/lostcities/loot_table" -name '*.json' | wc -l) " \
      "lang=$(find "$PORT/assets/lostcities/lang" -name '*.json' | wc -l)"
 
-echo "PASS: the lostcity dimension answered, all nine decoded parts authored their own blocks in it (slabs, bookshelves, east_west rails, the bend's north_south rails, the split's north_east rails, the descent's ascending_east rails, the first descent's iron bars, the second building's quartz blocks and the city centre's quartz stairs), #lostcities:notbreakable matched bedrock, and both carried loot tables yielded items"
+echo "PASS: the lostcity dimension answered, all ten decoded parts authored their own blocks in it (slabs, bookshelves, east_west rails, the bend's north_south rails, the split's north_east rails, the descent's ascending_east rails, the first descent's iron bars, the second building's quartz blocks, the city centre's quartz stairs and the shopping part's cobblestone walls), #lostcities:notbreakable matched bedrock, and both carried loot tables yielded items"

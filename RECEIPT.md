@@ -1,11 +1,11 @@
-# Package receipt — the_lost_cities 0.1.9
+# Package receipt — the_lost_cities 0.1.10
 
 | field | value |
 |---|---|
-| version | `0.1.9` |
+| version | `0.1.10` |
 | file | `the_lost_cities.hmod` |
-| bytes | 37,092 |
-| sha256 | `ebeca9f22eb117d2b512d9bde1df315e6aa5120f96c22a8a8304e56ad57155d7` |
+| bytes | 38,460 |
+| sha256 | `a729fbd163b15a7ef1f87804c67adfb508b46f404f262d21be2f270d87a97e9f` |
 | source | this tag — the tree here is the source that produced the archive |
 | game | 26.3 |
 | horizon | `0a875da91dbb0fdcb7ba8c42c11341aa229af51a` |
