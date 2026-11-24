@@ -10,8 +10,8 @@ horizon-mixins `e59da9094f0c2fdda6c627fe9eff22dec6a906f0`. It is a first
 publication at version **0.1.0**; the city-generator slice shipped as **0.1.1**, the
 second multi-layer building part as **0.1.2**, the horizontal rail line as **0.1.3**,
 the rail bend as **0.1.4**, the three-way rail split as **0.1.5**, the
-eighteen-layer rail descent as **0.1.6** and the twelve-layer first rail descent
-as **0.1.7**.
+eighteen-layer rail descent as **0.1.6**, the twelve-layer first rail descent
+as **0.1.7** and the second six-layer building part as **0.1.8**.
 
 ## What this version implements
 
@@ -93,12 +93,22 @@ as **0.1.7**.
     so the in-game assertion fill-replaces `minecraft:iron_bars` at y=96..112;
     vanilla noise fills nothing. No new decoder form, SDK API or manifest key.
 
+- **An eighth, six-layer second building** (0.1.8): `parts/building1_2.json`
+    (16x16, six slices, 998 non-space cells, embedded byte-identically from the
+    cached jar, sha256 `b2130f36…`) is decoded with a merged palette that adds
+    the two `palettes/default.json` entries absent from the building palette —
+    `Q` → `minecraft:quartz_block` and `:` → `minecraft:iron_bars` — carried
+    verbatim. It is laid at y=116..121, above the first descent. Quartz is
+    written by no other decoded part, so the in-game assertion fill-replaces
+    `minecraft:quartz_block` at y=112..122; vanilla noise fills nothing. No new
+    decoder form, SDK API or manifest key.
+
 ## What it does **not** implement
 
-- **The other 201 parts, 38 buildings, 31 palettes, 15 multibuildings, the
+- **The other 200 parts, 38 buildings, 31 palettes, 15 multibuildings, the
   spheres/rail dungeons and Java-assembled structures** — still
   `blocked(no-city-data-decoder)` / `blocked(no-structure-type-for-cities)`:
-  this port decodes exactly seven parts and the palette entries they use.
+  this port decodes exactly eight parts and the palette entries they use.
 - **Replacing vanilla terrain in the Overworld** — `blocked(level_reset:R11)`:
   the Java mod's mixins replace vanilla levels; the pin has no `levels_reset`
   surface and R11 refuses the manifest key. This port generates cities only in

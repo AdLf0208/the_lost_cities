@@ -1,9 +1,9 @@
 id = "the_lost_cities"
 name = "The Lost Cities"
-version = "0.1.7"
+version = "0.1.8"
 description = """Generate cities all over the world. This slice registers the lostcities:lostcity
 dimension from the jar's dimension_type values with a deterministic city chunk generator:
-seven jar parts are decoded by a clean-room Rust decoder and laid at seven heights — the street
+eight jar parts are decoded by a clean-room Rust decoder and laid at eight heights — the street
 (parts/street_straight.json) at y=90, a six-layer building (parts/building1_1.json) at y=72 whose
 # char resolves through a jar variant file, the six-layer horizontal rail line
 (parts/rails_horizontal.json) at y=54 whose e/f chars come verbatim from palettes/rails.json,
@@ -13,10 +13,11 @@ three-way rail split (parts/rails_3split.json) at y=18 whose n/q chars write the
 and south_east rail shapes, the eighteen-layer rail descent (parts/rails_down2.json) at
 y=4 whose j/i chars write the ascending_east and powered ascending_east rail shapes, and the
 twelve-layer first rail descent (parts/rails_down1.json) at y=100 whose :/_ chars write
-minecraft:iron_bars and bottom smooth-stone slabs from palettes/default.json — iron bars are
-placed by no other decoded part. Block tags, chest loot tables and the language file are
-carried as before.
-The other 201 parts and Java-assembled structures remain blocked: the pin has no
+minecraft:iron_bars and bottom smooth-stone slabs from palettes/default.json, and the
+six-layer second building (parts/building1_2.json) at y=116 whose Q char writes
+minecraft:quartz_block from palettes/default.json — quartz is placed by no other decoded
+part. Block tags, chest loot tables and the language file are carried as before.
+The other 200 parts and Java-assembled structures remain blocked: the pin has no
 configured-feature registrar and R11 refuses a level reset."""
 authors = ["McJty (upstream, MIT)", "AdLf0208 (port)"]
 api = "0.2"

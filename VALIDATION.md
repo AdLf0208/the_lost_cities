@@ -1,35 +1,37 @@
-# The Lost Cities — validation record (v0.1.7)
+# The Lost Cities — validation record (v0.1.8)
 
 Pin **`0a875da91dbb0fdcb7ba8c42c11341aa229af51a`**, mixins
 `e59da9094f0c2fdda6c627fe9eff22dec6a906f0`, game 26.3 (Nightly
 `nightly-2026-11-20-0a875da`), `api = "0.2"`.
 
-**Version 0.1.7** — an update of our first publication (0.1.0, PR #1861); 0.1.1
+**Version 0.1.8** — an update of our first publication (0.1.0, PR #1861); 0.1.1
 added the first deterministic city chunk generator, 0.1.2 the six-layer building
 part, 0.1.3 the six-layer horizontal rail line, 0.1.4 the six-layer rail
 bend from `parts/rails_bend.json`, 0.1.5 the three-way rail split from
 `parts/rails_3split.json`, 0.1.6 the eighteen-layer rail descent from
-`parts/rails_down2.json`, and 0.1.7 the twelve-layer first rail descent from
-`parts/rails_down1.json`, whose `:`/`_` chars add two `palettes/default.json`
-entries (iron bars, bottom slab) to the carried rail palette. Cargo and the
-manifest agree at 0.1.7. The orchestrator publishes; this port does not touch
-registry/PR/ledger.
+`parts/rails_down2.json`, 0.1.7 the twelve-layer first rail descent from
+`parts/rails_down1.json`, and 0.1.8 the second six-layer building from
+`parts/building1_2.json`, whose `Q` char adds a verbatim
+`palettes/default.json` entry (`minecraft:quartz_block`) to the carried building
+palette. Cargo and the manifest agree at 0.1.8. The orchestrator publishes;
+this port does not touch registry/PR/ledger.
 
 ## The deliverable
 
 | | |
 |---|---|
 | package | `ports/the_lost_cities/the_lost_cities.hmod` |
-| size | **34,134 B** |
-| SHA-256 | `9f2c2e28d8eaec9252187bea4c2fed3c079c02f4c1d48718b67597101923ac3f` |
-| version | 0.1.7 (manifest + Cargo.toml) |
+| size | **35,434 B** |
+| SHA-256 | `00515ddedd40fcab8c97d68442f7bd12e75a3044946a5bcc5e293747e7ebe877` |
+| version | 0.1.8 (manifest + Cargo.toml) |
 | entries | 17 (6 tags + 2 loot tables + 1 lang + manifest/Cargo/src/docs/uses.json) |
 | packed Cargo.lock | none |
-| runtime | `src/runtime.rs` byte-identical in tree and package (`a72419bb4cb7`) |
+| runtime | `src/runtime.rs` byte-identical in tree and package (`0015e54b953a`) |
 | embedded bend part | 2,643 B, sha256 `9969f02e8c9b566de15616eecb5598dbea4a4ff5528c5b8792fd4143497e3232`, byte-identical to the jar's `data/lostcities/lostcities/parts/rails_bend.json` |
 | embedded split part | 2,643 B, sha256 `b0c8bd61f1f3b3641b9bf20a57087429123b7de9353dd1fd3129e40717777eb0`, byte-identical to the jar's `data/lostcities/lostcities/parts/rails_3split.json` |
 | embedded descent part | 7,779 B, sha256 `f2f6ebabe2ae71dc6c094496de0b90ebda97415ecc619b7c7b8c78161e65be89`, byte-identical to the jar's `data/lostcities/lostcities/parts/rails_down2.json` (18 slices) |
 | embedded first descent part | 5,211 B, sha256 `822a38fa5420ab545f78248a216a937e0f1f8dc78d6a258ffbae45da8340411e`, byte-identical to the jar's `data/lostcities/lostcities/parts/rails_down1.json` (12 slices, 911 non-space cells) |
+| embedded second building part | 2,618 B, sha256 `b2130f36f887c90c4b1602f04e3d70bcff0835ac5b176b070ca78e94ff264f74`, byte-identical to the jar's `data/lostcities/lostcities/parts/building1_2.json` (6 slices, 998 non-space cells) |
 
 ## Gates (fresh, against the delivered bytes)
 
@@ -43,23 +45,24 @@ registry/PR/ledger.
 | split red (slice 6) | `cargo test --offline` before split data | **FAIL**, 2 unresolved `RAILS_3SPLIT_PART_JSON` | `evidence/the_lost_cities/split-test-red.log` |
 | descent red (slice 7) | `cargo test --offline` before descent data | **FAIL**, 2 unresolved `RAILS_DOWN2_PART_JSON` | `evidence/the_lost_cities/down2-test-red.log` |
 | first-descent red (slice 8) | `cargo test --offline` before down1 data | **FAIL**, 3 unresolved `RAILS_DOWN1_PART_JSON`/`RAILS_DOWN1_PALETTE_JSON`, build-slot exit 101 | `evidence/the_lost_cities/down1-test-red.log` |
-| unit tests | `cargo test --offline` | **21 passed, 0 failed** | `evidence/the_lost_cities/sdk-test.log` |
-| lints | `cargo clippy --all-targets --offline -- -D warnings` | exit 0, 0 warnings | `evidence/the_lost_cities/sdk-clippy.log` |
-| format | `rustfmt --edition 2024 --check src/{lib,runtime}.rs` | clean | `evidence/the_lost_cities/sdk-fmt.log` |
-| SDK check (source) | `cargo horizon-mod check` | *132 API items; Made for 0a875da* | `evidence/the_lost_cities/sdk-check.log` |
-| package check | `cargo horizon-mod check the_lost_cities.hmod` | *0.1.7, native-1/0a875da…, 34,134 bytes, sha 9f2c2e28…* | `evidence/the_lost_cities/sdk-package-check.log` |
-| fits (pin) | `cargo horizon-mod fits … --build 0a875da` | **`made for`**, exit 0 | `evidence/the_lost_cities/sdk-fits.log` |
-| fits (other build) | `cargo horizon-mod fits … --build 0b14f8a` | **`fits`**, exit 0 — registrar + DimensionSettings exist in both builds; only the Rust decoder/embedded jar data are ours | `evidence/the_lost_cities/sdk-fits-other.log` |
+| second-building red (slice 9) | `cargo test --offline` before building1_2 data | **FAIL**, 3 unresolved `BUILDING_1_2_PART_JSON`/`BUILDING_1_2_PALETTE_JSON`, build-slot exit 101 | `evidence/the_lost_cities/building12-test-red.log` |
+| unit tests | `cargo test --offline` | **23 passed, 0 failed** | `evidence/the_lost_cities/sdk-test.log` |
+| lints | `cargo clippy --all-targets --offline -- -D warnings` | exit 0, 0 warnings | `evidence/the_lost_cities/sdk-clippy-018.log` |
+| format | `rustfmt --edition 2024 --check src/{lib,runtime}.rs` | clean | `evidence/the_lost_cities/sdk-fmt-018.log` |
+| SDK check (source) | `cargo horizon-mod check` | *132 API items; Made for 0a875da* | `evidence/the_lost_cities/sdk-check-018.log` |
+| package check | `cargo horizon-mod check the_lost_cities.hmod` | *0.1.8, native-1/0a875da…, 35,434 bytes, sha 00515dde…* | `evidence/the_lost_cities/sdk-package-check-018.log` |
+| fits (pin) | `cargo horizon-mod fits … --build 0a875da` | **`made for`**, exit 0 | `evidence/the_lost_cities/sdk-fits-018.log` |
+| fits (other build) | `cargo horizon-mod fits … --build 0b14f8a` | **`fits`**, exit 0 — registrar + DimensionSettings exist in both builds; only the Rust decoder/embedded jar data are ours | `evidence/the_lost_cities/sdk-fits-other-018.log` |
 | package gate | `verify-sdk-package.py the_lost_cities` | **1/1**, incl. "package matches the tree" | — |
 | skills gate | `check-skills.py --notes ports/the_lost_cities --strict` | PASS | — |
 
 README.md, horizon-mod.toml, Cargo.toml and `src/` were edited **before** the
 final build, so the whole-archive-vs-tree gate is green; `sdk-test.log` was
-regenerated for 0.1.7 after the build. The 5,211-byte down1 part and its two
-`palettes/default.json` entries were read from the jar before the edit and
-verified byte-identically in the source after rustfmt (sha `822a38fa…`). No type
-or variant named `Block`/`Item` was introduced (the R9-era `fits` false-fail
-trap). No new API item, manifest key or decoder form was needed.
+regenerated for 0.1.8 after the build. The 2,618-byte building1_2 part and its
+two `palettes/default.json` entries were read from the jar before the edit and
+verified byte-identically in the source after rustfmt (sha `b2130f36…`). No type
+or variant named `Block`/`Item` was introduced (the `fits` false-fail trap). No
+new API item, manifest key or decoder form was needed.
 
 Every Rust step went through `ports/tools/build-slot.sh` with
 `CARGO_INCREMENTAL=0`, no `--target-dir`, no `BUILD_LOCAL=1`: compile/test/
@@ -72,7 +75,7 @@ lease was backgrounded and no turn ended with a shell outstanding.
 
 | leg | result | log |
 |---|---|---|
-| modded game | **PASS** + `EXIT:0` — dimension answers; a written stone block reads back; **136 smooth-stone slabs** at y=90, **4 bookshelves** at y=72, **48 east_west rails** at y=54..59, **10 north_south rails** at y=36..41, **1 north_east rail** at y=18..23, **21 ascending_east rails** at y=4..21 and **30 iron bars** at y=100..111, all 0 on the vanilla-noise Overworld; `#lostcities:notbreakable` → `Test passed`; both loot tables → items; unknown tag/loot ids refused | `e2e.log` |
+| modded game | **PASS** + `EXIT:0` — dimension answers; a written stone block reads back; **136 smooth-stone slabs** at y=90, **4 bookshelves** at y=72, **48 east_west rails** at y=54..59, **10 north_south rails** at y=36..41, **1 north_east rail** at y=18..23, **21 ascending_east rails** at y=4..21, **30 iron bars** at y=100..111 and **3 quartz blocks** at y=116..121, all 0 on the vanilla-noise Overworld; `#lostcities:notbreakable` → `Test passed`; both loot tables → items; unknown tag/loot ids refused | `e2e.log` |
 | control (same Nightly, no mod) | **FAIL** + `EXIT:1` — `Unknown dimension 'lostcities:lostcity'` | `e2e-control.log` |
 | `SELFTEST=1` (invert dimension assertion) | **FAIL** + `EXIT:1` — `SELFTEST: the dimension answered` | `e2e-selftest.log` |
 | `TAG_SELFTEST=1` (invert tag assertion) | **FAIL** + `EXIT:1` — `TAG_SELFTEST: the tag matched` | `e2e-tag-selftest.log` |
@@ -83,17 +86,17 @@ lease was backgrounded and no turn ended with a shell outstanding.
 | `SPLIT_SELFTEST=1` (invert north_east rail count) | **FAIL** + `EXIT:1` — `SPLIT_SELFTEST: the split authored 1 north_east rail(s); the inverted assertion expected 0` | `e2e-split-selftest.log` |
 | `DOWN2_SELFTEST=1` (invert ascending_east rail count) | **FAIL** + `EXIT:1` — `DOWN2_SELFTEST: the descent authored 21 ascending_east rail(s); the inverted assertion expected 0` | `e2e-down2-selftest.log` |
 | `DOWN1_SELFTEST=1` (invert iron-bar count) | **FAIL** + `EXIT:1` — `DOWN1_SELFTEST: the first descent authored 30 iron-bar(s); the inverted assertion expected 0` | `e2e-down1-selftest.log` |
-| log gate | `check-e2e-logs.py the_lost_cities-e2e --strict` → `logs=11 ok=11 missing-exit=0 bad-exit=0` | — |
+| `BUILDING12_SELFTEST=1` (invert quartz count) | **FAIL** + `EXIT:1` — `BUILDING12_SELFTEST: the part authored 3 quartz block(s); the inverted assertion expected 0` | `e2e-building12-selftest.log` |
+| log gate | `check-e2e-logs.py the_lost_cities-e2e --strict` → `logs=12 ok=12 missing-exit=0 bad-exit=0` | — |
 
-The in-game count equals the part's 30 `:` cells: no neighbouring chunk adds
-extra iron bars at this band (unlike the inclusive 17×17 window effects on the
-slab/rail counts). The unit test pins the per-part count at 30.
+The in-game count equals the part's 3 `Q` cells: no neighbouring chunk adds
+extra quartz at that band. The unit test pins the per-part count at 3.
 
 The launcher native build printed **`Compiling the_lost_cities (1 of 1)`**, tag
-`native-0a875da-649ce6258bcc`, and `native-mods.json` named version **0.1.7**
+`native-0a875da-3368ae6765e8`, and `native-mods.json` named version **0.1.8**
 before any leg ran. No stale the_lost_cities `native-*` tag remained before the
-build (a concurrent native build had pruned the 0.1.6 one), so no leg could test
-a stale export. No exit 10 from a concurrent native build occurred.
+build (only another port's tag was present), so no leg could test a stale export.
+No exit 10 from a concurrent native build occurred.
 
 ## Re-run
 
@@ -113,5 +116,5 @@ eval "$(ports/tools/launcher-game.sh env the_lost_cities)"
 BUILD_LOCAL=1 ports/tools/build-slot.sh run --job TLC-e2e --port ports/the_lost_cities --step e2e -- bash ports/the_lost_cities/tools/e2e.sh
 # plus GAME=$CONTROL_GAME, SELFTEST=1, TAG_SELFTEST=1, CITY_SELFTEST=1,
 #       BUILDING_SELFTEST=1, RAILS_SELFTEST=1, BEND_SELFTEST=1, SPLIT_SELFTEST=1,
-#       DOWN2_SELFTEST=1, DOWN1_SELFTEST=1
+#       DOWN2_SELFTEST=1, DOWN1_SELFTEST=1, BUILDING12_SELFTEST=1
 ```

@@ -18,6 +18,7 @@
 #   SPLIT_SELFTEST=1 -> FAIL EXIT:1 (inverted north_east rail count of the 3split)
 #   DOWN2_SELFTEST=1 -> FAIL EXIT:1 (inverted ascending_east rail count of the descent)
 #   DOWN1_SELFTEST=1 -> FAIL EXIT:1 (inverted iron-bar count of the first descent)
+#   BUILDING12_SELFTEST=1 -> FAIL EXIT:1 (inverted quartz count of the second building)
 set -euo pipefail
 export LC_ALL=C
 
@@ -37,6 +38,7 @@ BEND_SELFTEST=${BEND_SELFTEST:-0}
 SPLIT_SELFTEST=${SPLIT_SELFTEST:-0}
 DOWN2_SELFTEST=${DOWN2_SELFTEST:-0}
 DOWN1_SELFTEST=${DOWN1_SELFTEST:-0}
+BUILDING12_SELFTEST=${BUILDING12_SELFTEST:-0}
 
 [ -n "$CTL" ] && [ -n "$GAME" ] || { echo "missing CTL/GAME: eval \"\$(ports/tools/launcher-game.sh env the_lost_cities)\"" >&2; exit 1; }
 [ -x "$CTL" ] || { echo "missing horizon-ctl: $CTL" >&2; exit 1; }
@@ -335,6 +337,37 @@ else
         || fail "the vanilla-noise control unexpectedly had $vanilla_down1_count iron-bar(s): $vanilla_down1_reply"
 fi
 
+# Slice 9: the eighth, six-layer second building part is laid at
+# BUILDING12_BASE_Y=116 (spanning y=116..121, above the first descent at
+# y=100..111). Its `Q` char resolves to `minecraft:quartz_block` in
+# palettes/default.json — a block no other decoded part writes (their palettes
+# never name quartz) — so a quartz count at y=112..122 can only come from this
+# part. The same fill on the vanilla-noise Overworld must report `No blocks
+# were filled`; BUILDING12_SELFTEST inverts it.
+say "six-layer second building part authors quartz blocks at the eighth Y"
+b12_reply=$(lc "fill 0 112 0 16 122 16 minecraft:air replace minecraft:quartz_block" 2>&1 || true)
+b12_chat=$(echo "$b12_reply" | jq -r '.chat[0] // ""' 2>/dev/null || echo "")
+echo "quartz second-building fill: $(echo "$b12_reply" | jq -c . 2>/dev/null | head -c 180)"
+b12_count=$(echo "$b12_chat" | grep -oE 'Successfully filled [0-9]+ block' | grep -oE '[0-9]+' || echo 0)
+b12_count=${b12_count:-0}
+echo "second-building-authored quartz count: $b12_count"
+vanilla_b12_reply=$(ctl command "fill 0 112 0 16 122 16 minecraft:air replace minecraft:quartz_block" 2>&1 || true)
+vanilla_b12_chat=$(echo "$vanilla_b12_reply" | jq -r '.chat[0] // ""' 2>/dev/null || echo "")
+echo "vanilla-noise quartz control: $(echo "$vanilla_b12_reply" | jq -c . 2>/dev/null | head -c 180)"
+vanilla_b12_count=$(echo "$vanilla_b12_chat" | grep -oE 'Successfully filled [0-9]+ block' | grep -oE '[0-9]+' || echo 0)
+vanilla_b12_count=${vanilla_b12_count:-0}
+echo "vanilla-noise quartz count: $vanilla_b12_count"
+if [ "$BUILDING12_SELFTEST" = 1 ]; then
+    [ "$b12_count" -eq 0 ] \
+        || fail "BUILDING12_SELFTEST: the part authored $b12_count quartz block(s); the inverted assertion expected 0"
+    echo "BUILDING12_SELFTEST: no quartz-authored blocks (unexpected)"
+else
+    [ "$b12_count" -gt 0 ] \
+        || fail "the chunk generator authored no quartz blocks: $b12_reply"
+    [ "$vanilla_b12_count" -eq 0 ] \
+        || fail "the vanilla-noise control unexpectedly had $vanilla_b12_count quartz block(s): $vanilla_b12_reply"
+fi
+
 say "carried block tag #lostcities:notbreakable matches bedrock"
 end "setblock 50 80 50 minecraft:bedrock" >/dev/null
 ctl wait 5
@@ -384,4 +417,4 @@ echo "tags=$(find "$PORT/data/lostcities/tags" -name '*.json' | wc -l) " \
      "loot=$(find "$PORT/data/lostcities/loot_table" -name '*.json' | wc -l) " \
      "lang=$(find "$PORT/assets/lostcities/lang" -name '*.json' | wc -l)"
 
-echo "PASS: the lostcity dimension answered, all seven decoded parts authored their own blocks in it (slabs, bookshelves, east_west rails, the bend's north_south rails, the split's north_east rails, the descent's ascending_east rails and the first descent's iron bars), #lostcities:notbreakable matched bedrock, and both carried loot tables yielded items"
+echo "PASS: the lostcity dimension answered, all eight decoded parts authored their own blocks in it (slabs, bookshelves, east_west rails, the bend's north_south rails, the split's north_east rails, the descent's ascending_east rails, the first descent's iron bars and the second building's quartz blocks), #lostcities:notbreakable matched bedrock, and both carried loot tables yielded items"
