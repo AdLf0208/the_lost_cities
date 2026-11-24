@@ -12,7 +12,8 @@ second multi-layer building part as **0.1.2**, the horizontal rail line as **0.1
 the rail bend as **0.1.4**, the three-way rail split as **0.1.5**, the
 eighteen-layer rail descent as **0.1.6**, the twelve-layer first rail descent
 as **0.1.7**, the second six-layer building part as **0.1.8**, the six-layer
-city centre as **0.1.9** and the six-layer shopping-open front as **0.1.10**.
+city centre as **0.1.9**, the six-layer shopping-open front as **0.1.10** and the
+seven-layer stone stair as **0.1.11**.
 
 ## What this version implements
 
@@ -129,10 +130,22 @@ city centre as **0.1.9** and the six-layer shopping-open front as **0.1.10**.
 
 ## What it does **not** implement
 
-- **The other 198 parts, 38 buildings, 31 palettes, 15 multibuildings, the
+- **An eleventh, seven-layer stone stair** (0.1.11): `parts/stairsnormal.json`
+  (6x11, seven slices, 138 non-space cells: `x` 102, `/` 24, `_` 12, embedded
+  byte-identically from the jar, sha256 `c6d17e44…`) is decoded with a palette
+  carrying three `palettes/default.json` entries verbatim — `x` is the jar's
+  `variant: stonebrick` entry, `_` the bottom smooth-stone slab and the one new
+  `/` → `minecraft:stone_stairs[facing=west,half=bottom,shape=straight]`. It is
+  laid at y=152..158, above the shopping front. Stone stairs are written by no
+  other decoded part, so the in-game assertion fill-replaces
+  `minecraft:stone_stairs` at y=152..158; vanilla noise fills nothing. The
+  generic decoder bounds already validate a non-16 footprint, so no new decoder
+  form, SDK API or manifest key was needed.
+
+- **The other 197 parts, 38 buildings, 31 palettes, 15 multibuildings, the
   spheres/rail dungeons and Java-assembled structures** — still
   `blocked(no-city-data-decoder)` / `blocked(no-structure-type-for-cities)`:
-  this port decodes exactly ten parts and the palette entries they use.
+  this port decodes exactly eleven parts and the palette entries they use.
 - **Replacing vanilla terrain in the Overworld** — `blocked(level_reset:R11)`:
   the Java mod's mixins replace vanilla levels; the pin has no `levels_reset`
   surface and R11 refuses the manifest key. This port generates cities only in

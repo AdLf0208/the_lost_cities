@@ -85,10 +85,19 @@ const CENTER001_BASE_Y: i32 = 128;
 /// cobblestone-wall count at y=136..150 is the in-game assertion.
 const SHOPPING1_BASE_Y: i32 = 140;
 
+/// The eleventh part — the seven-layer stone stair — is laid above the shopping
+/// front at y=152..158, the next sealed band inside the dimension's 256 height.
+/// Its `/` char resolves to `minecraft:stone_stairs[facing=west,half=bottom,
+/// shape=straight]` from `palettes/default.json`, which no other decoded part
+/// writes, so a stone-stairs count at y=152..158 is the in-game assertion. Its
+/// footprint is 6x11 rather than 16x16; the decoder's generic bounds already
+/// validate each row against `xsize` and each slice against `zsize`.
+const STAIRSNORMAL_BASE_Y: i32 = 152;
+
 #[derive(Default)]
 struct Mod;
 
-/// The stateless city generator: the eight decoded parts plus process-stable
+/// The stateless city generator: the eleven decoded parts plus process-stable
 /// block keys, requested once at registration. Two worldgen workers may fill
 /// neighbouring chunks at once, so nothing here is mutable.
 struct CityGenerator {
@@ -102,6 +111,7 @@ struct CityGenerator {
     building12: Vec<runtime::Placement>,
     center001: Vec<runtime::Placement>,
     shopping1: Vec<runtime::Placement>,
+    stairsnormal: Vec<runtime::Placement>,
     keys: HashMap<String, BlockKey>,
 }
 
@@ -153,6 +163,7 @@ impl ChunkGenerator for CityGenerator {
         self.write_part(chunk, &self.building12, BUILDING12_BASE_Y);
         self.write_part(chunk, &self.center001, CENTER001_BASE_Y);
         self.write_part(chunk, &self.shopping1, SHOPPING1_BASE_Y);
+        self.write_part(chunk, &self.stairsnormal, STAIRSNORMAL_BASE_Y);
     }
 
     fn vanilla_stages(&self) -> VanillaStages {
@@ -258,6 +269,16 @@ impl Hooks for Mod {
             &variants,
         )
         .expect("the embedded shopping-open part and merged palette decode");
+        // The eleventh part is the seven-layer stone stair. Its `x` char uses
+        // the same jar stonebrick variant; `_` and the one new `/` char are the
+        // three `palettes/default.json` entries carried verbatim in its merged
+        // palette. Its 6x11 footprint needs no new decoder form or SDK key.
+        let stairsnormal = runtime::decode_city_with_variants(
+            runtime::STAIRSNORMAL_PART_JSON,
+            runtime::STAIRSNORMAL_PALETTE_JSON,
+            &variants,
+        )
+        .expect("the embedded stairsnormal part and merged palette decode");
 
         // Request each distinct block id once. The registrar checks it against
         // the game's registry at load; an unknown id refuses the mod by name.
@@ -272,6 +293,7 @@ impl Hooks for Mod {
             .chain(building12.iter())
             .chain(center001.iter())
             .chain(shopping1.iter())
+            .chain(stairsnormal.iter())
             .map(|p| p.block.clone())
             .collect();
         blocks.sort();
@@ -296,6 +318,7 @@ impl Hooks for Mod {
                 building12,
                 center001,
                 shopping1,
+                stairsnormal,
                 keys,
             },
         );
