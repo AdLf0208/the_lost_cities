@@ -34,6 +34,12 @@ const BUILDING_BASE_Y: i32 = 72;
 /// street nor the building writes a rail, so `minecraft:rail` is differential.
 const RAILS_BASE_Y: i32 = 54;
 
+/// The fourth part — the rail bend — is laid below the horizontal line. Its six
+/// slices span y=36..41, inside the bend fill window (30..44). It is the only
+/// decoded part that writes `north_south` rails: the horizontal line writes
+/// `east_west`, so a `north_south` count in the level is the in-game assertion.
+const BEND_BASE_Y: i32 = 36;
+
 #[derive(Default)]
 struct Mod;
 
@@ -44,6 +50,7 @@ struct CityGenerator {
     street: Vec<runtime::Placement>,
     building: Vec<runtime::Placement>,
     rails: Vec<runtime::Placement>,
+    bend: Vec<runtime::Placement>,
     keys: HashMap<String, BlockKey>,
 }
 
@@ -88,6 +95,7 @@ impl ChunkGenerator for CityGenerator {
         self.write_part(chunk, &self.street, CITY_BASE_Y);
         self.write_part(chunk, &self.building, BUILDING_BASE_Y);
         self.write_part(chunk, &self.rails, RAILS_BASE_Y);
+        self.write_part(chunk, &self.bend, BEND_BASE_Y);
     }
 
     fn vanilla_stages(&self) -> VanillaStages {
@@ -122,6 +130,16 @@ impl Hooks for Mod {
             &variants,
         )
         .expect("the embedded rail part and merged palette decode");
+        // The bend reuses the same jar `palettes/rails.json` entries and the
+        // same stonebrick variant as the horizontal line; only its part bytes
+        // are new. Its `k`/`r`/`s`/`m` chars resolve to rail shapes no other
+        // decoded part writes.
+        let bend = runtime::decode_city_with_variants(
+            runtime::RAILS_BEND_PART_JSON,
+            runtime::RAILS_PALETTE_JSON,
+            &variants,
+        )
+        .expect("the embedded rail bend part and merged palette decode");
 
         // Request each distinct block id once. The registrar checks it against
         // the game's registry at load; an unknown id refuses the mod by name.
@@ -129,6 +147,7 @@ impl Hooks for Mod {
             .iter()
             .chain(building.iter())
             .chain(rails.iter())
+            .chain(bend.iter())
             .map(|p| p.block.clone())
             .collect();
         blocks.sort();
@@ -146,6 +165,7 @@ impl Hooks for Mod {
                 street,
                 building,
                 rails,
+                bend,
                 keys,
             },
         );

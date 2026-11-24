@@ -14,6 +14,7 @@
 #   CITY_SELFTEST=1 -> FAIL EXIT:1 (inverted generator-authored block count)
 #   BUILDING_SELFTEST=1 -> FAIL EXIT:1 (inverted bookshelf count of the six-layer part)
 #   RAILS_SELFTEST=1 -> FAIL EXIT:1 (inverted rail count of the horizontal rail line)
+#   BEND_SELFTEST=1  -> FAIL EXIT:1 (inverted north_south rail count of the bend)
 set -euo pipefail
 export LC_ALL=C
 
@@ -29,6 +30,7 @@ TAG_SELFTEST=${TAG_SELFTEST:-0}
 CITY_SELFTEST=${CITY_SELFTEST:-0}
 BUILDING_SELFTEST=${BUILDING_SELFTEST:-0}
 RAILS_SELFTEST=${RAILS_SELFTEST:-0}
+BEND_SELFTEST=${BEND_SELFTEST:-0}
 
 [ -n "$CTL" ] && [ -n "$GAME" ] || { echo "missing CTL/GAME: eval \"\$(ports/tools/launcher-game.sh env the_lost_cities)\"" >&2; exit 1; }
 [ -x "$CTL" ] || { echo "missing horizon-ctl: $CTL" >&2; exit 1; }
@@ -204,6 +206,36 @@ else
         || fail "the vanilla-noise control unexpectedly had $vanilla_rails_count rail(s): $vanilla_rails_reply"
 fi
 
+# Slice 5: the fourth, six-layer rail bend is laid at BEND_BASE_Y=36. Its `k`
+# char resolves to `minecraft:rail[shape=north_south]` in palettes/rails.json —
+# the artefact's id, and a shape the horizontal line never writes (that one is
+# east_west). So a north_south count at y=30..44 can only come from the bend.
+# The same fill on the vanilla-noise Overworld must report `No blocks were
+# filled`; BEND_SELFTEST inverts it.
+say "six-layer rail bend authors north_south rails at the fourth Y"
+bend_reply=$(lc "fill 0 30 0 16 44 16 minecraft:air replace minecraft:rail[shape=north_south]" 2>&1 || true)
+bend_chat=$(echo "$bend_reply" | jq -r '.chat[0] // ""' 2>/dev/null || echo "")
+echo "north_south rail bend fill: $(echo "$bend_reply" | jq -c . 2>/dev/null | head -c 180)"
+bend_count=$(echo "$bend_chat" | grep -oE 'Successfully filled [0-9]+ block' | grep -oE '[0-9]+' || echo 0)
+bend_count=${bend_count:-0}
+echo "bend-authored north_south rail count: $bend_count"
+vanilla_bend_reply=$(ctl command "fill 0 30 0 16 44 16 minecraft:air replace minecraft:rail[shape=north_south]" 2>&1 || true)
+vanilla_bend_chat=$(echo "$vanilla_bend_reply" | jq -r '.chat[0] // ""' 2>/dev/null || echo "")
+echo "vanilla-noise north_south rail control: $(echo "$vanilla_bend_reply" | jq -c . 2>/dev/null | head -c 180)"
+vanilla_bend_count=$(echo "$vanilla_bend_chat" | grep -oE 'Successfully filled [0-9]+ block' | grep -oE '[0-9]+' || echo 0)
+vanilla_bend_count=${vanilla_bend_count:-0}
+echo "vanilla-noise north_south rail count: $vanilla_bend_count"
+if [ "$BEND_SELFTEST" = 1 ]; then
+    [ "$bend_count" -eq 0 ] \
+        || fail "BEND_SELFTEST: the bend authored $bend_count north_south rail(s); the inverted assertion expected 0"
+    echo "BEND_SELFTEST: no bend-authored north_south rails (unexpected)"
+else
+    [ "$bend_count" -gt 0 ] \
+        || fail "the chunk generator authored no north_south rails: $bend_reply"
+    [ "$vanilla_bend_count" -eq 0 ] \
+        || fail "the vanilla-noise control unexpectedly had $vanilla_bend_count north_south rail(s): $vanilla_bend_reply"
+fi
+
 say "carried block tag #lostcities:notbreakable matches bedrock"
 end "setblock 50 80 50 minecraft:bedrock" >/dev/null
 ctl wait 5
@@ -253,4 +285,4 @@ echo "tags=$(find "$PORT/data/lostcities/tags" -name '*.json' | wc -l) " \
      "loot=$(find "$PORT/data/lostcities/loot_table" -name '*.json' | wc -l) " \
      "lang=$(find "$PORT/assets/lostcities/lang" -name '*.json' | wc -l)"
 
-echo "PASS: the lostcity dimension answered, all three decoded parts authored their own blocks in it (slabs, bookshelves and rails), #lostcities:notbreakable matched bedrock, and both carried loot tables yielded items"
+echo "PASS: the lostcity dimension answered, all four decoded parts authored their own blocks in it (slabs, bookshelves, east_west rails and the bend's north_south rails), #lostcities:notbreakable matched bedrock, and both carried loot tables yielded items"

@@ -8,7 +8,8 @@ This is a **clean-room Rust rewrite** of The Lost Cities for Horizon (Minecraft
 Java 26.3), pinned to SDK `0a875da91dbb0fdcb7ba8c42c11341aa229af51a` and
 horizon-mixins `e59da9094f0c2fdda6c627fe9eff22dec6a906f0`. It is a first
 publication at version **0.1.0**; the city-generator slice shipped as **0.1.1**, the
-second multi-layer building part as **0.1.2** and the horizontal rail line as **0.1.3**.
+second multi-layer building part as **0.1.2**, the horizontal rail line as **0.1.3**
+and the rail bend as **0.1.4**.
 
 ## What this version implements
 
@@ -48,13 +49,22 @@ second multi-layer building part as **0.1.2** and the horizontal rail line as **
   `minecraft:powered_rail[powered=true,shape=east_west]`; the brief's illustrative
   ids were wrong and were not used. The in-game assertion fill-replaces
   `minecraft:rail` at y=50..64, where vanilla noise fills nothing.
+- **A fourth, six-layer rail bend** (0.1.4): `parts/rails_bend.json`
+  (16x16, six slices, `refpalette: "rails"`) is decoded with the same verbatim
+  `palettes/rails.json` entries and laid at y=36. Its `k`/`r`/`s`/`m` chars
+  resolve to `minecraft:rail[shape=north_south]`, `rail[shape=north_west]`,
+  `rail[shape=south_west]` and `powered_rail[powered=true,shape=north_south]`
+  — rail shapes no other decoded part writes. The in-game assertion fill-replaces
+  `rail[shape=north_south]` at y=30..44, where vanilla noise fills nothing.
+  This time the brief's example ids matched the artefact; they were checked
+  against the jar before the carry.
 
 ## What it does **not** implement
 
-- **The other 205 parts, 38 buildings, 31 palettes, 15 multibuildings, the
+- **The other 204 parts, 38 buildings, 31 palettes, 15 multibuildings, the
   spheres/rail dungeons and Java-assembled structures** — still
   `blocked(no-city-data-decoder)` / `blocked(no-structure-type-for-cities)`:
-  this port decodes exactly three parts and the palette entries they use.
+  this port decodes exactly four parts and the palette entries they use.
 - **Replacing vanilla terrain in the Overworld** — `blocked(level_reset:R11)`:
   the Java mod's mixins replace vanilla levels; the pin has no `levels_reset`
   surface and R11 refuses the manifest key. This port generates cities only in

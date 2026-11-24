@@ -814,6 +814,127 @@ pub const RAILS_PART_JSON: &str = r#"{
 /// `powered_rail[powered=true,shape=east_west]`; both are carried as written.
 pub const RAILS_PALETTE_JSON: &str = "{\"palette\": [{\"char\": \"k\",\"block\": \"minecraft:rail[shape=north_south]\"},{\"char\": \"e\",\"block\": \"minecraft:rail[shape=east_west]\"},{\"char\": \"j\",\"block\": \"minecraft:rail[shape=ascending_east]\"},{\"char\": \"q\",\"block\": \"minecraft:rail[shape=south_east]\"},{\"char\": \"s\",\"block\": \"minecraft:rail[shape=south_west]\"},{\"char\": \"r\",\"block\": \"minecraft:rail[shape=north_west]\"},{\"char\": \"n\",\"block\": \"minecraft:rail[shape=north_east]\"},{\"char\": \"m\",\"block\": \"minecraft:powered_rail[powered=true,shape=north_south]\"},{\"char\": \"E\",\"block\": \"minecraft:powered_rail[powered=true,shape=ascending_south]\"},{\"char\": \"H\",\"block\": \"minecraft:powered_rail[powered=true,shape=ascending_north]\"},{\"char\": \"f\",\"block\": \"minecraft:powered_rail[powered=true,shape=east_west]\"},{\"char\": \"i\",\"block\": \"minecraft:powered_rail[powered=true,shape=ascending_east]\"},{\"char\": \"y\",\"variant\": \"stonebrick\",\"damaged\": \"minecraft:iron_bars\"},{\"char\": \"T\",\"block\": \"minecraft:wall_torch[facing=north]\",\"torch\": true},{\"char\": \"g\",\"block\": \"minecraft:redstone_torch[lit=true]\"},{\"char\": \"~\",\"block\": \"minecraft:structure_void\"},{\"char\": \" \",\"block\": \"minecraft:air\"}]}";
 
+/// `parts/rails_bend.json` from the cached jar, verbatim (2,643 B): 16x16, six
+/// slices, `refpalette: "rails"`. Its exact non-space chars are `y`, `k`, `g`,
+/// `m`, `e`, `f`, `r`, `s`, `~`. The brief's example ids were checked against the
+/// artefact this time and match: `k` is north_south, `r` north_west, `s`
+/// south_west and `m` powered north_south. No id or char was invented.
+pub const RAILS_BEND_PART_JSON: &str = r#"{
+  "xsize": 16,
+  "zsize": 16,
+  "refpalette": "rails",
+  "slices": [
+    [
+      "      yyyyy     ",
+      "      yyyyy     ",
+      "      yyyyy     ",
+      "yyyyyyyyyyy     ",
+      "yyyyyyyyyyy     ",
+      "yyyyyyyyyyy     ",
+      "yyyyyyyyyyy     ",
+      "yyyyyyyyyyy     ",
+      "yyyyyyyyyyy     ",
+      "yyyyyyyyyyy     ",
+      "yyyyyyyyyyy     ",
+      "yyyyyyyyyyy     ",
+      "      yyyyy     ",
+      "      yyyyy     ",
+      "      yyyyy     ",
+      "      yyyyy     "
+    ],
+    [
+      "      yykyy     ",
+      "      yykyy     ",
+      "      yykyy     ",
+      "yyyyyyyykyy     ",
+      "yyyyyyygmyy     ",
+      "eeeeeeefryy     ",
+      "yyyyyyyyyyy     ",
+      "yyyyyyyyyyy     ",
+      "yyyyyyyyyyy     ",
+      "eeeeeeefsyy     ",
+      "yyyyyyygmyy     ",
+      "yyyyyyyykyy     ",
+      "      yykyy     ",
+      "      yykyy     ",
+      "      yykyy     ",
+      "      yykyy     "
+    ],
+    [
+      "      y~~~y     ",
+      "      y~~~y     ",
+      "      y~~~y     ",
+      "yyyyyyy~~~y     ",
+      "~~~~~~~~~~y     ",
+      "~~~~~~~~~~y     ",
+      "~~~~~~~~~~y     ",
+      "~~~~~~~~yyy     ",
+      "~~~~~~~~~~y     ",
+      "~~~~~~~~~~y     ",
+      "~~~~~~~~~~y     ",
+      "yyyyyyy~~~y     ",
+      "      y~~~y     ",
+      "      y~~~y     ",
+      "      y~~~y     ",
+      "      y~~~y     "
+    ],
+    [
+      "      y~~~y     ",
+      "      y~~~y     ",
+      "      y~~~y     ",
+      "yyyyyyy~~~y     ",
+      "~~~~~~~~~~y     ",
+      "~~~~~~~~~~y     ",
+      "~~~~~~~~~~y     ",
+      "~~~~~~~~yyy     ",
+      "~~~~~~~~~~y     ",
+      "~~~~~~~~~~y     ",
+      "~~~~~~~~~~y     ",
+      "yyyyyyy~~~y     ",
+      "      y~~~y     ",
+      "      y~~~y     ",
+      "      y~~~y     ",
+      "      y~~~y     "
+    ],
+    [
+      "      y~~~y     ",
+      "      y~~~y     ",
+      "      y~~~y     ",
+      "yyyyyyy~~~y     ",
+      "~~~~~~~~~~y     ",
+      "~~~~~~~~~~y     ",
+      "~~~~~~~~~~y     ",
+      "~~~~~~~~yyy     ",
+      "~~~~~~~~~~y     ",
+      "~~~~~~~~~~y     ",
+      "~~~~~~~~~~y     ",
+      "yyyyyyy~~~y     ",
+      "      y~~~y     ",
+      "      y~~~y     ",
+      "      y~~~y     ",
+      "      y~~~y     "
+    ],
+    [
+      "      yyyyy     ",
+      "      yyyyy     ",
+      "      yyyyy     ",
+      "yyyyyyyyyyy     ",
+      "yyyyyyyyyyy     ",
+      "yyyyyyyyyyy     ",
+      "yyyyyyyyyyy     ",
+      "yyyyyyyyyyy     ",
+      "yyyyyyyyyyy     ",
+      "yyyyyyyyyyy     ",
+      "yyyyyyyyyyy     ",
+      "yyyyyyyyyyy     ",
+      "      yyyyy     ",
+      "      yyyyy     ",
+      "      yyyyy     ",
+      "      yyyyy     "
+    ]
+  ]
+}"#;
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1117,6 +1238,131 @@ mod rails_tests {
                 .count(),
             3,
             "one powered rail in each of the three rows"
+        );
+    }
+}
+
+/// Slice 5: the fourth part, the rail bend. These tests are written before the
+/// part data exists so the gap is proved red first: `RAILS_BEND_PART_JSON` is
+/// unresolved until the part is carried verbatim from the cached jar. Every id
+/// and count below is read from the artefact, not from the brief.
+#[cfg(test)]
+mod bend_tests {
+    use super::*;
+
+    /// The jar's `parts/rails_bend.json` is 16x16 with six slices, all rows the
+    /// declared width — the same multi-layer bound as the other two six-slice
+    /// parts, checked against the bend's own bytes.
+    #[test]
+    fn embedded_bend_part_has_six_16x16_layers() {
+        let part =
+            Part::from_json(&parse_json(RAILS_BEND_PART_JSON).expect("jar bend part parses"))
+                .expect("jar bend part decodes");
+        assert_eq!(part.xsize, 16, "jar xsize");
+        assert_eq!(part.zsize, 16, "jar zsize");
+        assert_eq!(part.slices.len(), 6, "the bend has six slices");
+        for (y, layer) in part.slices.iter().enumerate() {
+            assert_eq!(layer.len(), 16, "slice {y} has 16 rows");
+            for (z, row) in layer.iter().enumerate() {
+                assert_eq!(row.chars().count(), 16, "slice {y} row {z} is 16 chars");
+            }
+        }
+    }
+
+    /// The bend's rail chars resolve to the exact ids of `palettes/rails.json`:
+    /// `k` north_south, `r` north_west, `s` south_west, `m` powered north_south,
+    /// beside `e`/`f` east_west. The horizontal line writes only east_west
+    /// rails, so a north_south count can only come from the bend — the
+    /// differential the in-game assertion uses.
+    #[test]
+    fn bend_chars_resolve_to_the_jar_rail_shapes() {
+        let variants = VariantTable::from_files(&[("stonebrick", STONEBRICK_VARIANT_JSON)])
+            .expect("the jar's stonebrick variant decodes");
+        let placements =
+            decode_city_with_variants(RAILS_BEND_PART_JSON, RAILS_PALETTE_JSON, &variants)
+                .expect("the embedded jar bend part and merged palette decode");
+
+        let shape = |dx: usize, dz: usize| -> (String, Vec<(String, String)>) {
+            let p = placements
+                .iter()
+                .find(|p| p.dx == dx && p.dy == 1 && p.dz == dz)
+                .expect("a slice-1 bend cell at the expected coordinate");
+            (p.block.clone(), p.properties.clone())
+        };
+        let (id, props) = shape(8, 0);
+        assert_eq!(id, "minecraft:rail", "the k char is a rail");
+        assert_eq!(
+            props,
+            vec![("shape".to_string(), "north_south".to_string())],
+            "the k char is palettes/rails.json north_south rail"
+        );
+        let (id, props) = shape(8, 5);
+        assert_eq!(id, "minecraft:rail", "the r char is a rail");
+        assert_eq!(
+            props,
+            vec![("shape".to_string(), "north_west".to_string())],
+            "the r char is palettes/rails.json north_west rail"
+        );
+        let (id, props) = shape(8, 9);
+        assert_eq!(id, "minecraft:rail", "the s char is a rail");
+        assert_eq!(
+            props,
+            vec![("shape".to_string(), "south_west".to_string())],
+            "the s char is palettes/rails.json south_west rail"
+        );
+        let (id, props) = shape(8, 4);
+        assert_eq!(id, "minecraft:powered_rail", "the m char is a powered rail");
+        assert_eq!(
+            props,
+            vec![
+                ("powered".to_string(), "true".to_string()),
+                ("shape".to_string(), "north_south".to_string())
+            ],
+            "the m char is palettes/rails.json powered north_south rail"
+        );
+
+        // Exact char counts of the artefact's slice 1, cross-checked against
+        // the jar: 9 k, 2 m, 1 r, 1 s, 14 e, 2 f.
+        let count = |block: &str, shape: &str| {
+            placements
+                .iter()
+                .filter(|p| {
+                    p.block == block && p.properties.iter().any(|(k, v)| k == "shape" && v == shape)
+                })
+                .count()
+        };
+        assert_eq!(count("minecraft:rail", "north_south"), 9, "nine k cells");
+        assert_eq!(
+            count("minecraft:powered_rail", "north_south"),
+            2,
+            "two m cells"
+        );
+        assert_eq!(count("minecraft:rail", "north_west"), 1, "one r cell");
+        assert_eq!(count("minecraft:rail", "south_west"), 1, "one s cell");
+        assert_eq!(count("minecraft:rail", "east_west"), 14, "fourteen e cells");
+        assert_eq!(
+            count("minecraft:powered_rail", "east_west"),
+            2,
+            "two f cells"
+        );
+
+        // Differential: the horizontal line writes east_west rails only, so
+        // its decoded placements contain no north_south rail to confuse the
+        // in-game fill assertion.
+        let horizontal = decode_city_with_variants(RAILS_PART_JSON, RAILS_PALETTE_JSON, &variants)
+            .expect("the embedded horizontal rail part decodes");
+        assert_eq!(
+            horizontal
+                .iter()
+                .filter(|p| {
+                    p.block == "minecraft:rail"
+                        && p.properties
+                            .iter()
+                            .any(|(k, v)| k == "shape" && v == "north_south")
+                })
+                .count(),
+            0,
+            "the horizontal line must not write a north_south rail"
         );
     }
 }
