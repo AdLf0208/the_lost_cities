@@ -40,10 +40,17 @@ const RAILS_BASE_Y: i32 = 54;
 /// `east_west`, so a `north_south` count in the level is the in-game assertion.
 const BEND_BASE_Y: i32 = 36;
 
+/// The fifth part — the three-way rail split — is laid below the bend. Its six
+/// slices span y=18..23, inside the split fill window (12..26). It is the only
+/// decoded part that writes the `north_east` and `south_east` rail shapes: the
+/// horizontal line writes `east_west`, the bend `north_south`/`north_west`/
+/// `south_west`, so an `north_east` count in the level is the in-game assertion.
+const SPLIT_BASE_Y: i32 = 18;
+
 #[derive(Default)]
 struct Mod;
 
-/// The stateless city generator: the three decoded parts plus process-stable
+/// The stateless city generator: the five decoded parts plus process-stable
 /// block keys, requested once at registration. Two worldgen workers may fill
 /// neighbouring chunks at once, so nothing here is mutable.
 struct CityGenerator {
@@ -51,6 +58,7 @@ struct CityGenerator {
     building: Vec<runtime::Placement>,
     rails: Vec<runtime::Placement>,
     bend: Vec<runtime::Placement>,
+    split: Vec<runtime::Placement>,
     keys: HashMap<String, BlockKey>,
 }
 
@@ -96,6 +104,7 @@ impl ChunkGenerator for CityGenerator {
         self.write_part(chunk, &self.building, BUILDING_BASE_Y);
         self.write_part(chunk, &self.rails, RAILS_BASE_Y);
         self.write_part(chunk, &self.bend, BEND_BASE_Y);
+        self.write_part(chunk, &self.split, SPLIT_BASE_Y);
     }
 
     fn vanilla_stages(&self) -> VanillaStages {
@@ -140,6 +149,15 @@ impl Hooks for Mod {
             &variants,
         )
         .expect("the embedded rail bend part and merged palette decode");
+        // The split reuses the same jar `palettes/rails.json` entries (including
+        // the `n`/`q` north_east/south_east shapes no other part writes) and the
+        // same stonebrick variant; only its part bytes are new.
+        let split = runtime::decode_city_with_variants(
+            runtime::RAILS_3SPLIT_PART_JSON,
+            runtime::RAILS_PALETTE_JSON,
+            &variants,
+        )
+        .expect("the embedded rail split part and merged palette decode");
 
         // Request each distinct block id once. The registrar checks it against
         // the game's registry at load; an unknown id refuses the mod by name.
@@ -148,6 +166,7 @@ impl Hooks for Mod {
             .chain(building.iter())
             .chain(rails.iter())
             .chain(bend.iter())
+            .chain(split.iter())
             .map(|p| p.block.clone())
             .collect();
         blocks.sort();
@@ -166,6 +185,7 @@ impl Hooks for Mod {
                 building,
                 rails,
                 bend,
+                split,
                 keys,
             },
         );

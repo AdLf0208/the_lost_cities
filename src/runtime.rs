@@ -935,6 +935,128 @@ pub const RAILS_BEND_PART_JSON: &str = r#"{
   ]
 }"#;
 
+/// `parts/rails_3split.json` from the cached jar, verbatim (2,643 B, sha256
+/// `b0c8bd61...`): 16x16, six slices, `refpalette: "rails"`. Its exact non-space
+/// chars are `y`, `k`, `g`, `m`, `n`, `f`, `e`, `q`, `~`, `T`; `n` and `q` are the
+/// `rail[shape=north_east]` and `rail[shape=south_east]` entries of
+/// `palettes/rails.json`, two shapes none of the first four parts writes. All
+/// entries are copied byte-for-byte from the artefact, checked against its sha.
+pub const RAILS_3SPLIT_PART_JSON: &str = r#"{
+  "xsize": 16,
+  "zsize": 16,
+  "refpalette": "rails",
+  "slices": [
+    [
+      "      yyyyy     ",
+      "      yyyyy     ",
+      "      yyyyy     ",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "      yyyyy     ",
+      "      yyyyy     ",
+      "      yyyyy     ",
+      "      yyyyy     "
+    ],
+    [
+      "      yykyy     ",
+      "      ygmgy     ",
+      "      yykyy     ",
+      "yyyyyyyykyyyyyyy",
+      "yyyyyyyykyyyyyyy",
+      "yyyyyyyynfeeeeee",
+      "ygyyyyyyygyyyyyy",
+      "efeeeeeeefeeeeee",
+      "ygyyyyyyygyyyyyy",
+      "yyyyyyyyqfeeeeee",
+      "yyyyyyyykyyyyyyy",
+      "yyyyyyyykyyyyyyy",
+      "      yykyy     ",
+      "      yykyy     ",
+      "      ygmgy     ",
+      "      yykyy     "
+    ],
+    [
+      "      y~~~y     ",
+      "      y~~~y     ",
+      "      y~~~y     ",
+      "yyyyyyy~~~yyyyyy",
+      "~~~~~~~~~~~~~~~~",
+      "~~~~~~~~~~~~~~~~",
+      "~~~~~~~~~~~~~~~~",
+      "~~~~~~~~~~~~~~~~",
+      "~~~~~~~~~~~~~~~~",
+      "~~~~~~~~~~~~~~~~",
+      "~~~~~~~~~~~~~~~~",
+      "yyyyyyy~~~yyyyyy",
+      "      y~~~y     ",
+      "      y~~~y     ",
+      "      y~~~y     ",
+      "      y~~~y     "
+    ],
+    [
+      "      y~~~y     ",
+      "      y~~~y     ",
+      "      y~~~y     ",
+      "yyyyyyy~~~yyyyyy",
+      "~~~~~~~~~~~~~~~~",
+      "~~~~~~~~~~~~~~~~",
+      "~~~~~~~~~~~~~~~~",
+      "~~~~~~~~~~~~~~~~",
+      "~~~~~~~~~~~~~~~~",
+      "~~~~~~~~~~~~~~~~",
+      "~~~~~~~~~~~~~~~~",
+      "yyyyyyy~~~yyyyyy",
+      "      y~~~y     ",
+      "      y~~~y     ",
+      "      y~~~y     ",
+      "      y~~~y     "
+    ],
+    [
+      "      y~~~y     ",
+      "      y~~~y     ",
+      "      y~~~y     ",
+      "yyyyyyy~~~yyyyyy",
+      "~~~T~~~~~~~~~~~~",
+      "~~~~~~~~~~~~~~~~",
+      "~~~~~~~~~~~~~~~~",
+      "~~~~~~~~~~~~~~~~",
+      "~~~~~~~~~~~~~~~~",
+      "~~~~~~~~~~~~~~~~",
+      "~~~~~~~~~~~~~T~~",
+      "yyyyyyy~~~yyyyyy",
+      "      y~~~y     ",
+      "      y~~~y     ",
+      "      y~~~y     ",
+      "      y~~~y     "
+    ],
+    [
+      "      yyyyy     ",
+      "      yyyyy     ",
+      "      yyyyy     ",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "      yyyyy     ",
+      "      yyyyy     ",
+      "      yyyyy     ",
+      "      yyyyy     "
+    ]
+  ]
+}"#;
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1363,6 +1485,137 @@ mod bend_tests {
                 .count(),
             0,
             "the horizontal line must not write a north_south rail"
+        );
+    }
+}
+
+/// Slice 6: the fifth part, the three-way rail split. These tests are written
+/// before the part data exists so the gap is proved red first:
+/// `RAILS_3SPLIT_PART_JSON` is unresolved until the part is carried verbatim
+/// from the cached jar. Every id and count below is read from the artefact —
+/// in particular `n` = north_east and `q` = south_east from `palettes/rails.json`,
+/// two shapes none of the first four decoded parts writes.
+#[cfg(test)]
+mod split_tests {
+    use super::*;
+
+    /// The jar's `parts/rails_3split.json` is 16x16 with six slices, all rows
+    /// the declared width — the same multi-layer bound as the other parts.
+    #[test]
+    fn embedded_split_part_has_six_16x16_layers() {
+        let part =
+            Part::from_json(&parse_json(RAILS_3SPLIT_PART_JSON).expect("jar split part parses"))
+                .expect("jar split part decodes");
+        assert_eq!(part.xsize, 16, "jar xsize");
+        assert_eq!(part.zsize, 16, "jar zsize");
+        assert_eq!(part.slices.len(), 6, "the split has six slices");
+        for (y, layer) in part.slices.iter().enumerate() {
+            assert_eq!(layer.len(), 16, "slice {y} has 16 rows");
+            for (z, row) in layer.iter().enumerate() {
+                assert_eq!(row.chars().count(), 16, "slice {y} row {z} is 16 chars");
+            }
+        }
+    }
+
+    /// The split's `n` and `q` chars resolve to the exact north_east and
+    /// south_east rail ids of `palettes/rails.json` — the two shapes the in-game
+    /// fill assertion detects, and which no other decoded part writes. Every
+    /// count is the artefact's per-part census, not the whole filled window.
+    #[test]
+    fn split_chars_resolve_to_the_jar_rail_shapes() {
+        let variants = VariantTable::from_files(&[("stonebrick", STONEBRICK_VARIANT_JSON)])
+            .expect("the jar's stonebrick variant decodes");
+        let placements =
+            decode_city_with_variants(RAILS_3SPLIT_PART_JSON, RAILS_PALETTE_JSON, &variants)
+                .expect("the embedded jar split part and merged palette decode");
+
+        let shape = |dx: usize, dz: usize| -> (String, Vec<(String, String)>) {
+            let p = placements
+                .iter()
+                .find(|p| p.dx == dx && p.dy == 1 && p.dz == dz)
+                .expect("a slice-1 split cell at the expected coordinate");
+            (p.block.clone(), p.properties.clone())
+        };
+        let (id, props) = shape(8, 5);
+        assert_eq!(id, "minecraft:rail", "the n char is a rail");
+        assert_eq!(
+            props,
+            vec![("shape".to_string(), "north_east".to_string())],
+            "the n char is palettes/rails.json north_east rail"
+        );
+        let (id, props) = shape(8, 9);
+        assert_eq!(id, "minecraft:rail", "the q char is a rail");
+        assert_eq!(
+            props,
+            vec![("shape".to_string(), "south_east".to_string())],
+            "the q char is palettes/rails.json south_east rail"
+        );
+
+        // Exact per-part census of the artefact: 1 n, 1 q, 9 k, 2 m, 26 e,
+        // 4 f, and no r (north_west) or s (south_west) char.
+        let count = |block: &str, shape: &str| {
+            placements
+                .iter()
+                .filter(|p| {
+                    p.block == block && p.properties.iter().any(|(k, v)| k == "shape" && v == shape)
+                })
+                .count()
+        };
+        assert_eq!(count("minecraft:rail", "north_east"), 1, "one n cell");
+        assert_eq!(count("minecraft:rail", "south_east"), 1, "one q cell");
+        assert_eq!(count("minecraft:rail", "north_south"), 9, "nine k cells");
+        assert_eq!(
+            count("minecraft:powered_rail", "north_south"),
+            2,
+            "two m cells"
+        );
+        assert_eq!(
+            count("minecraft:rail", "east_west"),
+            26,
+            "twenty-six e cells"
+        );
+        assert_eq!(
+            count("minecraft:powered_rail", "east_west"),
+            4,
+            "four f cells"
+        );
+        assert_eq!(count("minecraft:rail", "north_west"), 0, "no r cells");
+        assert_eq!(count("minecraft:rail", "south_west"), 0, "no s cells");
+
+        // Differential: none of the first four decoded parts writes either
+        // east-facing shape, so an in-game north_east/south_east rail count can
+        // only come from this part.
+        let has_east_shape = |ps: &[Placement]| {
+            ps.iter().any(|p| {
+                p.properties
+                    .iter()
+                    .any(|(k, v)| k == "shape" && (v == "north_east" || v == "south_east"))
+            })
+        };
+        let street = decode_city(STREET_PART_JSON, STREET_PALETTE_JSON)
+            .expect("the embedded street part decodes");
+        let building =
+            decode_city_with_variants(BUILDING_PART_JSON, BUILDING_PALETTE_JSON, &variants)
+                .expect("the embedded building part decodes");
+        let horizontal = decode_city_with_variants(RAILS_PART_JSON, RAILS_PALETTE_JSON, &variants)
+            .expect("the embedded horizontal rail part decodes");
+        let bend = decode_city_with_variants(RAILS_BEND_PART_JSON, RAILS_PALETTE_JSON, &variants)
+            .expect("the embedded rail bend part decodes");
+        assert!(
+            !has_east_shape(&street),
+            "the street must not write an east-facing rail"
+        );
+        assert!(
+            !has_east_shape(&building),
+            "the building must not write an east-facing rail"
+        );
+        assert!(
+            !has_east_shape(&horizontal),
+            "the horizontal line must not write an east-facing rail"
+        );
+        assert!(
+            !has_east_shape(&bend),
+            "the bend must not write an east-facing rail"
         );
     }
 }

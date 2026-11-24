@@ -8,8 +8,8 @@ This is a **clean-room Rust rewrite** of The Lost Cities for Horizon (Minecraft
 Java 26.3), pinned to SDK `0a875da91dbb0fdcb7ba8c42c11341aa229af51a` and
 horizon-mixins `e59da9094f0c2fdda6c627fe9eff22dec6a906f0`. It is a first
 publication at version **0.1.0**; the city-generator slice shipped as **0.1.1**, the
-second multi-layer building part as **0.1.2**, the horizontal rail line as **0.1.3**
-and the rail bend as **0.1.4**.
+second multi-layer building part as **0.1.2**, the horizontal rail line as **0.1.3**,
+the rail bend as **0.1.4** and the three-way rail split as **0.1.5**.
 
 ## What this version implements
 
@@ -59,12 +59,21 @@ and the rail bend as **0.1.4**.
   This time the brief's example ids matched the artefact; they were checked
   against the jar before the carry.
 
+- **A fifth, six-layer three-way rail split** (0.1.5): `parts/rails_3split.json`
+   (16x16, six slices, `refpalette: "rails"`, embedded byte-identically from the
+   cached jar, sha256 `b0c8bd61…`) is decoded with the same verbatim
+   `palettes/rails.json` entries and laid at y=18. Its `n`/`q` chars resolve to
+   `minecraft:rail[shape=north_east]` and `rail[shape=south_east]` — the two rail
+   shapes none of the other four decoded parts writes. The in-game assertion
+   fill-replaces `rail[shape=north_east]` at y=12..26, where vanilla noise fills
+   nothing. No new decoder form, SDK API or manifest key was needed.
+
 ## What it does **not** implement
 
-- **The other 204 parts, 38 buildings, 31 palettes, 15 multibuildings, the
+- **The other 203 parts, 38 buildings, 31 palettes, 15 multibuildings, the
   spheres/rail dungeons and Java-assembled structures** — still
   `blocked(no-city-data-decoder)` / `blocked(no-structure-type-for-cities)`:
-  this port decodes exactly four parts and the palette entries they use.
+  this port decodes exactly five parts and the palette entries they use.
 - **Replacing vanilla terrain in the Overworld** — `blocked(level_reset:R11)`:
   the Java mod's mixins replace vanilla levels; the pin has no `levels_reset`
   surface and R11 refuses the manifest key. This port generates cities only in

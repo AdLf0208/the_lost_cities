@@ -15,6 +15,7 @@
 #   BUILDING_SELFTEST=1 -> FAIL EXIT:1 (inverted bookshelf count of the six-layer part)
 #   RAILS_SELFTEST=1 -> FAIL EXIT:1 (inverted rail count of the horizontal rail line)
 #   BEND_SELFTEST=1  -> FAIL EXIT:1 (inverted north_south rail count of the bend)
+#   SPLIT_SELFTEST=1 -> FAIL EXIT:1 (inverted north_east rail count of the 3split)
 set -euo pipefail
 export LC_ALL=C
 
@@ -31,6 +32,7 @@ CITY_SELFTEST=${CITY_SELFTEST:-0}
 BUILDING_SELFTEST=${BUILDING_SELFTEST:-0}
 RAILS_SELFTEST=${RAILS_SELFTEST:-0}
 BEND_SELFTEST=${BEND_SELFTEST:-0}
+SPLIT_SELFTEST=${SPLIT_SELFTEST:-0}
 
 [ -n "$CTL" ] && [ -n "$GAME" ] || { echo "missing CTL/GAME: eval \"\$(ports/tools/launcher-game.sh env the_lost_cities)\"" >&2; exit 1; }
 [ -x "$CTL" ] || { echo "missing horizon-ctl: $CTL" >&2; exit 1; }
@@ -236,6 +238,37 @@ else
         || fail "the vanilla-noise control unexpectedly had $vanilla_bend_count north_south rail(s): $vanilla_bend_reply"
 fi
 
+# Slice 6: the fifth, six-layer rail split is laid at SPLIT_BASE_Y=18. Its `n`
+# char resolves to `minecraft:rail[shape=north_east]` in palettes/rails.json —
+# a shape none of the other four decoded parts writes (the horizontal line is
+# east_west; the bend is north_south/north_west/south_west). So a north_east
+# count at y=12..26 can only come from this part. The same fill on the
+# vanilla-noise Overworld must report `No blocks were filled`; SPLIT_SELFTEST
+# inverts it.
+say "six-layer rail split authors north_east rails at the fifth Y"
+split_reply=$(lc "fill 0 12 0 16 26 16 minecraft:air replace minecraft:rail[shape=north_east]" 2>&1 || true)
+split_chat=$(echo "$split_reply" | jq -r '.chat[0] // ""' 2>/dev/null || echo "")
+echo "north_east rail split fill: $(echo "$split_reply" | jq -c . 2>/dev/null | head -c 180)"
+split_count=$(echo "$split_chat" | grep -oE 'Successfully filled [0-9]+ block' | grep -oE '[0-9]+' || echo 0)
+split_count=${split_count:-0}
+echo "split-authored north_east rail count: $split_count"
+vanilla_split_reply=$(ctl command "fill 0 12 0 16 26 16 minecraft:air replace minecraft:rail[shape=north_east]" 2>&1 || true)
+vanilla_split_chat=$(echo "$vanilla_split_reply" | jq -r '.chat[0] // ""' 2>/dev/null || echo "")
+echo "vanilla-noise north_east rail control: $(echo "$vanilla_split_reply" | jq -c . 2>/dev/null | head -c 180)"
+vanilla_split_count=$(echo "$vanilla_split_chat" | grep -oE 'Successfully filled [0-9]+ block' | grep -oE '[0-9]+' || echo 0)
+vanilla_split_count=${vanilla_split_count:-0}
+echo "vanilla-noise north_east rail count: $vanilla_split_count"
+if [ "$SPLIT_SELFTEST" = 1 ]; then
+    [ "$split_count" -eq 0 ] \
+        || fail "SPLIT_SELFTEST: the split authored $split_count north_east rail(s); the inverted assertion expected 0"
+    echo "SPLIT_SELFTEST: no split-authored north_east rails (unexpected)"
+else
+    [ "$split_count" -gt 0 ] \
+        || fail "the chunk generator authored no north_east rails: $split_reply"
+    [ "$vanilla_split_count" -eq 0 ] \
+        || fail "the vanilla-noise control unexpectedly had $vanilla_split_count north_east rail(s): $vanilla_split_reply"
+fi
+
 say "carried block tag #lostcities:notbreakable matches bedrock"
 end "setblock 50 80 50 minecraft:bedrock" >/dev/null
 ctl wait 5
@@ -285,4 +318,4 @@ echo "tags=$(find "$PORT/data/lostcities/tags" -name '*.json' | wc -l) " \
      "loot=$(find "$PORT/data/lostcities/loot_table" -name '*.json' | wc -l) " \
      "lang=$(find "$PORT/assets/lostcities/lang" -name '*.json' | wc -l)"
 
-echo "PASS: the lostcity dimension answered, all four decoded parts authored their own blocks in it (slabs, bookshelves, east_west rails and the bend's north_south rails), #lostcities:notbreakable matched bedrock, and both carried loot tables yielded items"
+echo "PASS: the lostcity dimension answered, all five decoded parts authored their own blocks in it (slabs, bookshelves, east_west rails, the bend's north_south rails and the split's north_east rails), #lostcities:notbreakable matched bedrock, and both carried loot tables yielded items"
