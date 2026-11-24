@@ -1656,6 +1656,25 @@ pub const BUILDING_1_2_PART_JSON: &str = "{\n  \"xsize\": 16,\n  \"zsize\": 16,\
 /// verbatim from the jar. No id or char was invented.
 pub const BUILDING_1_2_PALETTE_JSON: &str = "{\"palette\": [{\"char\": \"#\", \"variant\": \"stonebrick\", \"damaged\": \"minecraft:iron_bars\"}, {\"char\": \"a\", \"block\": \"minecraft:glass\"}, {\"char\": \"@\", \"frompalette\": \"#\"}, {\"char\": \"1\", \"block\": \"minecraft:spawner\", \"mob\": \"easymobs\"}, {\"char\": \"T\", \"block\": \"minecraft:wall_torch[facing=north]\", \"torch\": true}, {\"char\": \"F\", \"blocks\": [{\"random\": 25, \"block\": \"minecraft:furnace[facing=north]\"}, {\"random\": 20, \"block\": \"minecraft:crafting_table\"}, {\"random\": 7, \"block\": \"minecraft:brewing_stand\"}, {\"random\": 6, \"block\": \"minecraft:anvil[facing=north]\"}, {\"random\": 5, \"block\": \"minecraft:cauldron\"}, {\"random\": 2, \"block\": \"minecraft:enchanting_table\"}, {\"random\": 1000, \"block\": \"minecraft:cobweb\"}]}, {\"char\": \"D\", \"block\": \"minecraft:dirt\"}, {\"char\": \"l\", \"block\": \"minecraft:ladder[facing=north]\"}, {\"char\": \"L\", \"block\": \"minecraft:bookshelf\"}, {\"char\": \"*\", \"block\": \"minecraft:potted_cactus\"}, {\"char\": \" \", \"block\": \"minecraft:air\"}, {\"char\": \"Q\", \"block\": \"minecraft:quartz_block\", \"damaged\": \"minecraft:iron_bars\"}, {\"char\": \":\", \"block\": \"minecraft:iron_bars\"}]}";
 
+/// `parts/center00_1.json` from the cached jar, verbatim (2,618 B, sha256
+/// `5ade2e7903e012f38fb9e9559ccda6aa51ef4c9856d2d365b891c118acebdc54`):
+/// 16x16, six slices, 680 non-space cells. Exact census: `#` 338, `a` 126,
+/// `Q` 107, `S` 97, `)` 12 — measured from the artefact, not from the brief.
+/// The `)` cells are at (x,y,z) (13,0,14), (14,0,14), (13,1,9), (14,1,9),
+/// (13,2,10), (14,2,10), (13,3,11), (14,3,11), (13,4,12), (14,4,12),
+/// (13,5,13), (14,5,13). Written as an escaped literal because each brick row
+/// begins `"#`, which would close a `r#"..."#` raw string immediately.
+pub const CENTER00_1_PART_JSON: &str = "{\n  \"xsize\": 16,\n  \"zsize\": 16,\n  \"slices\": [\n    [\n      \"##   #aaaa#   ##\",\n      \"######QSQS######\",\n      \" #SQSQSQSQSQSQSQ\",\n      \" #QSQSQSQSQSQSQS\",\n      \" #SQSQSQSQSQSQSQ\",\n      \"##QSQSQSQSQSQSQS\",\n      \"aQSQSQSQSQSQSQSQ\",\n      \"aSQSQSQSQSQSQSQS\",\n      \"aQSQSQSQSQSQSQSQ\",\n      \"aSQSQSQSQSQSQSQS\",\n      \"##SQSQSQSQSQS  Q\",\n      \" #QSQSQSQSQSQ  S\",\n      \" #SQSQSQSQSQS  Q\",\n      \" #QSQSQSQSQSQ  S\",\n      \"##SQSQSQSQSQS))Q\",\n      \"##QSQSQSQSQSQSQS\"\n    ],\n    [\n      \"##   #aaaa#   ##\",\n      \"##aaa#    #aaa##\",\n      \" a              \",\n      \" a              \",\n      \" a              \",\n      \"##              \",\n      \"a               \",\n      \"a               \",\n      \"a               \",\n      \"a            )) \",\n      \"##          Q  Q\",\n      \" a          Q  Q\",\n      \" a          Q  Q\",\n      \" a          Q  Q\",\n      \"##          Q  Q\",\n      \"##              \"\n    ],\n    [\n      \"##   #aaaa#   ##\",\n      \"##aaa#    #aaa##\",\n      \" a              \",\n      \" a              \",\n      \" a              \",\n      \"##              \",\n      \"a               \",\n      \"a               \",\n      \"a               \",\n      \"a               \",\n      \"##          a))a\",\n      \" a          a  a\",\n      \" a          a  a\",\n      \" a          a  a\",\n      \"##          a  a\",\n      \"##              \"\n    ],\n    [\n      \"##   #aaaa#   ##\",\n      \"##aaa#    #aaa##\",\n      \" a              \",\n      \" a              \",\n      \" a              \",\n      \"##              \",\n      \"a               \",\n      \"a               \",\n      \"a               \",\n      \"a               \",\n      \"##          a  a\",\n      \" a          a))a\",\n      \" a          a  a\",\n      \" a          a  a\",\n      \"##          a  a\",\n      \"##              \"\n    ],\n    [\n      \"##   #aaaa#   ##\",\n      \"##aaa#    #aaa##\",\n      \" a              \",\n      \" a              \",\n      \" a              \",\n      \"##              \",\n      \"a               \",\n      \"a               \",\n      \"a               \",\n      \"a               \",\n      \"##          a  a\",\n      \" a          a  a\",\n      \" a          a))a\",\n      \" a          a  a\",\n      \"##          a  a\",\n      \"##              \"\n    ],\n    [\n      \"##   #aaaa#   ##\",\n      \"################\",\n      \" ###############\",\n      \" ###############\",\n      \" ###############\",\n      \"################\",\n      \"a###############\",\n      \"a###############\",\n      \"a###############\",\n      \"a###############\",\n      \"#############  #\",\n      \" ############  #\",\n      \" ############  #\",\n      \" ############))#\",\n      \"#############  #\",\n      \"################\"\n    ]\n  ]\n}";
+
+/// Merged palette for the city-centre part: the standard building groups
+/// (`BUILDING_PALETTE_JSON`, selected together by `styles/standard.json`) plus
+/// three entries copied verbatim from the jar's `palettes/default.json`: `Q` ->
+/// `minecraft:quartz_block` (with its `damaged` field), `S` ->
+/// `minecraft:smooth_stone_slab[type=double]` (with its `damaged` field), and
+/// the one new entry `)` -> `minecraft:quartz_stairs[facing=south,half=bottom,
+/// shape=straight]`. No id or char was invented.
+pub const CENTER00_1_PALETTE_JSON: &str = "{\"palette\": [{\"char\": \"#\", \"variant\": \"stonebrick\", \"damaged\": \"minecraft:iron_bars\"}, {\"char\": \"a\", \"block\": \"minecraft:glass\"}, {\"char\": \"@\", \"frompalette\": \"#\"}, {\"char\": \"1\", \"block\": \"minecraft:spawner\", \"mob\": \"easymobs\"}, {\"char\": \"T\", \"block\": \"minecraft:wall_torch[facing=north]\", \"torch\": true}, {\"char\": \"F\", \"blocks\": [{\"random\": 25, \"block\": \"minecraft:furnace[facing=north]\"}, {\"random\": 20, \"block\": \"minecraft:crafting_table\"}, {\"random\": 7, \"block\": \"minecraft:brewing_stand\"}, {\"random\": 6, \"block\": \"minecraft:anvil[facing=north]\"}, {\"random\": 5, \"block\": \"minecraft:cauldron\"}, {\"random\": 2, \"block\": \"minecraft:enchanting_table\"}, {\"random\": 1000, \"block\": \"minecraft:cobweb\"}]}, {\"char\": \"D\", \"block\": \"minecraft:dirt\"}, {\"char\": \"l\", \"block\": \"minecraft:ladder[facing=north]\"}, {\"char\": \"L\", \"block\": \"minecraft:bookshelf\"}, {\"char\": \"*\", \"block\": \"minecraft:potted_cactus\"}, {\"char\": \" \", \"block\": \"minecraft:air\"}, {\"char\": \"Q\", \"block\": \"minecraft:quartz_block\", \"damaged\": \"minecraft:iron_bars\"}, {\"char\": \"S\", \"block\": \"minecraft:smooth_stone_slab[type=double]\", \"damaged\": \"minecraft:iron_bars\"}, {\"char\": \")\", \"block\": \"minecraft:quartz_stairs[facing=south,half=bottom,shape=straight]\"}]}";
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -2559,6 +2578,111 @@ mod building1_2_tests {
             assert!(
                 !ps.iter().any(|p| p.block == "minecraft:quartz_block"),
                 "the {name} must not write a quartz block"
+            );
+        }
+    }
+}
+
+/// Slice 10: the ninth part, the six-layer city centre. These tests are
+/// written before the part data exists so the gap is proved red first:
+/// `CENTER00_1_PART_JSON` and `CENTER00_1_PALETTE_JSON` are unresolved until
+/// the part and its extra `palettes/default.json` entries are carried verbatim
+/// from the cached jar. Every id and count below is read from the artefact, not
+/// from the brief — in particular `)` = `minecraft:quartz_stairs[facing=south,
+/// half=bottom,shape=straight]`, which no other decoded part writes.
+#[cfg(test)]
+mod center00_1_tests {
+    use super::*;
+
+    /// The jar's `parts/center00_1.json` is 16x16 with six slices, all rows the
+    /// declared width — the same bound check as the other six-layer parts.
+    #[test]
+    fn embedded_center001_part_has_six_16x16_layers() {
+        let part =
+            Part::from_json(&parse_json(CENTER00_1_PART_JSON).expect("jar center00_1 part parses"))
+                .expect("jar center00_1 part decodes");
+        assert_eq!(part.xsize, 16, "jar xsize");
+        assert_eq!(part.zsize, 16, "jar zsize");
+        assert_eq!(part.slices.len(), 6, "the city centre has six slices");
+        for (y, layer) in part.slices.iter().enumerate() {
+            assert_eq!(layer.len(), 16, "slice {y} has 16 rows");
+            for (z, row) in layer.iter().enumerate() {
+                assert_eq!(row.chars().count(), 16, "slice {y} row {z} is 16 chars");
+            }
+        }
+    }
+
+    /// The centre's `)` char resolves to the exact quartz-stairs id of
+    /// `palettes/default.json`, a block written by no other decoded part, so an
+    /// in-game quartz-stairs count at the ninth Y can only come from this part.
+    /// Every count is the artefact's per-part census (680 non-space cells).
+    #[test]
+    fn center001_chars_resolve_to_the_jar_quartz_stairs() {
+        let variants = VariantTable::from_files(&[("stonebrick", STONEBRICK_VARIANT_JSON)])
+            .expect("the jar's stonebrick variant decodes");
+        let placements =
+            decode_city_with_variants(CENTER00_1_PART_JSON, CENTER00_1_PALETTE_JSON, &variants)
+                .expect("the embedded jar center00_1 part and merged palette decode");
+
+        let cell = |dx: usize, dy: usize, dz: usize| -> (String, Vec<(String, String)>) {
+            let p = placements
+                .iter()
+                .find(|p| p.dx == dx && p.dy == dy && p.dz == dz)
+                .expect("a center00_1 cell at the expected coordinate");
+            (p.block.clone(), p.properties.clone())
+        };
+        let (id, props) = cell(13, 0, 14);
+        assert_eq!(id, "minecraft:quartz_stairs", "the ) char is quartz stairs");
+        assert_eq!(
+            props,
+            vec![
+                ("facing".to_string(), "south".to_string()),
+                ("half".to_string(), "bottom".to_string()),
+                ("shape".to_string(), "straight".to_string()),
+            ],
+            "the ) char is palettes/default.json's south-facing quartz stairs"
+        );
+
+        let count = |id: &str| placements.iter().filter(|p| p.block == id).count();
+        assert_eq!(count("minecraft:quartz_stairs"), 12, "twelve ) cells");
+        assert_eq!(count("minecraft:quartz_block"), 107, "107 Q cells");
+        assert_eq!(count("minecraft:smooth_stone_slab"), 97, "97 S cells");
+
+        // Differential: none of the first eight decoded parts writes a quartz
+        // stair, so the in-game fill at the ninth Y cannot be confused by them.
+        let street = decode_city(STREET_PART_JSON, STREET_PALETTE_JSON)
+            .expect("the embedded street part decodes");
+        let building =
+            decode_city_with_variants(BUILDING_PART_JSON, BUILDING_PALETTE_JSON, &variants)
+                .expect("the embedded first building part decodes");
+        let horizontal = decode_city_with_variants(RAILS_PART_JSON, RAILS_PALETTE_JSON, &variants)
+            .expect("the embedded horizontal rail part decodes");
+        let bend = decode_city_with_variants(RAILS_BEND_PART_JSON, RAILS_PALETTE_JSON, &variants)
+            .expect("the embedded rail bend part decodes");
+        let split =
+            decode_city_with_variants(RAILS_3SPLIT_PART_JSON, RAILS_PALETTE_JSON, &variants)
+                .expect("the embedded rail split part decodes");
+        let down2 = decode_city_with_variants(RAILS_DOWN2_PART_JSON, RAILS_PALETTE_JSON, &variants)
+            .expect("the embedded rail descent part decodes");
+        let down1 =
+            decode_city_with_variants(RAILS_DOWN1_PART_JSON, RAILS_DOWN1_PALETTE_JSON, &variants)
+                .expect("the embedded first descent part decodes");
+        let building12 =
+            decode_city_with_variants(BUILDING_1_2_PART_JSON, BUILDING_1_2_PALETTE_JSON, &variants)
+                .expect("the embedded second building part decodes");
+        for (name, ps) in [
+            ("street", &street),
+            ("first building", &building),
+            ("horizontal line", &horizontal),
+            ("bend", &bend),
+            ("split", &split),
+            ("eighteen-layer descent", &down2),
+            ("first descent", &down1),
+            ("second building", &building12),
+        ] {
+            assert!(
+                !ps.iter().any(|p| p.block == "minecraft:quartz_stairs"),
+                "the {name} must not write a quartz stair"
             );
         }
     }

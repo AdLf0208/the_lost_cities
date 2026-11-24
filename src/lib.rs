@@ -70,6 +70,14 @@ const DOWN1_BASE_Y: i32 = 100;
 /// in-game assertion.
 const BUILDING12_BASE_Y: i32 = 116;
 
+/// The ninth part — the six-layer city centre — is laid above the second
+/// building at y=128..133, the next sealed band inside the dimension's 256
+/// height. Its `)` char resolves to `minecraft:quartz_stairs[facing=south,
+/// half=bottom,shape=straight]` from `palettes/default.json`, which no other
+/// decoded part writes, so a quartz-stairs count at y=124..134 is the in-game
+/// assertion.
+const CENTER001_BASE_Y: i32 = 128;
+
 #[derive(Default)]
 struct Mod;
 
@@ -85,6 +93,7 @@ struct CityGenerator {
     down2: Vec<runtime::Placement>,
     down1: Vec<runtime::Placement>,
     building12: Vec<runtime::Placement>,
+    center001: Vec<runtime::Placement>,
     keys: HashMap<String, BlockKey>,
 }
 
@@ -134,6 +143,7 @@ impl ChunkGenerator for CityGenerator {
         self.write_part(chunk, &self.down2, DOWN2_BASE_Y);
         self.write_part(chunk, &self.down1, DOWN1_BASE_Y);
         self.write_part(chunk, &self.building12, BUILDING12_BASE_Y);
+        self.write_part(chunk, &self.center001, CENTER001_BASE_Y);
     }
 
     fn vanilla_stages(&self) -> VanillaStages {
@@ -218,6 +228,17 @@ impl Hooks for Mod {
             &variants,
         )
         .expect("the embedded second building part and merged palette decode");
+        // The ninth part is the city centre. Its `#`/`a` chars use the standard
+        // building palette and stonebrick variant above; `Q`, `S` and the one
+        // new `)` char are three `palettes/default.json` entries added to its
+        // merged palette (quartz_block, double smooth-stone slab and the south
+        // quartz stairs). No new decoder form, SDK API or manifest key is needed.
+        let center001 = runtime::decode_city_with_variants(
+            runtime::CENTER00_1_PART_JSON,
+            runtime::CENTER00_1_PALETTE_JSON,
+            &variants,
+        )
+        .expect("the embedded city-centre part and merged palette decode");
 
         // Request each distinct block id once. The registrar checks it against
         // the game's registry at load; an unknown id refuses the mod by name.
@@ -230,6 +251,7 @@ impl Hooks for Mod {
             .chain(down2.iter())
             .chain(down1.iter())
             .chain(building12.iter())
+            .chain(center001.iter())
             .map(|p| p.block.clone())
             .collect();
         blocks.sort();
@@ -252,6 +274,7 @@ impl Hooks for Mod {
                 down2,
                 down1,
                 building12,
+                center001,
                 keys,
             },
         );

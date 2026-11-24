@@ -19,6 +19,7 @@
 #   DOWN2_SELFTEST=1 -> FAIL EXIT:1 (inverted ascending_east rail count of the descent)
 #   DOWN1_SELFTEST=1 -> FAIL EXIT:1 (inverted iron-bar count of the first descent)
 #   BUILDING12_SELFTEST=1 -> FAIL EXIT:1 (inverted quartz count of the second building)
+#   CENTER001_SELFTEST=1 -> FAIL EXIT:1 (inverted quartz-stairs count of the city centre)
 set -euo pipefail
 export LC_ALL=C
 
@@ -39,6 +40,7 @@ SPLIT_SELFTEST=${SPLIT_SELFTEST:-0}
 DOWN2_SELFTEST=${DOWN2_SELFTEST:-0}
 DOWN1_SELFTEST=${DOWN1_SELFTEST:-0}
 BUILDING12_SELFTEST=${BUILDING12_SELFTEST:-0}
+CENTER001_SELFTEST=${CENTER001_SELFTEST:-0}
 
 [ -n "$CTL" ] && [ -n "$GAME" ] || { echo "missing CTL/GAME: eval \"\$(ports/tools/launcher-game.sh env the_lost_cities)\"" >&2; exit 1; }
 [ -x "$CTL" ] || { echo "missing horizon-ctl: $CTL" >&2; exit 1; }
@@ -368,6 +370,37 @@ else
         || fail "the vanilla-noise control unexpectedly had $vanilla_b12_count quartz block(s): $vanilla_b12_reply"
 fi
 
+# Slice 10: the ninth, six-layer city centre is laid at CENTER001_BASE_Y=128
+# (spanning y=128..133, above the second building at y=116..121). Its `)`
+# char resolves to `minecraft:quartz_stairs[facing=south,half=bottom,shape=straight]`
+# from palettes/default.json — a block no other decoded part writes — so a
+# quartz-stairs count at y=124..134 can only come from this part. The same fill
+# on the vanilla-noise Overworld must report `No blocks were filled`;
+# CENTER001_SELFTEST inverts it.
+say "six-layer city-centre part authors quartz stairs at the ninth Y"
+c001_reply=$(lc "fill 0 124 0 16 134 16 minecraft:air replace minecraft:quartz_stairs" 2>&1 || true)
+c001_chat=$(echo "$c001_reply" | jq -r '.chat[0] // ""' 2>/dev/null || echo "")
+echo "quartz-stairs city-centre fill: $(echo "$c001_reply" | jq -c . 2>/dev/null | head -c 180)"
+c001_count=$(echo "$c001_chat" | grep -oE 'Successfully filled [0-9]+ block' | grep -oE '[0-9]+' || echo 0)
+c001_count=${c001_count:-0}
+echo "city-centre-authored quartz-stairs count: $c001_count"
+vanilla_c001_reply=$(ctl command "fill 0 124 0 16 134 16 minecraft:air replace minecraft:quartz_stairs" 2>&1 || true)
+vanilla_c001_chat=$(echo "$vanilla_c001_reply" | jq -r '.chat[0] // ""' 2>/dev/null || echo "")
+echo "vanilla-noise quartz-stairs control: $(echo "$vanilla_c001_reply" | jq -c . 2>/dev/null | head -c 180)"
+vanilla_c001_count=$(echo "$vanilla_c001_chat" | grep -oE 'Successfully filled [0-9]+ block' | grep -oE '[0-9]+' || echo 0)
+vanilla_c001_count=${vanilla_c001_count:-0}
+echo "vanilla-noise quartz-stairs count: $vanilla_c001_count"
+if [ "$CENTER001_SELFTEST" = 1 ]; then
+    [ "$c001_count" -eq 0 ] \
+        || fail "CENTER001_SELFTEST: the part authored $c001_count quartz staircase(s); the inverted assertion expected 0"
+    echo "CENTER001_SELFTEST: no quartz-stairs-authored blocks (unexpected)"
+else
+    [ "$c001_count" -gt 0 ] \
+        || fail "the chunk generator authored no quartz stairs: $c001_reply"
+    [ "$vanilla_c001_count" -eq 0 ] \
+        || fail "the vanilla-noise control unexpectedly had $vanilla_c001_count quartz staircase(s): $vanilla_c001_reply"
+fi
+
 say "carried block tag #lostcities:notbreakable matches bedrock"
 end "setblock 50 80 50 minecraft:bedrock" >/dev/null
 ctl wait 5
@@ -417,4 +450,4 @@ echo "tags=$(find "$PORT/data/lostcities/tags" -name '*.json' | wc -l) " \
      "loot=$(find "$PORT/data/lostcities/loot_table" -name '*.json' | wc -l) " \
      "lang=$(find "$PORT/assets/lostcities/lang" -name '*.json' | wc -l)"
 
-echo "PASS: the lostcity dimension answered, all eight decoded parts authored their own blocks in it (slabs, bookshelves, east_west rails, the bend's north_south rails, the split's north_east rails, the descent's ascending_east rails, the first descent's iron bars and the second building's quartz blocks), #lostcities:notbreakable matched bedrock, and both carried loot tables yielded items"
+echo "PASS: the lostcity dimension answered, all nine decoded parts authored their own blocks in it (slabs, bookshelves, east_west rails, the bend's north_south rails, the split's north_east rails, the descent's ascending_east rails, the first descent's iron bars, the second building's quartz blocks and the city centre's quartz stairs), #lostcities:notbreakable matched bedrock, and both carried loot tables yielded items"

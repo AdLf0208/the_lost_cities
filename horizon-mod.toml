@@ -1,6 +1,6 @@
 id = "the_lost_cities"
 name = "The Lost Cities"
-version = "0.1.8"
+version = "0.1.9"
 description = """Generate cities all over the world. This slice registers the lostcities:lostcity
 dimension from the jar's dimension_type values with a deterministic city chunk generator:
 eight jar parts are decoded by a clean-room Rust decoder and laid at eight heights — the street
@@ -16,8 +16,11 @@ twelve-layer first rail descent (parts/rails_down1.json) at y=100 whose :/_ char
 minecraft:iron_bars and bottom smooth-stone slabs from palettes/default.json, and the
 six-layer second building (parts/building1_2.json) at y=116 whose Q char writes
 minecraft:quartz_block from palettes/default.json — quartz is placed by no other decoded
-part. Block tags, chest loot tables and the language file are carried as before.
-The other 200 parts and Java-assembled structures remain blocked: the pin has no
+part. A ninth, six-layer city centre (parts/center00_1.json) at y=128 whose ) char
+writes minecraft:quartz_stairs[facing=south,half=bottom,shape=straight] from
+palettes/default.json — stairs are placed by no other decoded part. Block tags,
+chest loot tables and the language file are carried as before.
+The other 199 parts and Java-assembled structures remain blocked: the pin has no
 configured-feature registrar and R11 refuses a level reset."""
 authors = ["McJty (upstream, MIT)", "AdLf0208 (port)"]
 api = "0.2"

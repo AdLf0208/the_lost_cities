@@ -11,7 +11,8 @@ publication at version **0.1.0**; the city-generator slice shipped as **0.1.1**,
 second multi-layer building part as **0.1.2**, the horizontal rail line as **0.1.3**,
 the rail bend as **0.1.4**, the three-way rail split as **0.1.5**, the
 eighteen-layer rail descent as **0.1.6**, the twelve-layer first rail descent
-as **0.1.7** and the second six-layer building part as **0.1.8**.
+as **0.1.7**, the second six-layer building part as **0.1.8** and the six-layer
+city centre as **0.1.9**.
 
 ## What this version implements
 
@@ -103,12 +104,25 @@ as **0.1.7** and the second six-layer building part as **0.1.8**.
     `minecraft:quartz_block` at y=112..122; vanilla noise fills nothing. No new
     decoder form, SDK API or manifest key.
 
+- **A ninth, six-layer city centre** (0.1.9): `parts/center00_1.json`
+    (16x16, six slices, 680 non-space cells, embedded byte-identically from the
+    cached jar, sha256 `5ade2e79…`) is decoded with a merged palette that adds
+    three `palettes/default.json` entries to the standard building groups —
+    `Q` → `minecraft:quartz_block`, `S` → `minecraft:smooth_stone_slab[type=double]`
+    and the one new `)` → `minecraft:quartz_stairs[facing=south,half=bottom,
+    shape=straight]`, all carried verbatim. It is laid at y=128..133, above the
+    second building. Quartz stairs are written by no other decoded part, so the
+    in-game assertion fill-replaces `minecraft:quartz_stairs` at y=124..134;
+    vanilla noise fills nothing. The part is embedded as an escaped string
+    literal because each brick row begins `"#`, which would close a raw
+    `r#"..."#` string. No new decoder form, SDK API or manifest key.
+
 ## What it does **not** implement
 
-- **The other 200 parts, 38 buildings, 31 palettes, 15 multibuildings, the
+- **The other 199 parts, 38 buildings, 31 palettes, 15 multibuildings, the
   spheres/rail dungeons and Java-assembled structures** — still
   `blocked(no-city-data-decoder)` / `blocked(no-structure-type-for-cities)`:
-  this port decodes exactly eight parts and the palette entries they use.
+  this port decodes exactly nine parts and the palette entries they use.
 - **Replacing vanilla terrain in the Overworld** — `blocked(level_reset:R11)`:
   the Java mod's mixins replace vanilla levels; the pin has no `levels_reset`
   surface and R11 refuses the manifest key. This port generates cities only in
