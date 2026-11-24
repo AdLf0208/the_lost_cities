@@ -1,9 +1,9 @@
 id = "the_lost_cities"
 name = "The Lost Cities"
-version = "0.1.13"
+version = "0.1.18"
 description = """Generate cities all over the world. This slice registers the lostcities:lostcity
 dimension from the jar's dimension_type values with a deterministic city chunk generator:
-thirteen jar parts are decoded by a clean-room Rust decoder and laid at thirteen heights — the street
+eighteen jar parts are decoded by a clean-room Rust decoder and laid at eighteen heights — the street
 (parts/street_straight.json) at y=90, a six-layer building (parts/building1_1.json) at y=72 whose
 # char resolves through a jar variant file, the six-layer horizontal rail line
 (parts/rails_horizontal.json) at y=54 whose e/f chars come verbatim from palettes/rails.json,
@@ -32,8 +32,21 @@ y=164..170 height band rather than a new block id. A thirteenth, six-layer
 third building (parts/building1_3.json) at y=176 whose W char writes
 minecraft:water from palettes/common.json — water is placed by no other decoded
 part.
+A fourteenth, six-layer second city centre (parts/center00_2.json) at y=188
+whose C char writes minecraft:chest[facing=north] from palettes/common.json —
+a chest is placed by no other decoded part.
+A fifteenth, six-layer library (parts/library10_2.json) at y=200 whose `.` and
+`-` chars write minecraft:oak_fence and minecraft:oak_pressure_plate from
+palettes/common.json — two block ids placed by no other decoded part.
+A sixteenth, six-layer rail dungeon (parts/rail_dungeon1.json) at y=212 whose
+`!` char resolves the jar's weighted treasure list (diamond/gold/emerald/iron)
+deterministically to minecraft:iron_block, a block id placed by no other
+decoded part. An eighteenth, six-layer rail end cap (parts/rails_horizontal_end.json)
+reuses the verbatim rail palette at y=236..241; its 33 e cells write the same
+minecraft:rail[shape=east_west] id as the lower line, so its assertion is a count
+in a disjoint height band.
 Block tags, chest loot tables and the language file are carried as before.
-The other 195 parts and Java-assembled structures remain blocked: the pin has no
+The other 190 parts and Java-assembled structures remain blocked: the pin has no
 configured-feature registrar and R11 refuses a level reset."""
 authors = ["McJty (upstream, MIT)", "AdLf0208 (port)"]
 api = "0.2"

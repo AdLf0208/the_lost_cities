@@ -14,7 +14,10 @@ eighteen-layer rail descent as **0.1.6**, the twelve-layer first rail descent
 as **0.1.7**, the second six-layer building part as **0.1.8**, the six-layer
 city centre as **0.1.9**, the six-layer shopping-open front as **0.1.10**, the
 seven-layer stone stair as **0.1.11**, the seven-layer large stone stair as
-**0.1.12** and the third six-layer building part as **0.1.13**.
+**0.1.12**, the third six-layer building part as **0.1.13** and the second
+six-layer city centre as **0.1.14**, the six-layer library part as **0.1.15**
+and the six-layer rail-dungeon part as **0.1.16**, the second six-layer
+rail-dungeon part as **0.1.17**, and the six-layer rail end cap as **0.1.18**.
 
 ## What this version implements
 
@@ -165,10 +168,77 @@ seven-layer stone stair as **0.1.11**, the seven-layer large stone stair as
   the vanilla-noise Overworld as control. No new decoder form, SDK API or
   manifest key was needed.
 
-- **The other 195 parts, 38 buildings, 31 palettes, 15 multibuildings, the
-  spheres/rail dungeons and Java-assembled structures** — still
-  `blocked(no-city-data-decoder)` / `blocked(no-structure-type-for-cities)`:
-  this port decodes exactly thirteen parts and the palette entries they use.
+- **A fourteenth, six-layer second city centre** (0.1.14):
+  `parts/center00_2.json` (16x16, six slices, 771 non-space cells: `#` 420,
+  `a` 126, `Q` 107, `S` 97, `)` 12, `1` 5, `C` 2, `4` 1, `T` 1, embedded
+  byte-identically from the jar, sha256 `3fdc948a…`) is decoded against a merged
+  palette that adds two entries copied verbatim from `palettes/common.json`:
+  `C` → `minecraft:chest[facing=north]` (its `loot` field ignored like `mob`)
+  and `4` → `minecraft:spawner` (the block id already placed by `1`). It is laid
+  at y=188..193, above the third building. A chest is placed by no other decoded
+  part, so the in-game assertion fill-replaces `minecraft:chest` at y=188..193,
+  with the vanilla-noise Overworld as control and `CENTER002_SELFTEST=1`
+  inverting the count. No new decoder form, SDK API or manifest key was needed.
+
+- **A fifteenth, six-layer library** (0.1.15):
+  `parts/library10_2.json` (16x16, six slices, 680 non-space cells: `#` 361,
+  `Q` 144, `a` 75, `S` 56, `L` 30, `-` 6, `.` 6, `T` 2, embedded
+  byte-identically from the jar, sha256 `e52c4556…`) is decoded against a merged
+  palette that adds two entries copied verbatim from `palettes/common.json`:
+  `.` → `minecraft:oak_fence` and `-` → `minecraft:oak_pressure_plate`. It is
+  laid at y=200..205, above the second city centre. Neither block is placed by
+  any other decoded part, so the in-game assertion fill-replaces both ids at
+  y=200..205 (with a property-exact fence read-back at (5,201,7)), with the
+  vanilla-noise Overworld as control and `LIBRARY1002_SELFTEST=1` inverting the
+  fence count. No new decoder form, SDK API or manifest key was needed.
+
+- **A sixteenth, six-layer rail-dungeon part** (0.1.16):
+  `parts/rail_dungeon1.json` (16x16, six slices, 1,536 non-space cells: `y` 1127,
+  `~` 382, `!` 17, `C` 4, `1` 3, `4` 3, embedded byte-identically from the jar,
+  sha256 `1216e334…`) is decoded against the carried centre palette plus the
+  part's `refpalette: rails` `y`/`~` entries and one new weighted entry copied
+  verbatim from `palettes/common.json`: `!` → diamond 15 / gold 20 / emerald
+  15 / iron 1000, which the decoder resolves deterministically to
+  `minecraft:iron_block`. It is laid at y=212..217, above the library. Iron
+  blocks are placed by no other decoded part, so the in-game assertion
+  fill-replaces `minecraft:iron_block` at y=212..217 with a property-exact
+  read-back at (10,214,6), the vanilla-noise Overworld as control and
+  `RAILDUNGEON1_SELFTEST=1` inverting the count. No new decoder form, SDK API
+  or manifest key was needed.
+
+- **A seventeenth, six-layer second rail-dungeon part** (0.1.17):
+   `parts/rail_dungeon2.json` (16x16, six slices, 1,536 non-space cells: `y` 1148,
+   `~` 380, `1` 3, `!` 3, `F` 2, embedded byte-identically from the jar,
+   sha256 `6b5081f1…`) uses the same merged rail-dungeon palette as 0.1.16 — its
+   `y`/`~` come from `refpalette: rails`, its `1`/`F`/`!` from the verbatim
+   `palettes/common.json` entries (spawner; the weighted furniture list resolving
+   to `minecraft:cobweb`; the weighted treasure list resolving deterministically
+   to `minecraft:iron_block`) — so no new id or palette entry is introduced. The
+   three `!` cells at (9,2,8)/(9,2,9)/(9,2,10) resolve to iron blocks. It is laid
+   at y=224..229, a band disjoint from the first dungeon's y=212..217; the
+   in-game assertion fill-replaces `minecraft:iron_block` there and requires
+   exactly **3** blocks (versus 17 in the lower band, already cleared by the
+   earlier leg), with a property-exact read-back at (9,226,8), the vanilla-noise
+   Overworld as control and `RAILDUNGEON2_SELFTEST=1` inverting the count. No new
+   decoder form, SDK API or manifest key was needed.
+
+- **An eighteenth, six-layer rail end cap** (0.1.18):
+  `parts/rails_horizontal_end.json` (16x16, six slices, 942 non-space cells: `y` 589,
+  `~` 314, `e` 33, `f` 3, `g` 2, `T` 1, embedded byte-identically from the jar,
+  sha256 `6e302fa0…`) uses the **same verbatim `RAILS_PALETTE_JSON`** as the
+  lower rail line — all six of its chars are already carried, so no new id or
+  palette entry is introduced. It is laid at y=236..241, a band disjoint from
+  the horizontal line's y=54..59; the in-game assertion fill-replaces
+  `minecraft:rail` there and requires exactly **36** blocks (33 in-chunk `e`
+  cells plus 3 from the inclusive 17x17 fill window's x=16 rim, calibrated
+  against the lower line's 48 = 45 + 3), with a property-exact read-back at
+  (0,237,5), the vanilla-noise Overworld as control and `RAILEND_SELFTEST=1`
+  inverting the count. No new decoder form, SDK API or manifest key was needed.
+
+- **The other 190 parts, 38 buildings, 31 palettes, 15 multibuildings, the
+  spheres and the remaining rail-dungeon parts, and Java-assembled structures**
+  — still `blocked(no-city-data-decoder)` / `blocked(no-structure-type-for-cities)`:
+  this port decodes exactly eighteen parts and the palette entries they use.
 - **Replacing vanilla terrain in the Overworld** — `blocked(level_reset:R11)`:
   the Java mod's mixins replace vanilla levels; the pin has no `levels_reset`
   surface and R11 refuses the manifest key. This port generates cities only in

@@ -819,6 +819,129 @@ pub const RAILS_PALETTE_JSON: &str = "{\"palette\": [{\"char\": \"k\",\"block\":
 /// `m`, `e`, `f`, `r`, `s`, `~`. The brief's example ids were checked against the
 /// artefact this time and match: `k` is north_south, `r` north_west, `s`
 /// south_west and `m` powered north_south. No id or char was invented.
+/// `parts/rails_horizontal_end.json` from the cached jar, verbatim (2,643 B,
+/// sha256 `6e302fa0ba450e26eae406b1f9219817a5e5bd41cd46fbc11e32c5587d3cd529`):
+/// 16x16, six slices, `refpalette: "rails"`, 942 non-space cells with the byte
+/// census `y` 589 / `~` 314 / `e` 33 / `f` 3 / `g` 2 / `T` 1. All six chars are
+/// already carried verbatim by `RAILS_PALETTE_JSON` above, so this part adds no
+/// new id or palette entry. It is a raw string literal: no row contains the `"#`
+/// sequence that would close `r#"..."#`.
+pub const RAILS_HORIZONTAL_END_PART_JSON: &str = r#"{
+  "xsize": 16,
+  "zsize": 16,
+  "refpalette": "rails",
+  "slices": [
+    [
+      "y              y",
+      "y              y",
+      "y              y",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "y              y",
+      "y              y",
+      "y              y",
+      "y               "
+    ],
+    [
+      "y              y",
+      "y              y",
+      "y              y",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "eeeeeeefeeeyyyye",
+      "yyyyyyygyyyyyyyy",
+      "eeeeeeefeeeyyyye",
+      "yyyyyyygyyyyyyyy",
+      "eeeeeeefeeeyyyye",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "y              y",
+      "y              y",
+      "y              y",
+      "y               "
+    ],
+    [
+      "y              y",
+      "y              y",
+      "y              y",
+      "yyyyyyyyyyyyyyyy",
+      "~~~~~~~~~~~~~~~y",
+      "~~~~~~~~~~~~~~~y",
+      "~~~~~~~~~~~~~~~y",
+      "~~~~~~~~~~~~~~~y",
+      "~~~~~~~~~~~~~~~y",
+      "~~~~~~~~~~~~~~~y",
+      "~~~~~~~~~~~~~~~y",
+      "yyyyyyyyyyyyyyyy",
+      "y              y",
+      "y              y",
+      "y              y",
+      "y               "
+    ],
+    [
+      "y              y",
+      "y              y",
+      "y              y",
+      "yyyyyyyyyyyyyyyy",
+      "~~~~~~~~~~~~~~~y",
+      "~~~~~~~~~~~~~~~y",
+      "~~~~~~~~~~~~~~~y",
+      "~~~~~~~~~~~~~~~y",
+      "~~~~~~~~~~~~~~~y",
+      "~~~~~~~~~~~~~~~y",
+      "~~~~~~~~~~~~~~~y",
+      "yyyyyyyyyyyyyyyy",
+      "y              y",
+      "y              y",
+      "y              y",
+      "y               "
+    ],
+    [
+      "y              y",
+      "y              y",
+      "y              y",
+      "yyyyyyyyyyyyyyyy",
+      "~~~~~~~~T~~~~~~y",
+      "~~~~~~~~~~~~~~~y",
+      "~~~~~~~~~~~~~~~y",
+      "~~~~~~~~~~~~~~~y",
+      "~~~~~~~~~~~~~~~y",
+      "~~~~~~~~~~~~~~~y",
+      "~~~~~~~~~~~~~~~y",
+      "yyyyyyyyyyyyyyyy",
+      "y              y",
+      "y              y",
+      "y              y",
+      "y               "
+    ],
+    [
+      "y              y",
+      "y              y",
+      "y              y",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "y              y",
+      "y              y",
+      "y              y",
+      "y               "
+    ]
+  ]
+}"#;
+
 pub const RAILS_BEND_PART_JSON: &str = r#"{
   "xsize": 16,
   "zsize": 16,
@@ -1694,6 +1817,42 @@ pub const CENTER00_1_PART_JSON: &str = "{\n  \"xsize\": 16,\n  \"zsize\": 16,\n 
 /// shape=straight]`. No id or char was invented.
 pub const CENTER00_1_PALETTE_JSON: &str = "{\"palette\": [{\"char\": \"#\", \"variant\": \"stonebrick\", \"damaged\": \"minecraft:iron_bars\"}, {\"char\": \"a\", \"block\": \"minecraft:glass\"}, {\"char\": \"@\", \"frompalette\": \"#\"}, {\"char\": \"1\", \"block\": \"minecraft:spawner\", \"mob\": \"easymobs\"}, {\"char\": \"T\", \"block\": \"minecraft:wall_torch[facing=north]\", \"torch\": true}, {\"char\": \"F\", \"blocks\": [{\"random\": 25, \"block\": \"minecraft:furnace[facing=north]\"}, {\"random\": 20, \"block\": \"minecraft:crafting_table\"}, {\"random\": 7, \"block\": \"minecraft:brewing_stand\"}, {\"random\": 6, \"block\": \"minecraft:anvil[facing=north]\"}, {\"random\": 5, \"block\": \"minecraft:cauldron\"}, {\"random\": 2, \"block\": \"minecraft:enchanting_table\"}, {\"random\": 1000, \"block\": \"minecraft:cobweb\"}]}, {\"char\": \"D\", \"block\": \"minecraft:dirt\"}, {\"char\": \"l\", \"block\": \"minecraft:ladder[facing=north]\"}, {\"char\": \"L\", \"block\": \"minecraft:bookshelf\"}, {\"char\": \"*\", \"block\": \"minecraft:potted_cactus\"}, {\"char\": \" \", \"block\": \"minecraft:air\"}, {\"char\": \"Q\", \"block\": \"minecraft:quartz_block\", \"damaged\": \"minecraft:iron_bars\"}, {\"char\": \"S\", \"block\": \"minecraft:smooth_stone_slab[type=double]\", \"damaged\": \"minecraft:iron_bars\"}, {\"char\": \")\", \"block\": \"minecraft:quartz_stairs[facing=south,half=bottom,shape=straight]\"}]}";
 
+/// `parts/center00_2.json` from the cached jar, verbatim (2,618 B, sha256
+/// `3fdc948a024ae6100518f23c434137f27462b597a003f00cfd2e47ba9b99349e`): 16x16, six slices, 771 non-space cells. Exact census: `#` 420,
+/// `a` 126, `Q` 107, `S` 97, `)` 12, `1` 5, `C` 2, `4` 1, `T` 1 — measured from
+/// the bytes. The two `C` cells are at (x,y,z) (3,1,11) and (4,1,11); the one
+/// `4` cell at (7,3,11). Written as an escaped literal because every brick row
+/// begins `"#`, which would close a `r#"..."#` raw string immediately.
+pub const CENTER00_2_PART_JSON: &str = "{\n  \"xsize\": 16,\n  \"zsize\": 16,\n  \"slices\": [\n    [\n      \"##   #aaaa#   ##\",\n      \"######QSQS######\",\n      \" #SQSQSQSQSQSQSQ\",\n      \" #QSQSQSQSQSQSQS\",\n      \" #SQSQSQSQSQSQSQ\",\n      \"##QSQSQSQSQSQSQS\",\n      \"aQSQSQSQSQSQSQSQ\",\n      \"aSQSQSQSQSQSQSQS\",\n      \"aQSQSQSQSQSQSQSQ\",\n      \"aSQSQSQSQSQSQSQS\",\n      \"##SQSQSQSQSQS  Q\",\n      \" #QSQSQSQSQSQ  S\",\n      \" #SQSQSQSQSQS  Q\",\n      \" #QSQSQSQSQSQ  S\",\n      \"##SQSQSQSQSQS))Q\",\n      \"##QSQSQSQSQSQSQS\"\n    ],\n    [\n      \"##   #aaaa#   ##\",\n      \"##aaa#    #aaa##\",\n      \" a              \",\n      \" a              \",\n      \" a              \",\n      \"##              \",\n      \"a               \",\n      \"a               \",\n      \"a               \",\n      \"a            )) \",\n      \"#########   Q  Q\",\n      \" a CC #1#   Q  Q\",\n      \" a    #1#   Q  Q\",\n      \" a    #1#   Q  Q\",\n      \"### #####   Q  Q\",\n      \"##              \"\n    ],\n    [\n      \"##   #aaaa#   ##\",\n      \"##aaa#    #aaa##\",\n      \" a              \",\n      \" a              \",\n      \" a              \",\n      \"##              \",\n      \"a               \",\n      \"a               \",\n      \"a               \",\n      \"a    T          \",\n      \"#########   a))a\",\n      \" a    ###   a  a\",\n      \" a    ###   a  a\",\n      \" a    ###   a  a\",\n      \"### #####   a  a\",\n      \"##              \"\n    ],\n    [\n      \"##   #aaaa#   ##\",\n      \"##aaa#    #aaa##\",\n      \" a              \",\n      \" a              \",\n      \" a              \",\n      \"##              \",\n      \"a               \",\n      \"a               \",\n      \"a               \",\n      \"a               \",\n      \"#########   a  a\",\n      \" a    #4#   a))a\",\n      \" a    #1#   a  a\",\n      \" a    #1#   a  a\",\n      \"### #####   a  a\",\n      \"##              \"\n    ],\n    [\n      \"##   #aaaa#   ##\",\n      \"##aaa#    #aaa##\",\n      \" a              \",\n      \" a              \",\n      \" a              \",\n      \"##              \",\n      \"a               \",\n      \"a               \",\n      \"a               \",\n      \"a               \",\n      \"#########   a  a\",\n      \" a    ###   a  a\",\n      \" a    ###   a))a\",\n      \" a    ###   a  a\",\n      \"### #####   a  a\",\n      \"##              \"\n    ],\n    [\n      \"##   #aaaa#   ##\",\n      \"################\",\n      \" ###############\",\n      \" ###############\",\n      \" ###############\",\n      \"################\",\n      \"a###############\",\n      \"a###############\",\n      \"a###############\",\n      \"a###############\",\n      \"#############  #\",\n      \" ############  #\",\n      \" ############  #\",\n      \" ############))#\",\n      \"#############  #\",\n      \"################\"\n    ]\n  ]\n}";
+
+/// Merged palette for the second city-centre part: the exact
+/// `CENTER00_1_PALETTE_JSON` entries (the standard building groups plus the
+/// verbatim `palettes/default.json` entries `Q`, `S` and `)`) plus two entries
+/// copied from the jar's `palettes/common.json`: `4` -> `minecraft:spawner`
+/// (`mob: hardmobs`, the block id already placed by `1`) and the one new id
+/// `C` -> `minecraft:chest[facing=north]` (`loot: chestloot`, ignored just like
+/// `mob`). Field names, order and values verbatim; only insignificant
+/// whitespace normalised to the compact style of every other carried entry.
+pub const CENTER00_2_PALETTE_JSON: &str = "{\"palette\": [{\"char\": \"#\", \"variant\": \"stonebrick\", \"damaged\": \"minecraft:iron_bars\"}, {\"char\": \"a\", \"block\": \"minecraft:glass\"}, {\"char\": \"@\", \"frompalette\": \"#\"}, {\"char\": \"1\", \"block\": \"minecraft:spawner\", \"mob\": \"easymobs\"}, {\"char\": \"T\", \"block\": \"minecraft:wall_torch[facing=north]\", \"torch\": true}, {\"char\": \"F\", \"blocks\": [{\"random\": 25, \"block\": \"minecraft:furnace[facing=north]\"}, {\"random\": 20, \"block\": \"minecraft:crafting_table\"}, {\"random\": 7, \"block\": \"minecraft:brewing_stand\"}, {\"random\": 6, \"block\": \"minecraft:anvil[facing=north]\"}, {\"random\": 5, \"block\": \"minecraft:cauldron\"}, {\"random\": 2, \"block\": \"minecraft:enchanting_table\"}, {\"random\": 1000, \"block\": \"minecraft:cobweb\"}]}, {\"char\": \"D\", \"block\": \"minecraft:dirt\"}, {\"char\": \"l\", \"block\": \"minecraft:ladder[facing=north]\"}, {\"char\": \"L\", \"block\": \"minecraft:bookshelf\"}, {\"char\": \"*\", \"block\": \"minecraft:potted_cactus\"}, {\"char\": \" \", \"block\": \"minecraft:air\"}, {\"char\": \"Q\", \"block\": \"minecraft:quartz_block\", \"damaged\": \"minecraft:iron_bars\"}, {\"char\": \"S\", \"block\": \"minecraft:smooth_stone_slab[type=double]\", \"damaged\": \"minecraft:iron_bars\"}, {\"char\": \")\", \"block\": \"minecraft:quartz_stairs[facing=south,half=bottom,shape=straight]\"}, {\"char\": \"4\", \"block\": \"minecraft:spawner\", \"mob\": \"hardmobs\"}, {\"char\": \"C\", \"block\": \"minecraft:chest[facing=north]\", \"loot\": \"chestloot\"}]}";
+
+/// `parts/library10_2.json` from the cached jar, verbatim (2,618 B, sha256
+/// `e52c4556d19cf3eb5617161852cba5a0f632f7b5794a6acc3e888976d5fcc30b`):
+/// 16x16, six slices, 680 non-space cells. Exact census: `#` 361, `Q` 144,
+/// `a` 75, `S` 56, `L` 30, `-` 6, `.` 6, `T` 2 — measured from the bytes. The
+/// six `.` cells are at (x,y,z) (5,1,7), (8,1,7), (11,1,7), (5,1,10), (8,1,10),
+/// (11,1,10); the six `-` cells are the same x/z at y=2. Written as an escaped
+/// literal because every brick row begins `"#`, which would close a raw string.
+pub const LIBRARY_10_2_PART_JSON: &str = "{\n  \"xsize\": 16,\n  \"zsize\": 16,\n  \"slices\": [\n    [\n      \"################\",\n      \"SSSSSSSSSSSSSSS#\",\n      \"SSSSSSSSSSSSSSS#\",\n      \"#############SS#\",\n      \"QQQQQQQQQQQQ#SS#\",\n      \"QQQQQQQQQQQQ#SS#\",\n      \"QQQQQQQQQQQQ#SS#\",\n      \"QQQQQQQQQQQQ#SS#\",\n      \"QQQQQQQQQQQQ#SS#\",\n      \"QQQQQQQQQQQQ#SS#\",\n      \"QQQQQQQQQQQQ#SS#\",\n      \"QQQQQQQQQQQQ#SS#\",\n      \"QQQQQQQQQQQQ#SS#\",\n      \"QQQQQQQQQQQQ#SS#\",\n      \"QQQQQQQQQQQQ#SS#\",\n      \"QQQQQQQQQQQQ#SS#\"\n    ],\n    [\n      \"aaa#aaaa#aaaa#aa\",\n      \"               a\",\n      \"               #\",\n      \"               a\",\n      \"     LLLLL     a\",\n      \"               a\",\n      \"               a\",\n      \"     .  .  .   #\",\n      \"               a\",\n      \"               a\",\n      \"     .  .  .   a\",\n      \"               a\",\n      \"               #\",\n      \"     LLLLL     a\",\n      \"               a\",\n      \"               a\"\n    ],\n    [\n      \"aaa#aaaa#aaaa#aa\",\n      \"               a\",\n      \"               #\",\n      \"               a\",\n      \"    TLLLLL     a\",\n      \"               a\",\n      \"               a\",\n      \"     -  -  -   #\",\n      \"               a\",\n      \"               a\",\n      \"     -  -  -   a\",\n      \"               a\",\n      \"               #\",\n      \"    TLLLLL     a\",\n      \"               a\",\n      \"               a\"\n    ],\n    [\n      \"aaa#aaaa#aaaa#aa\",\n      \"               a\",\n      \"               #\",\n      \"               a\",\n      \"     LLLLL     a\",\n      \"               a\",\n      \"               a\",\n      \"               #\",\n      \"               a\",\n      \"               a\",\n      \"               a\",\n      \"               a\",\n      \"               #\",\n      \"     LLLLL     a\",\n      \"               a\",\n      \"               a\"\n    ],\n    [\n      \"################\",\n      \"               #\",\n      \"               #\",\n      \"               #\",\n      \"               #\",\n      \"               #\",\n      \"               #\",\n      \"               #\",\n      \"               #\",\n      \"               #\",\n      \"               #\",\n      \"               #\",\n      \"               #\",\n      \"               #\",\n      \"               #\",\n      \"               #\"\n    ],\n    [\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\"\n    ]\n  ]\n}";
+
+/// Merged palette for the library part: the exact `CENTER00_2_PALETTE_JSON`
+/// entries (the standard building groups plus the verbatim `palettes/default.json`
+/// entries `Q`, `S` and `)` and the `palettes/common.json` entries `4` and `C`)
+/// plus two more entries copied from the jar's `palettes/common.json`:
+/// `-` -> `minecraft:oak_pressure_plate` and `.` -> `minecraft:oak_fence`.
+/// Field names, order and values verbatim; only insignificant whitespace
+/// normalised to the compact style of every other carried entry.
+pub const LIBRARY_10_2_PALETTE_JSON: &str = "{\"palette\": [{\"char\": \"#\", \"variant\": \"stonebrick\", \"damaged\": \"minecraft:iron_bars\"}, {\"char\": \"a\", \"block\": \"minecraft:glass\"}, {\"char\": \"@\", \"frompalette\": \"#\"}, {\"char\": \"1\", \"block\": \"minecraft:spawner\", \"mob\": \"easymobs\"}, {\"char\": \"T\", \"block\": \"minecraft:wall_torch[facing=north]\", \"torch\": true}, {\"char\": \"F\", \"blocks\": [{\"random\": 25, \"block\": \"minecraft:furnace[facing=north]\"}, {\"random\": 20, \"block\": \"minecraft:crafting_table\"}, {\"random\": 7, \"block\": \"minecraft:brewing_stand\"}, {\"random\": 6, \"block\": \"minecraft:anvil[facing=north]\"}, {\"random\": 5, \"block\": \"minecraft:cauldron\"}, {\"random\": 2, \"block\": \"minecraft:enchanting_table\"}, {\"random\": 1000, \"block\": \"minecraft:cobweb\"}]}, {\"char\": \"D\", \"block\": \"minecraft:dirt\"}, {\"char\": \"l\", \"block\": \"minecraft:ladder[facing=north]\"}, {\"char\": \"L\", \"block\": \"minecraft:bookshelf\"}, {\"char\": \"*\", \"block\": \"minecraft:potted_cactus\"}, {\"char\": \" \", \"block\": \"minecraft:air\"}, {\"char\": \"Q\", \"block\": \"minecraft:quartz_block\", \"damaged\": \"minecraft:iron_bars\"}, {\"char\": \"S\", \"block\": \"minecraft:smooth_stone_slab[type=double]\", \"damaged\": \"minecraft:iron_bars\"}, {\"char\": \")\", \"block\": \"minecraft:quartz_stairs[facing=south,half=bottom,shape=straight]\"}, {\"char\": \"4\", \"block\": \"minecraft:spawner\", \"mob\": \"hardmobs\"}, {\"char\": \"C\", \"block\": \"minecraft:chest[facing=north]\", \"loot\": \"chestloot\"}, {\"char\": \"-\", \"block\": \"minecraft:oak_pressure_plate\"}, {\"char\": \".\", \"block\": \"minecraft:oak_fence\"}]}";
+
 /// `parts/shopping_open01_1.json` from the cached jar, verbatim (2,697 B, sha256
 /// `c16f5ff65b9a32b168b8c5bb5edfbdaa970a994bc1434f4a35679b30b4a4ed5d`):
 /// 16x16, six slices, a private `meta` key the decoder ignores. Its only non-space
@@ -2094,6 +2253,266 @@ pub const STAIRSBIG_PART_JSON: &str = r#"{
     ]
   ]
 }"#;
+
+/// `parts/rail_dungeon1.json` from the cached jar, verbatim: a 16x16
+/// six-layer rail-dungeon part whose `!` char is the weighted treasure
+/// list of `palettes/common.json`. Embedded byte-identically (2,643 B,
+/// sha256 1216e3346e3be52eb2b5f93b39816e9f0305c45101fb393614f198d95204225c).
+pub const RAIL_DUNGEON1_PART_JSON: &str = r#"{
+  "xsize": 16,
+  "zsize": 16,
+  "refpalette": "rails",
+  "slices": [
+    [
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy"
+    ],
+    [
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "y4yyyyyyyyyyyy1y",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "y4yyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "y1yyyyyyyyyyyy1y",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy"
+    ],
+    [
+      "yyyyyy~~yyyyyyyy",
+      "yyy~~~~~~~~~~yyy",
+      "yyy~~~~~~~~~~yyy",
+      "yyy~~~~~~~~~~yyy",
+      "yyyC~~~~~yyyyyyy",
+      "yyy~~~~~~~~~~yyy",
+      "yyyC~~~~~~!!!yyy",
+      "yyy~~~~~~~!!4yyy",
+      "yyyC~~~~~~!!!yyy",
+      "yyy~~~~~~~~~~yyy",
+      "yyyC~~~~~yyyyyyy",
+      "yyy~~~~~~~~~~yyy",
+      "yyy~~~~~~~~~~yyy",
+      "yyy~~~~~~~~~~yyy",
+      "yyy~~~~~~~~~~yyy",
+      "yyyyyy~~yyyyyyyy"
+    ],
+    [
+      "yyyyyy~~yyyyyyyy",
+      "yyy~~~~~~~~~~yyy",
+      "yyy~~~~~~~~~~yyy",
+      "yyy~~~~~~~~~~yyy",
+      "yyy~~~~~~yyyyyyy",
+      "yyy~~~~~~~~~~yyy",
+      "yyy~~~~~~~!!!yyy",
+      "yyy~~~~~~~!!!yyy",
+      "yyy~~~~~~~!!!yyy",
+      "yyy~~~~~~~~~~yyy",
+      "yyy~~~~~~yyyyyyy",
+      "yyy~~~~~~~~~~yyy",
+      "yyy~~~~~~~~~~yyy",
+      "yyy~~~~~~~~~~yyy",
+      "yyy~~~~~~~~~~yyy",
+      "yyyyyy~~yyyyyyyy"
+    ],
+    [
+      "yyyyyyyyyyyyyyyy",
+      "yyy~~~~~~~~~~yyy",
+      "yyy~~~~~~~~~~yyy",
+      "yyy~~~~~~~~~~yyy",
+      "yyy~~~~~~yyyyyyy",
+      "yyy~~~~~~~~~~yyy",
+      "yyy~~~~~~~~~~yyy",
+      "yyy~~~~~~~~~~yyy",
+      "yyy~~~~~~~~~~yyy",
+      "yyy~~~~~~~~~~yyy",
+      "yyy~~~~~~yyyyyyy",
+      "yyy~~~~~~~~~~yyy",
+      "yyy~~~~~~~~~~yyy",
+      "yyy~~~~~~~~~~yyy",
+      "yyy~~~~~~~~~~yyy",
+      "yyyyyyyyyyyyyyyy"
+    ],
+    [
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy"
+    ]
+  ]
+}"#;
+
+/// Merged palette for the rail-dungeon part: the sixteen verbatim
+/// `CENTER00_2_PALETTE_JSON` entries plus the part's `refpalette: rails`
+/// `y`/`~` entries (carried verbatim from `palettes/default.json` and
+/// `palettes/common.json`) and the one new `!` weighted-entry copied from
+/// `palettes/common.json` (diamond 15 / gold 20 / emerald 15 / iron 1000).
+/// Field names, order and values are the jar's; only insignificant
+/// whitespace is normalised.
+pub const RAIL_DUNGEON1_PALETTE_JSON: &str = "{\"palette\": [{\"char\": \"#\", \"variant\": \"stonebrick\", \"damaged\": \"minecraft:iron_bars\"}, {\"char\": \"a\", \"block\": \"minecraft:glass\"}, {\"char\": \"@\", \"frompalette\": \"#\"}, {\"char\": \"1\", \"block\": \"minecraft:spawner\", \"mob\": \"easymobs\"}, {\"char\": \"T\", \"block\": \"minecraft:wall_torch[facing=north]\", \"torch\": true}, {\"char\": \"F\", \"blocks\": [{\"random\": 25, \"block\": \"minecraft:furnace[facing=north]\"}, {\"random\": 20, \"block\": \"minecraft:crafting_table\"}, {\"random\": 7, \"block\": \"minecraft:brewing_stand\"}, {\"random\": 6, \"block\": \"minecraft:anvil[facing=north]\"}, {\"random\": 5, \"block\": \"minecraft:cauldron\"}, {\"random\": 2, \"block\": \"minecraft:enchanting_table\"}, {\"random\": 1000, \"block\": \"minecraft:cobweb\"}]}, {\"char\": \"D\", \"block\": \"minecraft:dirt\"}, {\"char\": \"l\", \"block\": \"minecraft:ladder[facing=north]\"}, {\"char\": \"L\", \"block\": \"minecraft:bookshelf\"}, {\"char\": \"*\", \"block\": \"minecraft:potted_cactus\"}, {\"char\": \" \", \"block\": \"minecraft:air\"}, {\"char\": \"Q\", \"block\": \"minecraft:quartz_block\", \"damaged\": \"minecraft:iron_bars\"}, {\"char\": \"S\", \"block\": \"minecraft:smooth_stone_slab[type=double]\", \"damaged\": \"minecraft:iron_bars\"}, {\"char\": \")\", \"block\": \"minecraft:quartz_stairs[facing=south,half=bottom,shape=straight]\"}, {\"char\": \"4\", \"block\": \"minecraft:spawner\", \"mob\": \"hardmobs\"}, {\"char\": \"C\", \"block\": \"minecraft:chest[facing=north]\", \"loot\": \"chestloot\"}, {\"char\": \"y\", \"variant\": \"stonebrick\", \"damaged\": \"minecraft:iron_bars\"}, {\"char\": \"~\", \"block\": \"minecraft:structure_void\"}, {\"char\": \"!\", \"blocks\": [{\"random\": 15, \"block\": \"minecraft:diamond_block\"}, {\"random\": 20, \"block\": \"minecraft:gold_block\"}, {\"random\": 15, \"block\": \"minecraft:emerald_block\"}, {\"random\": 1000, \"block\": \"minecraft:iron_block\"}]}]}";
+
+/// `parts/rail_dungeon2.json` from the cached jar, verbatim: a 16x16 six-layer
+/// rail-dungeon part, the sibling of `rail_dungeon1`. Its `!` char resolves the
+/// same weighted treasure list to `minecraft:iron_block`, so the in-game
+/// differential is a disjoint height band, not a new block id. Embedded
+/// byte-identically (2,643 B, sha256
+/// `6b5081f14b4cbf30d5cc771c9bd3d5ed8ae82d8dad8b3bfa4190fb9b218bb2f5`).
+pub const RAIL_DUNGEON2_PART_JSON: &str = r#"{
+  "xsize": 16,
+  "zsize": 16,
+  "refpalette": "rails",
+  "slices": [
+    [
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy"
+    ],
+    [
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy"
+    ],
+    [
+      "yyyyyy~~yyyyyyyy",
+      "yyy~~~~~y~~~~yyy",
+      "yyy~~~~~y~~~~yyy",
+      "yyy~~~~~~~~~~yyy",
+      "yyy~~~~~y~~~~yyy",
+      "yyy~~~~~y~~~~yyy",
+      "yyy~~~~~y~~~~yyy",
+      "yyy~~~~~y1~~~yyy",
+      "yyy~~~~~y!~~~yyy",
+      "yyy~~~~~y!~~1yyy",
+      "yyy~~~~~y!~~~yyy",
+      "yyy~~~~~y1~~~yyy",
+      "yyy~~~~~y~~~~yyy",
+      "yyy~~~~~y~~~~yyy",
+      "yyy~~~~~y~~~~yyy",
+      "yyyyyy~~yyyyyyyy"
+    ],
+    [
+      "yyyyyy~~yyyyyyyy",
+      "yyy~~~~~y~~~~yyy",
+      "yyy~~~~~y~~~~yyy",
+      "yyy~~~~~~~~~~yyy",
+      "yyy~~~~~y~~~~yyy",
+      "yyy~~~~~y~~~~yyy",
+      "yyyF~~~~y~~~~yyy",
+      "yyyF~~~~y~~~~yyy",
+      "yyy~~~~~y~~~~yyy",
+      "yyy~~~~~y~~~~yyy",
+      "yyy~~~~~y~~~~yyy",
+      "yyy~~~~~y~~~~yyy",
+      "yyy~~~~~y~~~~yyy",
+      "yyy~~~~~y~~~~yyy",
+      "yyy~~~~~y~~~~yyy",
+      "yyyyyy~~yyyyyyyy"
+    ],
+    [
+      "yyyyyyyyyyyyyyyy",
+      "yyy~~~~~y~~~~yyy",
+      "yyy~~~~~y~~~~yyy",
+      "yyy~~~~~y~~~~yyy",
+      "yyy~~~~~y~~~~yyy",
+      "yyy~~~~~y~~~~yyy",
+      "yyy~~~~~y~~~~yyy",
+      "yyy~~~~~y~~~~yyy",
+      "yyy~~~~~y~~~~yyy",
+      "yyy~~~~~y~~~~yyy",
+      "yyy~~~~~y~~~~yyy",
+      "yyy~~~~~y~~~~yyy",
+      "yyy~~~~~y~~~~yyy",
+      "yyy~~~~~y~~~~yyy",
+      "yyy~~~~~y~~~~yyy",
+      "yyyyyyyyyyyyyyyy"
+    ],
+    [
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy",
+      "yyyyyyyyyyyyyyyy"
+    ]
+  ]
+}"#;
+
+/// The merged palette for the second rail dungeon is the same verbatim set the
+/// first one carries: `y`/`~` come from the part's `refpalette: rails` entries
+/// (`palettes/default.json` and `palettes/common.json`), while `1`, `F` and `!`
+/// are the `palettes/common.json` entries (spawner; the weighted furniture list
+/// resolving to `minecraft:cobweb`; the weighted treasure list resolving to
+/// `minecraft:iron_block`). Every char and id is already byte-copied in
+/// `RAIL_DUNGEON1_PALETTE_JSON`, so no new palette entry is introduced here.
+pub const RAIL_DUNGEON2_PALETTE_JSON: &str = RAIL_DUNGEON1_PALETTE_JSON;
 
 #[cfg(test)]
 mod tests {
@@ -3579,5 +3998,701 @@ mod building1_3_tests {
                 "the {name} must not write water"
             );
         }
+    }
+}
+
+/// Slice 15: the fourteenth part, the six-layer city-centre variant. These
+/// tests are written before the part data exists so the gap is proved red
+/// first: `CENTER00_2_PART_JSON` and `CENTER00_2_PALETTE_JSON` are unresolved
+/// until the jar bytes are carried. Its `C` char resolves to
+/// `minecraft:chest[facing=north]` from `palettes/common.json`, a block no
+/// other decoded part writes.
+#[cfg(test)]
+mod center00_2_tests {
+    use super::*;
+
+    /// The jar's `parts/center00_2.json` is 16x16 with six slices, every slice
+    /// sixteen rows of sixteen chars — the same footprint as center00_1.
+    #[test]
+    fn embedded_center002_part_has_six_16x16_layers() {
+        let part =
+            Part::from_json(&parse_json(CENTER00_2_PART_JSON).expect("jar center00_2 part parses"))
+                .expect("jar center00_2 part decodes");
+        assert_eq!(part.xsize, 16, "jar xsize");
+        assert_eq!(part.zsize, 16, "jar zsize");
+        assert_eq!(part.slices.len(), 6, "the part has six slices");
+        for (y, layer) in part.slices.iter().enumerate() {
+            assert_eq!(layer.len(), 16, "slice {y} has 16 rows");
+            for (z, row) in layer.iter().enumerate() {
+                assert_eq!(row.chars().count(), 16, "slice {y} row {z} is 16 chars");
+            }
+        }
+    }
+
+    /// The `C` char resolves to the verbatim `palettes/common.json` entry
+    /// `minecraft:chest[facing=north]` (its `loot` field ignored like `mob`),
+    /// a block no other decoded part writes. Counts below are the artefact's
+    /// per-part census (771 non-space cells), measured from the jar bytes.
+    #[test]
+    fn center002_chars_resolve_to_the_jar_chest_id() {
+        let variants = VariantTable::from_files(&[("stonebrick", STONEBRICK_VARIANT_JSON)])
+            .expect("the jar's stonebrick variant decodes");
+        let placements =
+            decode_city_with_variants(CENTER00_2_PART_JSON, CENTER00_2_PALETTE_JSON, &variants)
+                .expect("the embedded jar center00_2 part and merged palette decode");
+
+        let cell = |dx, dy, dz| {
+            placements
+                .iter()
+                .find(|p| p.dx == dx && p.dy == dy && p.dz == dz)
+                .expect("a center00_2 cell at the expected coordinate")
+        };
+        let chest = cell(3, 1, 11);
+        assert_eq!(chest.block, "minecraft:chest", "the C char is a chest");
+        assert_eq!(
+            chest.properties,
+            vec![("facing".to_string(), "north".to_string())],
+            "the C char is palettes/common.json's north-facing chest"
+        );
+        let chest2 = cell(4, 1, 11);
+        assert_eq!(
+            chest2.block, "minecraft:chest",
+            "the second C cell is a chest"
+        );
+        let hard_spawner = cell(7, 3, 11);
+        assert_eq!(
+            hard_spawner.block, "minecraft:spawner",
+            "the 4 char is palettes/common.json's hardmobs spawner"
+        );
+
+        let count = |id: &str| placements.iter().filter(|p| p.block == id).count();
+        assert_eq!(count("minecraft:chest"), 2, "two C cells");
+        assert_eq!(count("minecraft:spawner"), 6, "five 1 cells + one 4 cell");
+        assert_eq!(count("minecraft:quartz_block"), 107, "107 Q cells");
+        assert_eq!(count("minecraft:smooth_stone_slab"), 97, "97 S cells");
+        assert_eq!(count("minecraft:quartz_stairs"), 12, "twelve ) cells");
+        assert_eq!(
+            placements.len(),
+            771,
+            "420 # + 126 a + 107 Q + 97 S + 12 ) + 5 1 + 2 C + 1 4 + 1 T"
+        );
+
+        // Differential: none of the thirteen earlier parts writes a chest, so
+        // the in-game chest count at y=188..193 can only come from this part.
+        let street = decode_city(STREET_PART_JSON, STREET_PALETTE_JSON)
+            .expect("the embedded street part decodes");
+        let building =
+            decode_city_with_variants(BUILDING_PART_JSON, BUILDING_PALETTE_JSON, &variants)
+                .expect("the embedded first building part decodes");
+        let horizontal = decode_city_with_variants(RAILS_PART_JSON, RAILS_PALETTE_JSON, &variants)
+            .expect("the embedded horizontal rail part decodes");
+        let bend = decode_city_with_variants(RAILS_BEND_PART_JSON, RAILS_PALETTE_JSON, &variants)
+            .expect("the embedded rail bend part decodes");
+        let split =
+            decode_city_with_variants(RAILS_3SPLIT_PART_JSON, RAILS_PALETTE_JSON, &variants)
+                .expect("the embedded rail split part decodes");
+        let down2 = decode_city_with_variants(RAILS_DOWN2_PART_JSON, RAILS_PALETTE_JSON, &variants)
+            .expect("the embedded rail descent part decodes");
+        let down1 =
+            decode_city_with_variants(RAILS_DOWN1_PART_JSON, RAILS_DOWN1_PALETTE_JSON, &variants)
+                .expect("the embedded first descent part decodes");
+        let building12 =
+            decode_city_with_variants(BUILDING_1_2_PART_JSON, BUILDING_1_2_PALETTE_JSON, &variants)
+                .expect("the embedded second building part decodes");
+        let center001 =
+            decode_city_with_variants(CENTER00_1_PART_JSON, CENTER00_1_PALETTE_JSON, &variants)
+                .expect("the embedded city-centre part decodes");
+        let shopping1 = decode_city_with_variants(
+            SHOPPING_OPEN01_1_PART_JSON,
+            SHOPPING_OPEN01_1_PALETTE_JSON,
+            &variants,
+        )
+        .expect("the embedded shopping part decodes");
+        let stairsnormal =
+            decode_city_with_variants(STAIRSNORMAL_PART_JSON, STAIRSNORMAL_PALETTE_JSON, &variants)
+                .expect("the embedded stairsnormal part decodes");
+        let stairsbig =
+            decode_city_with_variants(STAIRSBIG_PART_JSON, STAIRSNORMAL_PALETTE_JSON, &variants)
+                .expect("the embedded stairsbig part decodes");
+        let building13 =
+            decode_city_with_variants(BUILDING_1_3_PART_JSON, BUILDING_1_3_PALETTE_JSON, &variants)
+                .expect("the embedded third building part decodes");
+        for (name, ps) in [
+            ("street", &street),
+            ("first building", &building),
+            ("horizontal line", &horizontal),
+            ("bend", &bend),
+            ("split", &split),
+            ("eighteen-layer descent", &down2),
+            ("first descent", &down1),
+            ("second building", &building12),
+            ("city centre", &center001),
+            ("shopping part", &shopping1),
+            ("stone stair", &stairsnormal),
+            ("large stone stair", &stairsbig),
+            ("third building", &building13),
+        ] {
+            assert!(
+                !ps.iter().any(|p| p.block == "minecraft:chest"),
+                "the {name} must not write a chest"
+            );
+        }
+    }
+}
+
+/// Slice 16: the fifteenth part, the six-layer library. These tests are written
+/// before the part data exists so the gap is proved red first:
+/// `LIBRARY_10_2_PART_JSON` and `LIBRARY_10_2_PALETTE_JSON` are unresolved until
+/// the jar bytes are carried. Its `.` and `-` chars resolve to two genuinely new
+/// ids from `palettes/common.json` — an oak fence and an oak pressure plate —
+/// neither of which is written by any of the fourteen earlier decoded parts.
+#[cfg(test)]
+mod library10_2_tests {
+    use super::*;
+
+    /// The jar's `parts/library10_2.json` is 16x16 with six slices, every slice
+    /// sixteen rows of sixteen chars — the same footprint as the earlier centres.
+    #[test]
+    fn embedded_library1002_part_has_six_16x16_layers() {
+        let part = Part::from_json(
+            &parse_json(LIBRARY_10_2_PART_JSON).expect("jar library10_2 part parses"),
+        )
+        .expect("jar library10_2 part decodes");
+        assert_eq!(part.xsize, 16, "jar xsize");
+        assert_eq!(part.zsize, 16, "jar zsize");
+        assert_eq!(part.slices.len(), 6, "the part has six slices");
+        for (y, layer) in part.slices.iter().enumerate() {
+            assert_eq!(layer.len(), 16, "slice {y} has 16 rows");
+            for (z, row) in layer.iter().enumerate() {
+                assert_eq!(row.chars().count(), 16, "slice {y} row {z} is 16 chars");
+            }
+        }
+    }
+
+    /// The `.` and `-` chars resolve to the verbatim `palettes/common.json`
+    /// entries `minecraft:oak_fence` and `minecraft:oak_pressure_plate` — blocks
+    /// no other decoded part writes. Counts below are the artefact's per-part
+    /// census (680 non-space cells), measured from the jar bytes.
+    #[test]
+    fn library1002_chars_resolve_to_the_jar_fence_and_pressure_plate() {
+        let variants = VariantTable::from_files(&[("stonebrick", STONEBRICK_VARIANT_JSON)])
+            .expect("the jar's stonebrick variant decodes");
+        let placements =
+            decode_city_with_variants(LIBRARY_10_2_PART_JSON, LIBRARY_10_2_PALETTE_JSON, &variants)
+                .expect("the embedded jar library10_2 part and merged palette decode");
+
+        let cell = |dx, dy, dz| {
+            placements
+                .iter()
+                .find(|p| p.dx == dx && p.dy == dy && p.dz == dz)
+                .expect("a library10_2 cell at the expected coordinate")
+        };
+        let fence = cell(5, 1, 7);
+        assert_eq!(
+            fence.block, "minecraft:oak_fence",
+            "the . char is palettes/common.json's oak fence"
+        );
+        assert!(
+            fence.properties.is_empty(),
+            "the verbatim fence entry declares no state properties"
+        );
+        let plate = cell(5, 2, 7);
+        assert_eq!(
+            plate.block, "minecraft:oak_pressure_plate",
+            "the - char is palettes/common.json's oak pressure plate"
+        );
+        assert!(
+            plate.properties.is_empty(),
+            "the verbatim pressure-plate entry declares no state properties"
+        );
+
+        let count = |id: &str| placements.iter().filter(|p| p.block == id).count();
+        assert_eq!(count("minecraft:oak_fence"), 6, "six . cells");
+        assert_eq!(count("minecraft:oak_pressure_plate"), 6, "six - cells");
+        assert_eq!(count("minecraft:quartz_block"), 144, "144 Q cells");
+        assert_eq!(count("minecraft:glass"), 75, "75 a cells");
+        assert_eq!(count("minecraft:smooth_stone_slab"), 56, "56 S cells");
+        assert_eq!(count("minecraft:bookshelf"), 30, "30 L cells");
+        assert_eq!(count("minecraft:wall_torch"), 2, "two T cells");
+        assert_eq!(
+            placements.len(),
+            680,
+            "361 # + 144 Q + 75 a + 56 S + 30 L + 6 - + 6 . + 2 T"
+        );
+
+        // Differential: none of the fourteen earlier parts writes an oak fence
+        // or an oak pressure plate, so the in-game counts at y=200..205 can only
+        // come from this part.
+        let street = decode_city(STREET_PART_JSON, STREET_PALETTE_JSON)
+            .expect("the embedded street part decodes");
+        let building =
+            decode_city_with_variants(BUILDING_PART_JSON, BUILDING_PALETTE_JSON, &variants)
+                .expect("the embedded first building part decodes");
+        let horizontal = decode_city_with_variants(RAILS_PART_JSON, RAILS_PALETTE_JSON, &variants)
+            .expect("the embedded horizontal rail part decodes");
+        let bend = decode_city_with_variants(RAILS_BEND_PART_JSON, RAILS_PALETTE_JSON, &variants)
+            .expect("the embedded rail bend part decodes");
+        let split =
+            decode_city_with_variants(RAILS_3SPLIT_PART_JSON, RAILS_PALETTE_JSON, &variants)
+                .expect("the embedded rail split part decodes");
+        let down2 = decode_city_with_variants(RAILS_DOWN2_PART_JSON, RAILS_PALETTE_JSON, &variants)
+            .expect("the embedded rail descent part decodes");
+        let down1 =
+            decode_city_with_variants(RAILS_DOWN1_PART_JSON, RAILS_DOWN1_PALETTE_JSON, &variants)
+                .expect("the embedded first descent part decodes");
+        let building12 =
+            decode_city_with_variants(BUILDING_1_2_PART_JSON, BUILDING_1_2_PALETTE_JSON, &variants)
+                .expect("the embedded second building part decodes");
+        let center001 =
+            decode_city_with_variants(CENTER00_1_PART_JSON, CENTER00_1_PALETTE_JSON, &variants)
+                .expect("the embedded city-centre part decodes");
+        let shopping1 = decode_city_with_variants(
+            SHOPPING_OPEN01_1_PART_JSON,
+            SHOPPING_OPEN01_1_PALETTE_JSON,
+            &variants,
+        )
+        .expect("the embedded shopping part decodes");
+        let stairsnormal =
+            decode_city_with_variants(STAIRSNORMAL_PART_JSON, STAIRSNORMAL_PALETTE_JSON, &variants)
+                .expect("the embedded stairsnormal part decodes");
+        let stairsbig =
+            decode_city_with_variants(STAIRSBIG_PART_JSON, STAIRSNORMAL_PALETTE_JSON, &variants)
+                .expect("the embedded stairsbig part decodes");
+        let building13 =
+            decode_city_with_variants(BUILDING_1_3_PART_JSON, BUILDING_1_3_PALETTE_JSON, &variants)
+                .expect("the embedded third building part decodes");
+        let center002 =
+            decode_city_with_variants(CENTER00_2_PART_JSON, CENTER00_2_PALETTE_JSON, &variants)
+                .expect("the embedded second city-centre part decodes");
+        for (name, ps) in [
+            ("street", &street),
+            ("first building", &building),
+            ("horizontal line", &horizontal),
+            ("bend", &bend),
+            ("split", &split),
+            ("eighteen-layer descent", &down2),
+            ("first descent", &down1),
+            ("second building", &building12),
+            ("city centre", &center001),
+            ("shopping part", &shopping1),
+            ("stone stair", &stairsnormal),
+            ("large stone stair", &stairsbig),
+            ("third building", &building13),
+            ("second city centre", &center002),
+        ] {
+            assert!(
+                !ps.iter().any(|p| p.block == "minecraft:oak_fence"),
+                "the {name} must not write an oak fence"
+            );
+            assert!(
+                !ps.iter().any(|p| p.block == "minecraft:oak_pressure_plate"),
+                "the {name} must not write an oak pressure plate"
+            );
+        }
+    }
+}
+
+#[cfg(test)]
+mod rail_dungeon1_tests {
+    use super::*;
+
+    /// The jar's `parts/rail_dungeon1.json` is 16x16 with six slices, every
+    /// slice sixteen rows of sixteen chars. Its 1,536 non-space cells are
+    /// `y` 1127 / `~` 382 / `!` 17 / `C` 4 / `1` 3 / `4` 3 — a byte census
+    /// measured from the cached jar, not from the brief.
+    #[test]
+    fn embedded_rail_dungeon1_part_has_six_16x16_layers() {
+        let part = Part::from_json(
+            &parse_json(RAIL_DUNGEON1_PART_JSON).expect("jar rail_dungeon1 part parses"),
+        )
+        .expect("jar rail_dungeon1 part decodes");
+        assert_eq!(part.xsize, 16, "jar xsize");
+        assert_eq!(part.zsize, 16, "jar zsize");
+        assert_eq!(part.slices.len(), 6, "the part has six slices");
+        let mut cells = 0usize;
+        for (y, layer) in part.slices.iter().enumerate() {
+            assert_eq!(layer.len(), 16, "slice {y} has 16 rows");
+            for (z, row) in layer.iter().enumerate() {
+                assert_eq!(row.chars().count(), 16, "slice {y} row {z} is 16 chars");
+                cells += row.chars().filter(|&ch| ch != ' ').count();
+            }
+        }
+        assert_eq!(cells, 1536, "the part has 1,536 non-space cells");
+        let census = |ch: char| {
+            part.slices
+                .iter()
+                .flat_map(|layer| layer.iter())
+                .flat_map(|row| row.chars())
+                .filter(|&c| c == ch)
+                .count()
+        };
+        assert_eq!(census('y'), 1127, "1,127 stonebrick-variant cells");
+        assert_eq!(census('~'), 382, "382 structure-void cells");
+        assert_eq!(census('!'), 17, "seventeen weighted-treasure cells");
+        assert_eq!(census('C'), 4, "four chest cells");
+        assert_eq!(census('1'), 3, "three easy-mob spawner cells");
+        assert_eq!(census('4'), 3, "three hard-mob spawner cells");
+    }
+
+    /// The part's `!` char is palettes/common.json's weighted treasure list
+    /// (diamond 15 / gold 20 / emerald 15 / iron 1000). The decoder's
+    /// deterministic `pick_weighted` resolves every one of the seventeen
+    /// cells to `minecraft:iron_block`, an id no other decoded part writes.
+    #[test]
+    fn rail_dungeon1_bang_resolves_to_the_jar_iron_block() {
+        let variants = VariantTable::from_files(&[("stonebrick", STONEBRICK_VARIANT_JSON)])
+            .expect("the jar's stonebrick variant decodes");
+        let placements = decode_city_with_variants(
+            RAIL_DUNGEON1_PART_JSON,
+            RAIL_DUNGEON1_PALETTE_JSON,
+            &variants,
+        )
+        .expect("the embedded jar rail_dungeon1 part and merged palette decode");
+
+        let iron: Vec<&Placement> = placements
+            .iter()
+            .filter(|p| p.block == "minecraft:iron_block")
+            .collect();
+        assert_eq!(iron.len(), 17, "every ! cell resolves to iron_block");
+        for (dx, dy, dz) in [
+            (10, 2, 6),
+            (11, 2, 6),
+            (12, 2, 6),
+            (10, 2, 7),
+            (11, 2, 7),
+            (10, 2, 8),
+            (11, 2, 8),
+            (12, 2, 8),
+            (10, 3, 6),
+            (11, 3, 6),
+            (12, 3, 6),
+            (10, 3, 7),
+            (11, 3, 7),
+            (12, 3, 7),
+            (10, 3, 8),
+            (11, 3, 8),
+            (12, 3, 8),
+        ] {
+            let cell = placements
+                .iter()
+                .find(|p| p.dx == dx && p.dy == dy && p.dz == dz)
+                .expect("a rail_dungeon1 cell at the expected coordinate");
+            assert_eq!(
+                cell.block, "minecraft:iron_block",
+                "the ! char at ({dx},{dy},{dz}) is the weighted iron block"
+            );
+            assert!(
+                cell.properties.is_empty(),
+                "the verbatim iron-block entry declares no state properties"
+            );
+        }
+        let count = |id: &str| placements.iter().filter(|p| p.block == id).count();
+        assert_eq!(count("minecraft:structure_void"), 382, "382 ~ cells");
+        assert_eq!(count("minecraft:chest"), 4, "four C cells");
+        assert_eq!(count("minecraft:spawner"), 6, "three 1 + three 4 cells");
+        assert_eq!(
+            placements.len(),
+            1536,
+            "every non-space cell is a placement"
+        );
+
+        // Differential: none of the fifteen earlier parts writes an iron block.
+        let street = decode_city(STREET_PART_JSON, STREET_PALETTE_JSON)
+            .expect("the embedded street part decodes");
+        let building =
+            decode_city_with_variants(BUILDING_PART_JSON, BUILDING_PALETTE_JSON, &variants)
+                .expect("the embedded first building part decodes");
+        let horizontal = decode_city_with_variants(RAILS_PART_JSON, RAILS_PALETTE_JSON, &variants)
+            .expect("the embedded horizontal rail part decodes");
+        let bend = decode_city_with_variants(RAILS_BEND_PART_JSON, RAILS_PALETTE_JSON, &variants)
+            .expect("the embedded rail bend part decodes");
+        let split =
+            decode_city_with_variants(RAILS_3SPLIT_PART_JSON, RAILS_PALETTE_JSON, &variants)
+                .expect("the embedded rail split part decodes");
+        let down2 = decode_city_with_variants(RAILS_DOWN2_PART_JSON, RAILS_PALETTE_JSON, &variants)
+            .expect("the embedded rail descent part decodes");
+        let down1 =
+            decode_city_with_variants(RAILS_DOWN1_PART_JSON, RAILS_DOWN1_PALETTE_JSON, &variants)
+                .expect("the embedded first descent part decodes");
+        let building12 =
+            decode_city_with_variants(BUILDING_1_2_PART_JSON, BUILDING_1_2_PALETTE_JSON, &variants)
+                .expect("the embedded second building part decodes");
+        let center001 =
+            decode_city_with_variants(CENTER00_1_PART_JSON, CENTER00_1_PALETTE_JSON, &variants)
+                .expect("the embedded city-centre part decodes");
+        let shopping1 = decode_city_with_variants(
+            SHOPPING_OPEN01_1_PART_JSON,
+            SHOPPING_OPEN01_1_PALETTE_JSON,
+            &variants,
+        )
+        .expect("the embedded shopping part decodes");
+        let stairsnormal =
+            decode_city_with_variants(STAIRSNORMAL_PART_JSON, STAIRSNORMAL_PALETTE_JSON, &variants)
+                .expect("the embedded stairsnormal part decodes");
+        let stairsbig =
+            decode_city_with_variants(STAIRSBIG_PART_JSON, STAIRSNORMAL_PALETTE_JSON, &variants)
+                .expect("the embedded stairsbig part decodes");
+        let building13 =
+            decode_city_with_variants(BUILDING_1_3_PART_JSON, BUILDING_1_3_PALETTE_JSON, &variants)
+                .expect("the embedded third building part decodes");
+        let center002 =
+            decode_city_with_variants(CENTER00_2_PART_JSON, CENTER00_2_PALETTE_JSON, &variants)
+                .expect("the embedded second city-centre part decodes");
+        let library1002 =
+            decode_city_with_variants(LIBRARY_10_2_PART_JSON, LIBRARY_10_2_PALETTE_JSON, &variants)
+                .expect("the embedded library part decodes");
+        for (name, ps) in [
+            ("street", &street),
+            ("first building", &building),
+            ("horizontal line", &horizontal),
+            ("bend", &bend),
+            ("split", &split),
+            ("eighteen-layer descent", &down2),
+            ("first descent", &down1),
+            ("second building", &building12),
+            ("city centre", &center001),
+            ("shopping part", &shopping1),
+            ("stone stair", &stairsnormal),
+            ("large stone stair", &stairsbig),
+            ("third building", &building13),
+            ("second city centre", &center002),
+            ("library", &library1002),
+        ] {
+            assert!(
+                !ps.iter().any(|p| p.block == "minecraft:iron_block"),
+                "the {name} must not write an iron block"
+            );
+        }
+    }
+}
+
+/// Slice 18: the second rail-dungeon part. Its `!` cells resolve to the same
+/// weighted `minecraft:iron_block` treasure as rail_dungeon1, so the in-game
+/// differential is a disjoint height band (y=224..229 vs the first dungeon's
+/// y=212..217). Both constants are unresolved until the jar bytes are carried.
+#[cfg(test)]
+mod rail_dungeon2_tests {
+    use super::*;
+
+    /// `parts/rail_dungeon2.json` is 16x16 with six slices, every slice sixteen
+    /// rows of sixteen chars. Its 1,536 non-space cells are `y` 1148 / `~` 380 /
+    /// `1` 3 / `!` 3 / `F` 2 — a byte census measured from the cached jar.
+    #[test]
+    fn embedded_rail_dungeon2_part_has_six_16x16_layers() {
+        let part = Part::from_json(
+            &parse_json(RAIL_DUNGEON2_PART_JSON).expect("jar rail_dungeon2 part parses"),
+        )
+        .expect("jar rail_dungeon2 part decodes");
+        assert_eq!(part.xsize, 16, "jar xsize");
+        assert_eq!(part.zsize, 16, "jar zsize");
+        assert_eq!(part.slices.len(), 6, "the part has six slices");
+        let mut cells = 0usize;
+        for (y, layer) in part.slices.iter().enumerate() {
+            assert_eq!(layer.len(), 16, "slice {y} has 16 rows");
+            for (z, row) in layer.iter().enumerate() {
+                assert_eq!(row.chars().count(), 16, "slice {y} row {z} is 16 chars");
+                cells += row.chars().filter(|&ch| ch != ' ').count();
+            }
+        }
+        assert_eq!(cells, 1536, "the part has 1,536 non-space cells");
+        let census = |ch: char| {
+            part.slices
+                .iter()
+                .flat_map(|layer| layer.iter())
+                .flat_map(|row| row.chars())
+                .filter(|&c| c == ch)
+                .count()
+        };
+        assert_eq!(census('y'), 1148, "1,148 stonebrick-variant cells");
+        assert_eq!(census('~'), 380, "380 structure-void cells");
+        assert_eq!(census('1'), 3, "three easy-mob spawner cells");
+        assert_eq!(census('!'), 3, "three weighted-treasure cells");
+        assert_eq!(census('F'), 2, "two weighted-furniture cells");
+    }
+
+    /// The part's `!` char is `palettes/common.json`'s weighted treasure list
+    /// (diamond 15 / gold 20 / emerald 15 / iron 1000). The decoder's
+    /// deterministic `pick_weighted` resolves each of the three cells to
+    /// `minecraft:iron_block` (picks 570/404/238), exactly as in rail_dungeon1;
+    /// its `F` char resolves the jar's weighted furniture list to `minecraft:cobweb`.
+    #[test]
+    fn rail_dungeon2_bang_resolves_to_three_iron_blocks() {
+        let variants = VariantTable::from_files(&[("stonebrick", STONEBRICK_VARIANT_JSON)])
+            .expect("the jar's stonebrick variant decodes");
+        let placements = decode_city_with_variants(
+            RAIL_DUNGEON2_PART_JSON,
+            RAIL_DUNGEON2_PALETTE_JSON,
+            &variants,
+        )
+        .expect("the embedded jar rail_dungeon2 part and merged palette decode");
+
+        let iron: Vec<&Placement> = placements
+            .iter()
+            .filter(|p| p.block == "minecraft:iron_block")
+            .collect();
+        assert_eq!(
+            iron.len(),
+            3,
+            "only the three ! cells resolve to iron_block"
+        );
+        for (dx, dy, dz) in [(9, 2, 8), (9, 2, 9), (9, 2, 10)] {
+            let cell = placements
+                .iter()
+                .find(|p| p.dx == dx && p.dy == dy && p.dz == dz)
+                .expect("a rail_dungeon2 cell at the expected coordinate");
+            assert_eq!(
+                cell.block, "minecraft:iron_block",
+                "the ! char at ({dx},{dy},{dz}) is the weighted iron block"
+            );
+            assert!(
+                cell.properties.is_empty(),
+                "the verbatim iron-block entry declares no state properties"
+            );
+        }
+        let count = |id: &str| placements.iter().filter(|p| p.block == id).count();
+        assert_eq!(count("minecraft:structure_void"), 380, "380 ~ cells");
+        assert_eq!(
+            count("minecraft:cobweb"),
+            2,
+            "two F cells resolve to cobweb"
+        );
+        assert_eq!(count("minecraft:spawner"), 3, "three 1 cells");
+        assert_eq!(
+            placements.len(),
+            1536,
+            "every non-space cell is a placement"
+        );
+
+        // Differential: the shared id is written by exactly three cells here,
+        // while the lower rail dungeon writes seventeen in its own band.
+        let rd1 = decode_city_with_variants(
+            RAIL_DUNGEON1_PART_JSON,
+            RAIL_DUNGEON1_PALETTE_JSON,
+            &variants,
+        )
+        .expect("the embedded rail_dungeon1 part decodes");
+        assert_eq!(
+            rd1.iter()
+                .filter(|p| p.block == "minecraft:iron_block")
+                .count(),
+            17,
+            "the lower rail dungeon writes seventeen iron blocks"
+        );
+    }
+}
+
+/// Slice 19: the end-cap sibling of the horizontal rail line. These tests are
+/// written before the part data exists so the gap is proved red first:
+/// `RAILS_HORIZONTAL_END_PART_JSON` is unresolved until the part is carried
+/// verbatim from the cached jar. The byte census below was measured from the
+/// jar (`parts/rails_horizontal_end.json`, 2,643 B, sha256 `6e302fa0…`), not
+/// from the brief's illustrative list. All six of its chars are already
+/// carried verbatim by `RAILS_PALETTE_JSON`, so no palette entry is new.
+#[cfg(test)]
+mod rails_horizontal_end_tests {
+    use super::*;
+
+    #[test]
+    fn embedded_rails_horizontal_end_part_has_six_16x16_layers() {
+        let part = Part::from_json(
+            &parse_json(RAILS_HORIZONTAL_END_PART_JSON)
+                .expect("jar rails_horizontal_end part parses"),
+        )
+        .expect("jar rails_horizontal_end part decodes");
+        assert_eq!(part.xsize, 16, "jar xsize");
+        assert_eq!(part.zsize, 16, "jar zsize");
+        assert_eq!(part.slices.len(), 6, "the part has six slices");
+        let mut cells = 0usize;
+        for (y, layer) in part.slices.iter().enumerate() {
+            assert_eq!(layer.len(), 16, "slice {y} has 16 rows");
+            for (z, row) in layer.iter().enumerate() {
+                assert_eq!(row.chars().count(), 16, "slice {y} row {z} is 16 chars");
+                cells += row.chars().filter(|&ch| ch != ' ').count();
+            }
+        }
+        assert_eq!(cells, 942, "the part has 942 non-space cells");
+        let census = |ch: char| {
+            part.slices
+                .iter()
+                .flat_map(|layer| layer.iter())
+                .flat_map(|row| row.chars())
+                .filter(|&c| c == ch)
+                .count()
+        };
+        assert_eq!(census('y'), 589, "589 stonebrick-variant cells");
+        assert_eq!(census('~'), 314, "314 structure-void cells");
+        assert_eq!(census('e'), 33, "33 east-west rail cells");
+        assert_eq!(census('f'), 3, "three powered east-west rail cells");
+        assert_eq!(census('g'), 2, "two redstone-torch cells");
+        assert_eq!(census('T'), 1, "one wall-torch cell");
+    }
+
+    /// The part's `e` char is `palettes/rails.json`'s verbatim
+    /// `minecraft:rail[shape=east_west]` entry — the same id the lower
+    /// horizontal line writes, so the differential is the cell count (33
+    /// here versus 45 there) and the disjoint height band in game.
+    #[test]
+    fn rails_horizontal_end_e_resolves_to_thirty_three_east_west_rails() {
+        let variants = VariantTable::from_files(&[("stonebrick", STONEBRICK_VARIANT_JSON)])
+            .expect("the jar's stonebrick variant decodes");
+        let placements = decode_city_with_variants(
+            RAILS_HORIZONTAL_END_PART_JSON,
+            RAILS_PALETTE_JSON,
+            &variants,
+        )
+        .expect("the embedded jar rail end part and verbatim rail palette decode");
+
+        let east_west: Vec<&Placement> = placements
+            .iter()
+            .filter(|p| {
+                p.block == "minecraft:rail"
+                    && p.properties == vec![("shape".to_string(), "east_west".to_string())]
+            })
+            .collect();
+        assert_eq!(
+            east_west.len(),
+            33,
+            "only the 33 e cells resolve to east-west rails"
+        );
+        for (dx, dy, dz) in [(0, 1, 5), (8, 1, 7), (15, 1, 9)] {
+            assert!(
+                east_west
+                    .iter()
+                    .any(|p| p.dx == dx && p.dy == dy && p.dz == dz),
+                "the e char at ({dx},{dy},{dz}) is an east-west rail"
+            );
+        }
+        let count = |id: &str| placements.iter().filter(|p| p.block == id).count();
+        assert_eq!(
+            count("minecraft:powered_rail"),
+            3,
+            "three f cells resolve to powered rails"
+        );
+        assert_eq!(
+            count("minecraft:redstone_torch"),
+            2,
+            "two g cells resolve to redstone torches"
+        );
+        assert_eq!(
+            count("minecraft:wall_torch"),
+            1,
+            "the one T cell resolves to a wall torch"
+        );
+        assert_eq!(
+            count("minecraft:structure_void"),
+            314,
+            "314 ~ cells resolve to structure void"
+        );
+        assert_eq!(placements.len(), 942, "every non-space cell is a placement");
+
+        // The in-chunk differential: the lower horizontal line writes 45
+        // east-west rails with the very same verbatim palette entry.
+        let lower = decode_city_with_variants(RAILS_PART_JSON, RAILS_PALETTE_JSON, &variants)
+            .expect("the embedded lower rail part decodes");
+        assert_eq!(
+            lower.iter().filter(|p| p.block == "minecraft:rail").count(),
+            45,
+            "the lower horizontal line writes forty-five east-west rails"
+        );
     }
 }

@@ -24,6 +24,11 @@
 #   STAIRS_SELFTEST=1   -> FAIL EXIT:1 (inverted stone-stairs count of the stair part)
 #   STAIRSBIG_SELFTEST=1 -> FAIL EXIT:1 (inverted stone-stairs count of the large stair)
 #   BUILDING13_SELFTEST=1-> FAIL EXIT:1 (inverted water count of the third building)
+#   CENTER002_SELFTEST=1 -> FAIL EXIT:1 (inverted chest count of the second city centre)
+#   LIBRARY1002_SELFTEST=1 -> FAIL EXIT:1 (inverted oak-fence count of the library)
+#   RAILDUNGEON1_SELFTEST=1 -> FAIL EXIT:1 (inverted iron-block count of the rail dungeon)
+#   RAILDUNGEON2_SELFTEST=1 -> FAIL EXIT:1 (inverted 3-cell iron-block count of the second rail dungeon)
+#   RAILEND_SELFTEST=1 -> FAIL EXIT:1 (inverted east-west rail count of the rail end cap)
 set -euo pipefail
 export LC_ALL=C
 
@@ -49,6 +54,11 @@ SHOPPING1_SELFTEST=${SHOPPING1_SELFTEST:-0}
 STAIRS_SELFTEST=${STAIRS_SELFTEST:-0}
 STAIRSBIG_SELFTEST=${STAIRSBIG_SELFTEST:-0}
 BUILDING13_SELFTEST=${BUILDING13_SELFTEST:-0}
+CENTER002_SELFTEST=${CENTER002_SELFTEST:-0}
+LIBRARY1002_SELFTEST=${LIBRARY1002_SELFTEST:-0}
+RAILDUNGEON1_SELFTEST=${RAILDUNGEON1_SELFTEST:-0}
+RAILDUNGEON2_SELFTEST=${RAILDUNGEON2_SELFTEST:-0}
+RAILEND_SELFTEST=${RAILEND_SELFTEST:-0}
 
 [ -n "$CTL" ] && [ -n "$GAME" ] || { echo "missing CTL/GAME: eval \"\$(ports/tools/launcher-game.sh env the_lost_cities)\"" >&2; exit 1; }
 [ -x "$CTL" ] || { echo "missing horizon-ctl: $CTL" >&2; exit 1; }
@@ -531,6 +541,228 @@ else
         || fail "the vanilla-noise control unexpectedly had $vanilla_b13_count water block(s): $vanilla_b13_reply"
 fi
 
+# Slice 15: the fourteenth, six-layer second city centre is laid at
+# CENTER002_BASE_Y=188 (spanning y=188..193, above the third building at
+# y=176..181). Its `C` char resolves to `minecraft:chest[facing=north]` in
+# palettes/common.json — a block no other decoded part writes — so a chest
+# count at y=188..193 can only come from this part. The same fill on the
+# vanilla-noise Overworld must report `No blocks were filled`;
+# CENTER002_SELFTEST inverts the count.
+say "six-layer second city centre authors a chest at the fourteenth Y"
+c002_state=$(lc "execute if block 3 189 11 minecraft:chest[facing=north]" 2>&1 || true)
+echo "north-facing chest read-back (informational): $(echo "$c002_state" | jq -c . 2>/dev/null | head -c 180)"
+c002_reply=$(lc "fill 0 188 0 16 193 16 minecraft:air replace minecraft:chest" 2>&1 || true)
+c002_chat=$(echo "$c002_reply" | jq -r '.chat[0] // ""' 2>/dev/null || echo "")
+echo "chest second-centre fill: $(echo "$c002_reply" | jq -c . 2>/dev/null | head -c 180)"
+c002_count=$(echo "$c002_chat" | grep -oE 'Successfully filled [0-9]+ block' | grep -oE '[0-9]+' || echo 0)
+c002_count=${c002_count:-0}
+echo "second-centre-authored chest count: $c002_count"
+vanilla_c002_reply=$(ctl command "fill 0 188 0 16 193 16 minecraft:air replace minecraft:chest" 2>&1 || true)
+vanilla_c002_chat=$(echo "$vanilla_c002_reply" | jq -r '.chat[0] // ""' 2>/dev/null || echo "")
+echo "vanilla-noise chest control: $(echo "$vanilla_c002_reply" | jq -c . 2>/dev/null | head -c 180)"
+vanilla_c002_count=$(echo "$vanilla_c002_chat" | grep -oE 'Successfully filled [0-9]+ block' | grep -oE '[0-9]+' || echo 0)
+vanilla_c002_count=${vanilla_c002_count:-0}
+echo "vanilla-noise chest count: $vanilla_c002_count"
+if [ "$CENTER002_SELFTEST" = 1 ]; then
+    [ "$c002_count" -eq 0 ] \
+        || fail "CENTER002_SELFTEST: the part authored $c002_count chest block(s); the inverted assertion expected 0"
+    echo "CENTER002_SELFTEST: no chest-authored blocks (unexpected)"
+else
+    [ "$c002_count" -gt 0 ] \
+        || fail "the chunk generator authored no chest blocks: $c002_reply"
+    [ "$vanilla_c002_count" -eq 0 ] \
+        || fail "the vanilla-noise control unexpectedly had $vanilla_c002_count chest block(s): $vanilla_c002_reply"
+fi
+
+# Slice 16: the fifteenth, six-layer library part is laid at
+# LIBRARY1002_BASE_Y=200 (spanning y=200..205, above the second city centre at
+# y=188..193). Its `.` char resolves to `minecraft:oak_fence` and its `-` char to
+# `minecraft:oak_pressure_plate` in palettes/common.json — two block ids no
+# other decoded part writes — so counts at y=200..205 can only come from this
+# part. The property/shape read-backs at (5,201,7) and (5,202,7) pin the exact
+# states. Each `-` plate sits directly on a `.` fence, so the plate fill must run
+# FIRST: removing the supporting fences with air drops the plates in game (a
+# measured harness fact, not a port defect). The same fills on the vanilla-noise
+# control level must report `No blocks were filled`; LIBRARY1002_SELFTEST inverts
+# the fence count.
+say "six-layer library part authors an oak fence and pressure plate at the fifteenth Y"
+lib_state=$(lc "execute if block 5 201 7 minecraft:oak_fence" 2>&1 || true)
+lib_state_chat=$(echo "$lib_state" | jq -r '.chat[0] // ""' 2>/dev/null || echo "")
+echo "oak fence read-back at (5,201,7): $(echo "$lib_state" | jq -c . 2>/dev/null | head -c 180)"
+plate_state=$(lc "execute if block 5 202 7 minecraft:oak_pressure_plate" 2>&1 || true)
+plate_state_chat=$(echo "$plate_state" | jq -r '.chat[0] // ""' 2>/dev/null || echo "")
+echo "oak pressure plate read-back at (5,202,7): $(echo "$plate_state" | jq -c . 2>/dev/null | head -c 180)"
+if [ "$LIBRARY1002_SELFTEST" != 1 ]; then
+    grep -q 'Test passed' <<<"$lib_state_chat" \
+        || fail "the library part did not author a fence at (5,201,7): $lib_state"
+    grep -q 'Test passed' <<<"$plate_state_chat" \
+        || fail "the library part did not author a pressure plate at (5,202,7): $plate_state"
+fi
+plate_reply=$(lc "fill 0 200 0 16 205 16 minecraft:air replace minecraft:oak_pressure_plate" 2>&1 || true)
+plate_chat=$(echo "$plate_reply" | jq -r '.chat[0] // ""' 2>/dev/null || echo "")
+echo "oak-pressure-plate library fill: $(echo "$plate_reply" | jq -c . 2>/dev/null | head -c 180)"
+plate_count=$(echo "$plate_chat" | grep -oE 'Successfully filled [0-9]+ block' | grep -oE '[0-9]+' || echo 0)
+plate_count=${plate_count:-0}
+echo "library-authored oak-pressure-plate count: $plate_count"
+vanilla_plate_reply=$(ctl command "fill 0 200 0 16 205 16 minecraft:air replace minecraft:oak_pressure_plate" 2>&1 || true)
+vanilla_plate_chat=$(echo "$vanilla_plate_reply" | jq -r '.chat[0] // ""' 2>/dev/null || echo "")
+echo "vanilla-noise oak-pressure-plate control: $(echo "$vanilla_plate_reply" | jq -c . 2>/dev/null | head -c 180)"
+vanilla_plate_count=$(echo "$vanilla_plate_chat" | grep -oE 'Successfully filled [0-9]+ block' | grep -oE '[0-9]+' || echo 0)
+vanilla_plate_count=${vanilla_plate_count:-0}
+echo "vanilla-noise oak-pressure-plate count: $vanilla_plate_count"
+lib_reply=$(lc "fill 0 200 0 16 205 16 minecraft:air replace minecraft:oak_fence" 2>&1 || true)
+lib_chat=$(echo "$lib_reply" | jq -r '.chat[0] // ""' 2>/dev/null || echo "")
+echo "oak-fence library fill: $(echo "$lib_reply" | jq -c . 2>/dev/null | head -c 180)"
+lib_count=$(echo "$lib_chat" | grep -oE 'Successfully filled [0-9]+ block' | grep -oE '[0-9]+' || echo 0)
+lib_count=${lib_count:-0}
+echo "library-authored oak-fence count: $lib_count"
+vanilla_lib_reply=$(ctl command "fill 0 200 0 16 205 16 minecraft:air replace minecraft:oak_fence" 2>&1 || true)
+vanilla_lib_chat=$(echo "$vanilla_lib_reply" | jq -r '.chat[0] // ""' 2>/dev/null || echo "")
+echo "vanilla-noise oak-fence control: $(echo "$vanilla_lib_reply" | jq -c . 2>/dev/null | head -c 180)"
+vanilla_lib_count=$(echo "$vanilla_lib_chat" | grep -oE 'Successfully filled [0-9]+ block' | grep -oE '[0-9]+' || echo 0)
+vanilla_lib_count=${vanilla_lib_count:-0}
+echo "vanilla-noise oak-fence count: $vanilla_lib_count"
+if [ "$LIBRARY1002_SELFTEST" = 1 ]; then
+    [ "$lib_count" -eq 0 ] \
+        || fail "LIBRARY1002_SELFTEST: the part authored $lib_count oak-fence block(s); the inverted assertion expected 0"
+    echo "LIBRARY1002_SELFTEST: no fence-authored blocks (unexpected)"
+else
+    [ "$lib_count" -gt 0 ] \
+        || fail "the chunk generator authored no oak fences: $lib_reply"
+    [ "$vanilla_lib_count" -eq 0 ] \
+        || fail "the vanilla-noise control unexpectedly had $vanilla_lib_count oak-fence block(s): $vanilla_lib_reply"
+    [ "$plate_count" -gt 0 ] \
+        || fail "the chunk generator authored no oak pressure plates: $plate_reply"
+    [ "$vanilla_plate_count" -eq 0 ] \
+        || fail "the vanilla-noise control unexpectedly had $vanilla_plate_count oak-pressure-plate block(s): $vanilla_plate_reply"
+fi
+
+# Slice 17: the sixteenth, six-layer rail-dungeon part is laid at
+# RAILDUNGEON1_BASE_Y=212 (spanning y=212..217, above the library at
+# y=200..205). Its `!` char resolves the jar's weighted treasure list in
+# palettes/common.json (diamond 15 / gold 20 / emerald 15 / iron 1000)
+# deterministically to `minecraft:iron_block`, a block id no other decoded
+# part writes, so a fill-replace count at y=212..217 can only come from this
+# part. The exact read-back at (10,214,6) pins the block; iron blocks need no
+# supporting neighbour, so the plate-before-fence support order does not apply.
+# The same fill on the vanilla-noise control level must report `No blocks were
+# filled`; RAILDUNGEON1_SELFTEST inverts the count.
+say "six-layer rail dungeon part authors an iron block at the sixteenth Y"
+rd_state=$(lc "execute if block 10 214 6 minecraft:iron_block" 2>&1 || true)
+rd_state_chat=$(echo "$rd_state" | jq -r '.chat[0] // ""' 2>/dev/null || echo "")
+echo "iron-block read-back at (10,214,6): $(echo "$rd_state" | jq -c . 2>/dev/null | head -c 180)"
+if [ "$RAILDUNGEON1_SELFTEST" != 1 ]; then
+    grep -q 'Test passed' <<<"$rd_state_chat" \
+        || fail "the rail dungeon part did not author an iron block at (10,214,6): $rd_state"
+fi
+rd_reply=$(lc "fill 0 212 0 16 217 16 minecraft:air replace minecraft:iron_block" 2>&1 || true)
+rd_chat=$(echo "$rd_reply" | jq -r '.chat[0] // ""' 2>/dev/null || echo "")
+echo "rail-dungeon iron-block fill: $(echo "$rd_reply" | jq -c . 2>/dev/null | head -c 180)"
+rd_count=$(echo "$rd_chat" | grep -oE 'Successfully filled [0-9]+ block' | grep -oE '[0-9]+' || echo 0)
+rd_count=${rd_count:-0}
+echo "rail-dungeon-authored iron-block count: $rd_count"
+vanilla_rd_reply=$(ctl command "fill 0 212 0 16 217 16 minecraft:air replace minecraft:iron_block" 2>&1 || true)
+vanilla_rd_chat=$(echo "$vanilla_rd_reply" | jq -r '.chat[0] // ""' 2>/dev/null || echo "")
+echo "vanilla-noise iron-block control: $(echo "$vanilla_rd_reply" | jq -c . 2>/dev/null | head -c 180)"
+vanilla_rd_count=$(echo "$vanilla_rd_chat" | grep -oE 'Successfully filled [0-9]+ block' | grep -oE '[0-9]+' || echo 0)
+vanilla_rd_count=${vanilla_rd_count:-0}
+echo "vanilla-noise iron-block count: $vanilla_rd_count"
+if [ "$RAILDUNGEON1_SELFTEST" = 1 ]; then
+    [ "$rd_count" -eq 0 ] \
+        || fail "RAILDUNGEON1_SELFTEST: the part authored $rd_count iron block(s); the inverted assertion expected 0"
+    echo "RAILDUNGEON1_SELFTEST: no iron-block-authored blocks (unexpected)"
+else
+    [ "$rd_count" -gt 0 ] \
+        || fail "the chunk generator authored no iron blocks: $rd_reply"
+    [ "$vanilla_rd_count" -eq 0 ] \
+        || fail "the vanilla-noise control unexpectedly had $vanilla_rd_count iron block(s): $vanilla_rd_reply"
+fi
+
+# Slice 18: the seventeenth, six-layer second rail dungeon is laid at
+# RAILDUNGEON2_BASE_Y=224 (spanning y=224..229, above the first dungeon at
+# y=212..217). Its `!` char resolves the jar's same weighted treasure list in
+# palettes/common.json (diamond 15 / gold 20 / emerald 15 / iron 1000)
+# deterministically to `minecraft:iron_block`, but this part has only three `!`
+# cells at (9,2,8)/(9,2,9)/(9,2,10). Because the block id is shared with the
+# lower dungeon, the differential is a DISJOINT HEIGHT BAND: the earlier leg has
+# already replaced the seventeen lower iron blocks, so the y=224..229 fill must
+# report exactly three. The exact read-back at (9,226,8) pins the cell; iron
+# blocks need no supporting neighbour. The same fill on the vanilla-noise
+# control level must report `No blocks were filled`; RAILDUNGEON2_SELFTEST
+# inverts the count.
+say "six-layer second rail dungeon authors three iron blocks at the seventeenth Y"
+rd2_state=$(lc "execute if block 9 226 8 minecraft:iron_block" 2>&1 || true)
+rd2_state_chat=$(echo "$rd2_state" | jq -r '.chat[0] // ""' 2>/dev/null || echo "")
+echo "iron-block read-back at (9,226,8): $(echo "$rd2_state" | jq -c . 2>/dev/null | head -c 180)"
+if [ "$RAILDUNGEON2_SELFTEST" != 1 ]; then
+    grep -q 'Test passed' <<<"$rd2_state_chat" \
+        || fail "the second rail dungeon did not author an iron block at (9,226,8): $rd2_state"
+fi
+rd2_reply=$(lc "fill 0 224 0 16 229 16 minecraft:air replace minecraft:iron_block" 2>&1 || true)
+rd2_chat=$(echo "$rd2_reply" | jq -r '.chat[0] // ""' 2>/dev/null || echo "")
+echo "second-rail-dungeon iron-block fill: $(echo "$rd2_reply" | jq -c . 2>/dev/null | head -c 180)"
+rd2_count=$(echo "$rd2_chat" | grep -oE 'Successfully filled [0-9]+ block' | grep -oE '[0-9]+' || echo 0)
+rd2_count=${rd2_count:-0}
+echo "second-rail-dungeon-authored iron-block count: $rd2_count"
+vanilla_rd2_reply=$(ctl command "fill 0 224 0 16 229 16 minecraft:air replace minecraft:iron_block" 2>&1 || true)
+vanilla_rd2_chat=$(echo "$vanilla_rd2_reply" | jq -r '.chat[0] // ""' 2>/dev/null || echo "")
+echo "vanilla-noise iron-block control (second band): $(echo "$vanilla_rd2_reply" | jq -c . 2>/dev/null | head -c 180)"
+vanilla_rd2_count=$(echo "$vanilla_rd2_chat" | grep -oE 'Successfully filled [0-9]+ block' | grep -oE '[0-9]+' || echo 0)
+vanilla_rd2_count=${vanilla_rd2_count:-0}
+echo "vanilla-noise iron-block count (second band): $vanilla_rd2_count"
+if [ "$RAILDUNGEON2_SELFTEST" = 1 ]; then
+    [ "$rd2_count" -eq 0 ] \
+        || fail "RAILDUNGEON2_SELFTEST: the part authored $rd2_count iron block(s); the inverted assertion expected 0"
+    echo "RAILDUNGEON2_SELFTEST: no iron-block-authored blocks (unexpected)"
+else
+    [ "$rd2_count" -eq 3 ] \
+        || fail "the second rail dungeon authored $rd2_count iron block(s), expected exactly 3: $rd2_reply"
+    [ "$vanilla_rd2_count" -eq 0 ] \
+        || fail "the vanilla-noise control unexpectedly had $vanilla_rd2_count iron block(s): $vanilla_rd2_reply"
+fi
+
+# Slice 19: the eighteenth, six-layer rail end cap is laid at RAILEND_BASE_Y=236
+# (spanning y=236..241, above rail_dungeon2 at y=224..229). Its `e` char resolves
+# through the verbatim palettes/rails.json entry to
+# minecraft:rail[shape=east_west], the same id the lower horizontal line writes.
+# The lower line's 45 in-chunk cells were already cleared at y=54..59, so the
+# y=236..241 fill can only count this part's 33 in-chunk `e` cells plus the three
+# the inclusive 17x17 window picks up from the x=16 rim of chunk (1,0) — exactly
+# 36, the same rim calibration that makes the lower line read 48 (= 45 + 3).
+# The property-exact read-back at (0,237,5) pins one in-chunk `e` cell; the
+# vanilla-noise control must report `No blocks were filled`; RAILEND_SELFTEST
+# inverts the count.
+say "six-layer rail end cap authors east-west rails at the eighteenth Y"
+rend_state=$(lc "execute if block 0 237 5 minecraft:rail[shape=east_west]" 2>&1 || true)
+rend_state_chat=$(echo "$rend_state" | jq -r '.chat[0] // ""' 2>/dev/null || echo "")
+echo "east-west rail read-back at (0,237,5): $(echo "$rend_state" | jq -c . 2>/dev/null | head -c 180)"
+if [ "$RAILEND_SELFTEST" != 1 ]; then
+    grep -q 'Test passed' <<<"$rend_state_chat" \
+        || fail "the rail end cap did not author an east-west rail at (0,237,5): $rend_state"
+fi
+rend_reply=$(lc "fill 0 236 0 16 241 16 minecraft:air replace minecraft:rail" 2>&1 || true)
+rend_chat=$(echo "$rend_reply" | jq -r '.chat[0] // ""' 2>/dev/null || echo "")
+echo "rail-end-cap rail fill: $(echo "$rend_reply" | jq -c . 2>/dev/null | head -c 180)"
+rend_count=$(echo "$rend_chat" | grep -oE 'Successfully filled [0-9]+ block' | grep -oE '[0-9]+' || echo 0)
+rend_count=${rend_count:-0}
+echo "rail-end-cap-authored rail count: $rend_count"
+vanilla_rend_reply=$(ctl command "fill 0 236 0 16 241 16 minecraft:air replace minecraft:rail" 2>&1 || true)
+vanilla_rend_chat=$(echo "$vanilla_rend_reply" | jq -r '.chat[0] // ""' 2>/dev/null || echo "")
+echo "vanilla-noise rail control (eighteenth band): $(echo "$vanilla_rend_reply" | jq -c . 2>/dev/null | head -c 180)"
+vanilla_rend_count=$(echo "$vanilla_rend_chat" | grep -oE 'Successfully filled [0-9]+ block' | grep -oE '[0-9]+' || echo 0)
+vanilla_rend_count=${vanilla_rend_count:-0}
+echo "vanilla-noise rail count (eighteenth band): $vanilla_rend_count"
+if [ "$RAILEND_SELFTEST" = 1 ]; then
+    [ "$rend_count" -eq 0 ] \
+        || fail "RAILEND_SELFTEST: the part authored $rend_count rail(s); the inverted assertion expected 0"
+    echo "RAILEND_SELFTEST: no rail-authored blocks (unexpected)"
+else
+    [ "$rend_count" -eq 36 ] \
+        || fail "the rail end cap authored $rend_count rail(s), expected exactly 36: $rend_reply"
+    [ "$vanilla_rend_count" -eq 0 ] \
+        || fail "the vanilla-noise control unexpectedly had $vanilla_rend_count rail(s): $vanilla_rend_reply"
+fi
+
 say "carried block tag #lostcities:notbreakable matches bedrock"
 end "setblock 50 80 50 minecraft:bedrock" >/dev/null
 ctl wait 5
@@ -580,4 +812,4 @@ echo "tags=$(find "$PORT/data/lostcities/tags" -name '*.json' | wc -l) " \
      "loot=$(find "$PORT/data/lostcities/loot_table" -name '*.json' | wc -l) " \
      "lang=$(find "$PORT/assets/lostcities/lang" -name '*.json' | wc -l)"
 
-echo "PASS: the lostcity dimension answered, all thirteen decoded parts authored their own blocks in it (slabs, bookshelves, east_west rails, the bend's north_south rails, the split's north_east rails, the descent's ascending_east rails, the first descent's iron bars, the second building's quartz blocks, the city centre's quartz stairs, the shopping part's cobblestone walls, the stair part's stone stairs, the large stair's stone stairs in its own height band and the third building's water), #lostcities:notbreakable matched bedrock, and both carried loot tables yielded items"
+echo "PASS: the lostcity dimension answered, all eighteen decoded parts authored their own blocks in it (slabs, bookshelves, east_west rails, the bend's north_south rails, the split's north_east rails, the descent's ascending_east rails, the first descent's iron bars, the second building's quartz blocks, the city centre's quartz stairs, the shopping part's cobblestone walls, the stair part's stone stairs, the large stair's stone stairs in its own height band, the third building's water, the second city centre's north-facing chest, the library's oak fences and oak pressure plates, the rail dungeon's seventeen iron blocks, the second rail dungeon's three iron blocks in its own height band and the rail end cap's east-west rails in its own height band), #lostcities:notbreakable matched bedrock, and both carried loot tables yielded items"

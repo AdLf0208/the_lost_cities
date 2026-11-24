@@ -110,6 +110,49 @@ const STAIRSBIG_BASE_Y: i32 = 164;
 /// decoder form or SDK key.
 const BUILDING13_BASE_Y: i32 = 176;
 
+/// The fourteenth part — a second six-layer city centre — is laid above the
+/// third building at y=188..193, the next sealed band inside the dimension's
+/// 256 height. Its `C` char resolves to `minecraft:chest[facing=north]` from
+/// the jar's `palettes/common.json`, which no other decoded part writes, so a
+/// chest count at y=188..193 is the in-game assertion. Its 16x16 footprint
+/// needs no new decoder form or SDK key.
+const CENTER002_BASE_Y: i32 = 188;
+
+/// The fifteenth part — a six-layer library — is laid above the second city
+/// centre at y=200..205, the next sealed band inside the dimension's 256 height.
+/// Its `.` and `-` chars resolve to `minecraft:oak_fence` and
+/// `minecraft:oak_pressure_plate` from the jar's `palettes/common.json`, two
+/// block ids no other decoded part writes, so their counts at y=200..205 are
+/// the in-game assertion. Its 16x16 footprint needs no new decoder form or SDK
+/// key.
+const LIBRARY1002_BASE_Y: i32 = 200;
+
+/// The sixteenth part — a six-layer rail dungeon — is laid above the library
+/// at y=212..217, the next sealed band inside the dimension's 256 height. Its
+/// `!` char is `palettes/common.json`'s weighted treasure list, which the
+/// decoder's deterministic pick resolves to `minecraft:iron_block`, an id no
+/// other decoded part writes, so an iron-block count at y=212..217 is the
+/// in-game assertion. Its 16x16 footprint needs no new decoder form or SDK key.
+const RAILDUNGEON1_BASE_Y: i32 = 212;
+
+/// The seventeenth part — the second six-layer rail dungeon — is laid above
+/// rail_dungeon1 at y=224..229, the next sealed band inside the dimension's 256
+/// height. Its `!` char resolves the same jar weighted treasure list to
+/// `minecraft:iron_block`, so the in-game assertion is a **disjoint height
+/// band**: exactly three iron blocks at y=224..229 versus the first dungeon's
+/// seventeen at y=212..217. Its 16x16 footprint needs no new decoder form or
+/// SDK key.
+const RAILDUNGEON2_BASE_Y: i32 = 224;
+
+/// The eighteenth part — the end-cap sibling of the horizontal rail line — is
+/// laid above rail_dungeon2 at y=236..241, the next sealed band inside the
+/// dimension's 256 height. Its `e` char resolves through the same verbatim
+/// `palettes/rails.json` entry to `minecraft:rail[shape=east_west]`, which the
+/// lower horizontal line also writes, so the in-game assertion is a count in a
+/// disjoint height band: 33 in-chunk cells here versus 45 there. Its 16x16
+/// footprint needs no new decoder form or SDK key.
+const RAILEND_BASE_Y: i32 = 236;
+
 #[derive(Default)]
 struct Mod;
 
@@ -130,6 +173,11 @@ struct CityGenerator {
     stairsnormal: Vec<runtime::Placement>,
     stairsbig: Vec<runtime::Placement>,
     building13: Vec<runtime::Placement>,
+    center002: Vec<runtime::Placement>,
+    library1002: Vec<runtime::Placement>,
+    rail_dungeon1: Vec<runtime::Placement>,
+    rail_dungeon2: Vec<runtime::Placement>,
+    rail_end: Vec<runtime::Placement>,
     keys: HashMap<String, BlockKey>,
 }
 
@@ -184,6 +232,11 @@ impl ChunkGenerator for CityGenerator {
         self.write_part(chunk, &self.stairsnormal, STAIRSNORMAL_BASE_Y);
         self.write_part(chunk, &self.stairsbig, STAIRSBIG_BASE_Y);
         self.write_part(chunk, &self.building13, BUILDING13_BASE_Y);
+        self.write_part(chunk, &self.center002, CENTER002_BASE_Y);
+        self.write_part(chunk, &self.library1002, LIBRARY1002_BASE_Y);
+        self.write_part(chunk, &self.rail_dungeon1, RAILDUNGEON1_BASE_Y);
+        self.write_part(chunk, &self.rail_dungeon2, RAILDUNGEON2_BASE_Y);
+        self.write_part(chunk, &self.rail_end, RAILEND_BASE_Y);
     }
 
     fn vanilla_stages(&self) -> VanillaStages {
@@ -321,6 +374,62 @@ impl Hooks for Mod {
             &variants,
         )
         .expect("the embedded third building part and merged palette decode");
+        // The fourteenth part is the second city centre. Its `#`/`a`/`Q`/`S`/`)`
+        // chars use the carried centre palette and stonebrick variant; `1`, `4`
+        // and `C` are three `palettes/common.json` entries (spawner twice and
+        // the one new id, a north-facing chest) added to its merged palette.
+        // No decoder form, SDK API or manifest key is new; it is laid at
+        // y=188..193.
+        let center002 = runtime::decode_city_with_variants(
+            runtime::CENTER00_2_PART_JSON,
+            runtime::CENTER00_2_PALETTE_JSON,
+            &variants,
+        )
+        .expect("the embedded second city-centre part and merged palette decode");
+        // The fifteenth part is the six-layer library. Its `#`/`a`/`Q`/`S`/`L`/
+        // `T` chars use the carried centre palette and stonebrick variant; `.`
+        // and `-` are two more `palettes/common.json` entries (oak fence and
+        // oak pressure plate) added to its merged palette. No decoder form,
+        // SDK API or manifest key is new; it is laid at y=200..205.
+        let library1002 = runtime::decode_city_with_variants(
+            runtime::LIBRARY_10_2_PART_JSON,
+            runtime::LIBRARY_10_2_PALETTE_JSON,
+            &variants,
+        )
+        .expect("the embedded library part and merged palette decode");
+        // The sixteenth part is the six-layer rail dungeon. Its `#`/`a`/`Q`/
+        // `S`/`C`/`1`/`4` chars use the carried centre palette and stonebrick
+        // variant; `y`/`~` come from the part's `refpalette: rails` entries and
+        // `!` is the new weighted treasure entry copied verbatim from
+        // `palettes/common.json`. No decoder form, SDK API or manifest key is
+        // new; it is laid at y=212..217.
+        let rail_dungeon1 = runtime::decode_city_with_variants(
+            runtime::RAIL_DUNGEON1_PART_JSON,
+            runtime::RAIL_DUNGEON1_PALETTE_JSON,
+            &variants,
+        )
+        .expect("the embedded rail dungeon part and merged palette decode");
+        // The seventeenth part is the second six-layer rail dungeon. All five of
+        // its chars (`y`/`~` from `refpalette: rails`, `1`/`F`/`!` from
+        // `palettes/common.json`) are already carried verbatim in the first
+        // dungeon's merged palette, so only the part bytes are new. Laid at
+        // y=224..229, disjoint from the first dungeon's y=212..217.
+        let rail_dungeon2 = runtime::decode_city_with_variants(
+            runtime::RAIL_DUNGEON2_PART_JSON,
+            runtime::RAIL_DUNGEON2_PALETTE_JSON,
+            &variants,
+        )
+        .expect("the embedded second rail dungeon part and palette decode");
+        // The eighteenth part is the six-layer rail end cap. All six of its
+        // chars (`y`/`~`, `e`/`f`, `g`, `T`) are already carried verbatim in
+        // `RAILS_PALETTE_JSON`, so only the 2,643-byte part is new. It is laid
+        // at y=236..241, disjoint from the lower rail line's y=54..59.
+        let rail_end = runtime::decode_city_with_variants(
+            runtime::RAILS_HORIZONTAL_END_PART_JSON,
+            runtime::RAILS_PALETTE_JSON,
+            &variants,
+        )
+        .expect("the embedded rail end part and verbatim rail palette decode");
 
         // Request each distinct block id once. The registrar checks it against
         // the game's registry at load; an unknown id refuses the mod by name.
@@ -338,6 +447,11 @@ impl Hooks for Mod {
             .chain(stairsnormal.iter())
             .chain(stairsbig.iter())
             .chain(building13.iter())
+            .chain(center002.iter())
+            .chain(library1002.iter())
+            .chain(rail_dungeon1.iter())
+            .chain(rail_dungeon2.iter())
+            .chain(rail_end.iter())
             .map(|p| p.block.clone())
             .collect();
         blocks.sort();
@@ -365,6 +479,11 @@ impl Hooks for Mod {
                 stairsnormal,
                 stairsbig,
                 building13,
+                center002,
+                library1002,
+                rail_dungeon1,
+                rail_dungeon2,
+                rail_end,
                 keys,
             },
         );
