@@ -13,8 +13,8 @@ the rail bend as **0.1.4**, the three-way rail split as **0.1.5**, the
 eighteen-layer rail descent as **0.1.6**, the twelve-layer first rail descent
 as **0.1.7**, the second six-layer building part as **0.1.8**, the six-layer
 city centre as **0.1.9**, the six-layer shopping-open front as **0.1.10**, the
-seven-layer stone stair as **0.1.11** and the seven-layer large stone stair as
-**0.1.12**.
+seven-layer stone stair as **0.1.11**, the seven-layer large stone stair as
+**0.1.12** and the third six-layer building part as **0.1.13**.
 
 ## What this version implements
 
@@ -154,10 +154,21 @@ seven-layer stone stair as **0.1.11** and the seven-layer large stone stair as
   part's y=152..158 band); vanilla noise fills nothing. No new decoder form,
   SDK API or manifest key was needed.
 
-- **The other 196 parts, 38 buildings, 31 palettes, 15 multibuildings, the
+- **A thirteenth, six-layer third building part** (0.1.13):
+  `parts/building1_3.json` (16x16, six slices, 1,206 non-space cells: `#` 784,
+  `a` 186, `W` 168, `:` 30, `@` 24, `l` 6, `L` 3, `F` 2, `1` 2, `T` 1, embedded
+  byte-identically from the jar, sha256 `93cd0a5b…`) is decoded against a merged
+  palette that adds one entry copied from `palettes/common.json`, `W` →
+  `minecraft:water`, to the already-carried building palette. It is laid at
+  y=176..181, above the large stair. Water is placed by no other decoded part,
+  so the in-game assertion fill-replaces `minecraft:water` at y=176..181, with
+  the vanilla-noise Overworld as control. No new decoder form, SDK API or
+  manifest key was needed.
+
+- **The other 195 parts, 38 buildings, 31 palettes, 15 multibuildings, the
   spheres/rail dungeons and Java-assembled structures** — still
   `blocked(no-city-data-decoder)` / `blocked(no-structure-type-for-cities)`:
-  this port decodes exactly twelve parts and the palette entries they use.
+  this port decodes exactly thirteen parts and the palette entries they use.
 - **Replacing vanilla terrain in the Overworld** — `blocked(level_reset:R11)`:
   the Java mod's mixins replace vanilla levels; the pin has no `levels_reset`
   surface and R11 refuses the manifest key. This port generates cities only in

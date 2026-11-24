@@ -102,6 +102,14 @@ const STAIRSNORMAL_BASE_Y: i32 = 152;
 /// Its footprint is 6x12; the decoder's generic bounds already validate it.
 const STAIRSBIG_BASE_Y: i32 = 164;
 
+/// The thirteenth part — the third six-layer building — is laid above the
+/// large stair at y=176..181, the next sealed band inside the dimension's 256
+/// height. Its `W` char resolves to `minecraft:water` from the jar's
+/// `palettes/common.json`, which no other decoded part writes, so a water count
+/// at y=176..181 is the in-game assertion. Its 16x16 footprint needs no new
+/// decoder form or SDK key.
+const BUILDING13_BASE_Y: i32 = 176;
+
 #[derive(Default)]
 struct Mod;
 
@@ -121,6 +129,7 @@ struct CityGenerator {
     shopping1: Vec<runtime::Placement>,
     stairsnormal: Vec<runtime::Placement>,
     stairsbig: Vec<runtime::Placement>,
+    building13: Vec<runtime::Placement>,
     keys: HashMap<String, BlockKey>,
 }
 
@@ -174,6 +183,7 @@ impl ChunkGenerator for CityGenerator {
         self.write_part(chunk, &self.shopping1, SHOPPING1_BASE_Y);
         self.write_part(chunk, &self.stairsnormal, STAIRSNORMAL_BASE_Y);
         self.write_part(chunk, &self.stairsbig, STAIRSBIG_BASE_Y);
+        self.write_part(chunk, &self.building13, BUILDING13_BASE_Y);
     }
 
     fn vanilla_stages(&self) -> VanillaStages {
@@ -299,6 +309,18 @@ impl Hooks for Mod {
             &variants,
         )
         .expect("the embedded stairsbig part and verbatim stair palette decode");
+        // The thirteenth part is the third six-layer building. Its `#`/`a`/`@`
+        // chars use the merged building palette and stonebrick variant above;
+        // `W` is the one new id, copied verbatim from `palettes/common.json`
+        // (minecraft:water) into its merged palette. `:` is the already-carried
+        // iron-bars entry from `palettes/default.json`. No decoder form, SDK
+        // API or manifest key is new; it is laid at y=176..181.
+        let building13 = runtime::decode_city_with_variants(
+            runtime::BUILDING_1_3_PART_JSON,
+            runtime::BUILDING_1_3_PALETTE_JSON,
+            &variants,
+        )
+        .expect("the embedded third building part and merged palette decode");
 
         // Request each distinct block id once. The registrar checks it against
         // the game's registry at load; an unknown id refuses the mod by name.
@@ -315,6 +337,7 @@ impl Hooks for Mod {
             .chain(shopping1.iter())
             .chain(stairsnormal.iter())
             .chain(stairsbig.iter())
+            .chain(building13.iter())
             .map(|p| p.block.clone())
             .collect();
         blocks.sort();
@@ -341,6 +364,7 @@ impl Hooks for Mod {
                 shopping1,
                 stairsnormal,
                 stairsbig,
+                building13,
                 keys,
             },
         );

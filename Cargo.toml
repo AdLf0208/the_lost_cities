@@ -2,7 +2,7 @@
 # Port of The Lost Cities 26.3-12.0.2 (McJtyMods/LostCities, MIT), Minecraft 26.3.
 # Clean-room Rust rewrite of the mod's observed behaviour; first publication at 0.1.0.
 name = "the_lost_cities"
-version = "0.1.12"
+version = "0.1.13"
 edition = "2024"
 license = "MIT"
 description = "The Lost Cities for Horizon: carried tags/loot, the lostcity dimension and a twelve-part city generator"

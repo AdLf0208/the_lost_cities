@@ -23,6 +23,7 @@
 #   SHOPPING1_SELFTEST=1 -> FAIL EXIT:1 (inverted cobblestone-wall count of the shopping part)
 #   STAIRS_SELFTEST=1   -> FAIL EXIT:1 (inverted stone-stairs count of the stair part)
 #   STAIRSBIG_SELFTEST=1 -> FAIL EXIT:1 (inverted stone-stairs count of the large stair)
+#   BUILDING13_SELFTEST=1-> FAIL EXIT:1 (inverted water count of the third building)
 set -euo pipefail
 export LC_ALL=C
 
@@ -47,6 +48,7 @@ CENTER001_SELFTEST=${CENTER001_SELFTEST:-0}
 SHOPPING1_SELFTEST=${SHOPPING1_SELFTEST:-0}
 STAIRS_SELFTEST=${STAIRS_SELFTEST:-0}
 STAIRSBIG_SELFTEST=${STAIRSBIG_SELFTEST:-0}
+BUILDING13_SELFTEST=${BUILDING13_SELFTEST:-0}
 
 [ -n "$CTL" ] && [ -n "$GAME" ] || { echo "missing CTL/GAME: eval \"\$(ports/tools/launcher-game.sh env the_lost_cities)\"" >&2; exit 1; }
 [ -x "$CTL" ] || { echo "missing horizon-ctl: $CTL" >&2; exit 1; }
@@ -499,6 +501,36 @@ else
         || fail "the vanilla-noise control unexpectedly had $vanilla_stairsbig_count stone stair(s): $vanilla_stairsbig_reply"
 fi
 
+# Slice 14: the thirteenth, six-layer third building part is laid at
+# BUILDING13_BASE_Y=176 (spanning y=176..181, above the large stair at y=164..170).
+# Its `W` char resolves to `minecraft:water` in palettes/common.json — a block no
+# other decoded part writes — so a water count at y=176..181 can only come from
+# this part. The same fill on the vanilla-noise Overworld must report `No blocks
+# were filled`; BUILDING13_SELFTEST inverts the count.
+say "six-layer third building part authors water at the thirteenth Y"
+b13_reply=$(lc "fill 0 176 0 16 181 16 minecraft:air replace minecraft:water" 2>&1 || true)
+b13_chat=$(echo "$b13_reply" | jq -r '.chat[0] // ""' 2>/dev/null || echo "")
+echo "water third-building fill: $(echo "$b13_reply" | jq -c . 2>/dev/null | head -c 180)"
+b13_count=$(echo "$b13_chat" | grep -oE 'Successfully filled [0-9]+ block' | grep -oE '[0-9]+' || echo 0)
+b13_count=${b13_count:-0}
+echo "third-building-authored water count: $b13_count"
+vanilla_b13_reply=$(ctl command "fill 0 176 0 16 181 16 minecraft:air replace minecraft:water" 2>&1 || true)
+vanilla_b13_chat=$(echo "$vanilla_b13_reply" | jq -r '.chat[0] // ""' 2>/dev/null || echo "")
+echo "vanilla-noise water control: $(echo "$vanilla_b13_reply" | jq -c . 2>/dev/null | head -c 180)"
+vanilla_b13_count=$(echo "$vanilla_b13_chat" | grep -oE 'Successfully filled [0-9]+ block' | grep -oE '[0-9]+' || echo 0)
+vanilla_b13_count=${vanilla_b13_count:-0}
+echo "vanilla-noise water count: $vanilla_b13_count"
+if [ "$BUILDING13_SELFTEST" = 1 ]; then
+    [ "$b13_count" -eq 0 ] \
+        || fail "BUILDING13_SELFTEST: the part authored $b13_count water block(s); the inverted assertion expected 0"
+    echo "BUILDING13_SELFTEST: no water-authored blocks (unexpected)"
+else
+    [ "$b13_count" -gt 0 ] \
+        || fail "the chunk generator authored no water blocks: $b13_reply"
+    [ "$vanilla_b13_count" -eq 0 ] \
+        || fail "the vanilla-noise control unexpectedly had $vanilla_b13_count water block(s): $vanilla_b13_reply"
+fi
+
 say "carried block tag #lostcities:notbreakable matches bedrock"
 end "setblock 50 80 50 minecraft:bedrock" >/dev/null
 ctl wait 5
@@ -548,4 +580,4 @@ echo "tags=$(find "$PORT/data/lostcities/tags" -name '*.json' | wc -l) " \
      "loot=$(find "$PORT/data/lostcities/loot_table" -name '*.json' | wc -l) " \
      "lang=$(find "$PORT/assets/lostcities/lang" -name '*.json' | wc -l)"
 
-echo "PASS: the lostcity dimension answered, all twelve decoded parts authored their own blocks in it (slabs, bookshelves, east_west rails, the bend's north_south rails, the split's north_east rails, the descent's ascending_east rails, the first descent's iron bars, the second building's quartz blocks, the city centre's quartz stairs, the shopping part's cobblestone walls, the stair part's stone stairs and the large stair's stone stairs in its own height band), #lostcities:notbreakable matched bedrock, and both carried loot tables yielded items"
+echo "PASS: the lostcity dimension answered, all thirteen decoded parts authored their own blocks in it (slabs, bookshelves, east_west rails, the bend's north_south rails, the split's north_east rails, the descent's ascending_east rails, the first descent's iron bars, the second building's quartz blocks, the city centre's quartz stairs, the shopping part's cobblestone walls, the stair part's stone stairs, the large stair's stone stairs in its own height band and the third building's water), #lostcities:notbreakable matched bedrock, and both carried loot tables yielded items"

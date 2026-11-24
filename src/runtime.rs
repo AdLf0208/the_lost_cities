@@ -1656,6 +1656,25 @@ pub const BUILDING_1_2_PART_JSON: &str = "{\n  \"xsize\": 16,\n  \"zsize\": 16,\
 /// verbatim from the jar. No id or char was invented.
 pub const BUILDING_1_2_PALETTE_JSON: &str = "{\"palette\": [{\"char\": \"#\", \"variant\": \"stonebrick\", \"damaged\": \"minecraft:iron_bars\"}, {\"char\": \"a\", \"block\": \"minecraft:glass\"}, {\"char\": \"@\", \"frompalette\": \"#\"}, {\"char\": \"1\", \"block\": \"minecraft:spawner\", \"mob\": \"easymobs\"}, {\"char\": \"T\", \"block\": \"minecraft:wall_torch[facing=north]\", \"torch\": true}, {\"char\": \"F\", \"blocks\": [{\"random\": 25, \"block\": \"minecraft:furnace[facing=north]\"}, {\"random\": 20, \"block\": \"minecraft:crafting_table\"}, {\"random\": 7, \"block\": \"minecraft:brewing_stand\"}, {\"random\": 6, \"block\": \"minecraft:anvil[facing=north]\"}, {\"random\": 5, \"block\": \"minecraft:cauldron\"}, {\"random\": 2, \"block\": \"minecraft:enchanting_table\"}, {\"random\": 1000, \"block\": \"minecraft:cobweb\"}]}, {\"char\": \"D\", \"block\": \"minecraft:dirt\"}, {\"char\": \"l\", \"block\": \"minecraft:ladder[facing=north]\"}, {\"char\": \"L\", \"block\": \"minecraft:bookshelf\"}, {\"char\": \"*\", \"block\": \"minecraft:potted_cactus\"}, {\"char\": \" \", \"block\": \"minecraft:air\"}, {\"char\": \"Q\", \"block\": \"minecraft:quartz_block\", \"damaged\": \"minecraft:iron_bars\"}, {\"char\": \":\", \"block\": \"minecraft:iron_bars\"}]}";
 
+/// `parts/building1_3.json` from the cached jar, verbatim (2,618 B, sha256
+/// `93cd0a5bac82a1e54b838f70a2e5366db4d4e54f33f087271426050f26ef9974`):
+/// 16x16, six slices, 1,206 non-space cells. Exact census: `#` 784, `a` 186,
+/// `W` 168, `:` 30, `@` 24, `l` 6, `L` 3, `F` 2, `1` 2, `T` 1 — measured from
+/// the bytes. The 168 `W` cells are at x=1..14, z=1..4 in slices 1..3 (56 per
+/// slice). Written as an escaped literal because every brick row begins `"#`,
+/// which would close a `r#"..."#` raw string immediately.
+pub const BUILDING_1_3_PART_JSON: &str = "{\n  \"xsize\": 16,\n  \"zsize\": 16,\n  \"slices\": [\n    [\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\",\n      \"#######l########\",\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\"\n    ],\n    [\n      \"#aa@aaaaaaaa@aa#\",\n      \"aWWWWWWWWWWWWWWa\",\n      \"aWWWWWWWWWWWWWWa\",\n      \"@WWWWWWWWWWWWWW@\",\n      \"aWWWWWWWWWWWWWWa\",\n      \"aaaaaaaaaaaaaaaa\",\n      \"a              a\",\n      \"a              a\",\n      \"aL             a\",\n      \"aF     l       a\",\n      \"aF    ###::::::a\",\n      \"a      :       a\",\n      \"@      :   T   @\",\n      \"a      :       a\",\n      \"a      :       a\",\n      \"#aa@aaaaaaaa@aa#\"\n    ],\n    [\n      \"#aa@aaaaaaaa@aa#\",\n      \"aWWWWWWWWWWWWWWa\",\n      \"aWWWWWWWWWWWWWWa\",\n      \"@WWWWWWWWWWWWWW@\",\n      \"aWWWWWWWWWWWWWWa\",\n      \"aaaaaaaaaaaaaaaa\",\n      \"a              a\",\n      \"a              a\",\n      \"aL             a\",\n      \"a      l       a\",\n      \"a     ###::::::a\",\n      \"a      :       a\",\n      \"@      :       @\",\n      \"a      :       a\",\n      \"a      :       a\",\n      \"#aa@aaaaaaaa@aa#\"\n    ],\n    [\n      \"#aa@aaaaaaaa@aa#\",\n      \"aWWWWWWWWWWWWWWa\",\n      \"aWWWWWWWWWWWWWWa\",\n      \"@WWWWWWWWWWWWWW@\",\n      \"aWWWWWWWWWWWWWWa\",\n      \"aaaaaaaaaaaaaaaa\",\n      \"a              a\",\n      \"a              a\",\n      \"aL             a\",\n      \"a      l       a\",\n      \"a     ###::::::a\",\n      \"a      :       a\",\n      \"@      :       @\",\n      \"a      :       a\",\n      \"a      :       a\",\n      \"#aa@aaaaaaaa@aa#\"\n    ],\n    [\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\",\n      \"#######l########\",\n      \"################\",\n      \"################\",\n      \"##1#1###########\",\n      \"################\",\n      \"################\",\n      \"################\"\n    ],\n    [\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\",\n      \"#######l########\",\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\",\n      \"################\"\n    ]\n  ]\n}";
+
+/// Merged palette for the third building part: the exact
+/// `BUILDING_1_2_PALETTE_JSON` entries (the standard building groups plus the
+/// verbatim `palettes/default.json` entries `Q` -> quartz_block and `:` ->
+/// iron_bars) plus one entry copied from the jar's `palettes/common.json`:
+/// `W` -> `minecraft:water` (field names, order and values verbatim; only
+/// insignificant whitespace normalised to the compact style of every other
+/// carried entry). The part's other nine chars are all already carried; no
+/// block id or char was invented. Water is placed by no other decoded part.
+pub const BUILDING_1_3_PALETTE_JSON: &str = "{\"palette\": [{\"char\": \"#\", \"variant\": \"stonebrick\", \"damaged\": \"minecraft:iron_bars\"}, {\"char\": \"a\", \"block\": \"minecraft:glass\"}, {\"char\": \"@\", \"frompalette\": \"#\"}, {\"char\": \"1\", \"block\": \"minecraft:spawner\", \"mob\": \"easymobs\"}, {\"char\": \"T\", \"block\": \"minecraft:wall_torch[facing=north]\", \"torch\": true}, {\"char\": \"F\", \"blocks\": [{\"random\": 25, \"block\": \"minecraft:furnace[facing=north]\"}, {\"random\": 20, \"block\": \"minecraft:crafting_table\"}, {\"random\": 7, \"block\": \"minecraft:brewing_stand\"}, {\"random\": 6, \"block\": \"minecraft:anvil[facing=north]\"}, {\"random\": 5, \"block\": \"minecraft:cauldron\"}, {\"random\": 2, \"block\": \"minecraft:enchanting_table\"}, {\"random\": 1000, \"block\": \"minecraft:cobweb\"}]}, {\"char\": \"D\", \"block\": \"minecraft:dirt\"}, {\"char\": \"l\", \"block\": \"minecraft:ladder[facing=north]\"}, {\"char\": \"L\", \"block\": \"minecraft:bookshelf\"}, {\"char\": \"*\", \"block\": \"minecraft:potted_cactus\"}, {\"char\": \" \", \"block\": \"minecraft:air\"}, {\"char\": \"Q\", \"block\": \"minecraft:quartz_block\", \"damaged\": \"minecraft:iron_bars\"}, {\"char\": \":\", \"block\": \"minecraft:iron_bars\"}, {\"char\": \"W\", \"block\": \"minecraft:water\"}]}";
+
 /// `parts/center00_1.json` from the cached jar, verbatim (2,618 B, sha256
 /// `5ade2e7903e012f38fb9e9559ccda6aa51ef4c9856d2d365b891c118acebdc54`):
 /// 16x16, six slices, 680 non-space cells. Exact census: `#` 338, `a` 126,
@@ -3443,6 +3462,121 @@ mod stairsbig_tests {
             assert!(
                 !ps.iter().any(|p| p.block == "minecraft:stone_stairs"),
                 "the {name} must not write a stone stair"
+            );
+        }
+    }
+}
+
+/// Slice 14: the thirteenth part, the six-layer building1_3. These tests are
+/// written before the part data exists so the gap is proved red first:
+/// `BUILDING_1_3_PART_JSON` and `BUILDING_1_3_PALETTE_JSON` are unresolved until
+/// the jar bytes are carried. Its `W` char resolves to `minecraft:water`, a
+/// block no other decoded part writes.
+#[cfg(test)]
+mod building1_3_tests {
+    use super::*;
+
+    /// The jar's `parts/building1_3.json` is 16x16 with six slices, every slice
+    /// sixteen rows of sixteen chars — the same footprint as the first building.
+    #[test]
+    fn embedded_building1_3_part_has_six_16x16_layers() {
+        let part = Part::from_json(
+            &parse_json(BUILDING_1_3_PART_JSON).expect("jar building1_3 part parses"),
+        )
+        .expect("jar building1_3 part decodes");
+        assert_eq!(part.xsize, 16, "jar xsize");
+        assert_eq!(part.zsize, 16, "jar zsize");
+        assert_eq!(part.slices.len(), 6, "the part has six slices");
+        for (y, layer) in part.slices.iter().enumerate() {
+            assert_eq!(layer.len(), 16, "slice {y} has 16 rows");
+            for (z, row) in layer.iter().enumerate() {
+                assert_eq!(row.chars().count(), 16, "slice {y} row {z} is 16 chars");
+            }
+        }
+    }
+
+    /// The `W` char resolves to the verbatim `palettes/common.json` entry
+    /// `minecraft:water` — a block no other decoded part writes, so a water
+    /// count at y=176..181 can only come from this part. Counts below are the
+    /// artefact's per-part census (1,206 non-space cells), measured from bytes.
+    #[test]
+    fn building1_3_chars_resolve_to_the_jar_water_id() {
+        let variants = VariantTable::from_files(&[("stonebrick", STONEBRICK_VARIANT_JSON)])
+            .expect("the jar's stonebrick variant decodes");
+        let placements =
+            decode_city_with_variants(BUILDING_1_3_PART_JSON, BUILDING_1_3_PALETTE_JSON, &variants)
+                .expect("the embedded jar building1_3 part and merged palette decode");
+
+        let cell = placements
+            .iter()
+            .find(|p| p.dx == 1 && p.dy == 1 && p.dz == 1)
+            .expect("a W cell at (1,1,1)");
+        assert_eq!(cell.block, "minecraft:water", "the W char is water");
+        assert!(cell.properties.is_empty(), "water has no state properties");
+
+        let count = |id: &str| placements.iter().filter(|p| p.block == id).count();
+        assert_eq!(count("minecraft:water"), 168, "168 W cells");
+        assert_eq!(count("minecraft:iron_bars"), 30, "30 : cells");
+        assert_eq!(count("minecraft:glass"), 186, "186 a cells");
+        assert_eq!(
+            placements.len(),
+            1206,
+            "784 # + 186 a + 168 W + 30 : + 24 @ + 6 l + 3 L + 2 F + 2 1 + 1 T"
+        );
+
+        // Differential: none of the twelve earlier parts writes water.
+        let street = decode_city(STREET_PART_JSON, STREET_PALETTE_JSON)
+            .expect("the embedded street part decodes");
+        let building =
+            decode_city_with_variants(BUILDING_PART_JSON, BUILDING_PALETTE_JSON, &variants)
+                .expect("the embedded first building part decodes");
+        let horizontal = decode_city_with_variants(RAILS_PART_JSON, RAILS_PALETTE_JSON, &variants)
+            .expect("the embedded horizontal rail part decodes");
+        let bend = decode_city_with_variants(RAILS_BEND_PART_JSON, RAILS_PALETTE_JSON, &variants)
+            .expect("the embedded rail bend part decodes");
+        let split =
+            decode_city_with_variants(RAILS_3SPLIT_PART_JSON, RAILS_PALETTE_JSON, &variants)
+                .expect("the embedded rail split part decodes");
+        let down2 = decode_city_with_variants(RAILS_DOWN2_PART_JSON, RAILS_PALETTE_JSON, &variants)
+            .expect("the embedded rail descent part decodes");
+        let down1 =
+            decode_city_with_variants(RAILS_DOWN1_PART_JSON, RAILS_DOWN1_PALETTE_JSON, &variants)
+                .expect("the embedded first descent part decodes");
+        let building12 =
+            decode_city_with_variants(BUILDING_1_2_PART_JSON, BUILDING_1_2_PALETTE_JSON, &variants)
+                .expect("the embedded second building part decodes");
+        let center001 =
+            decode_city_with_variants(CENTER00_1_PART_JSON, CENTER00_1_PALETTE_JSON, &variants)
+                .expect("the embedded city-centre part decodes");
+        let shopping1 = decode_city_with_variants(
+            SHOPPING_OPEN01_1_PART_JSON,
+            SHOPPING_OPEN01_1_PALETTE_JSON,
+            &variants,
+        )
+        .expect("the embedded shopping part decodes");
+        let stairsnormal =
+            decode_city_with_variants(STAIRSNORMAL_PART_JSON, STAIRSNORMAL_PALETTE_JSON, &variants)
+                .expect("the embedded stairsnormal part decodes");
+        let stairsbig =
+            decode_city_with_variants(STAIRSBIG_PART_JSON, STAIRSNORMAL_PALETTE_JSON, &variants)
+                .expect("the embedded stairsbig part decodes");
+        for (name, ps) in [
+            ("street", &street),
+            ("first building", &building),
+            ("horizontal line", &horizontal),
+            ("bend", &bend),
+            ("split", &split),
+            ("eighteen-layer descent", &down2),
+            ("first descent", &down1),
+            ("second building", &building12),
+            ("city centre", &center001),
+            ("shopping part", &shopping1),
+            ("stone stair", &stairsnormal),
+            ("large stone stair", &stairsbig),
+        ] {
+            assert!(
+                !ps.iter().any(|p| p.block == "minecraft:water"),
+                "the {name} must not write water"
             );
         }
     }

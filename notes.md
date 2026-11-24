@@ -1,4 +1,4 @@
-# The Lost Cities — port notes (slices 1–13)
+# The Lost Cities — port notes (slices 1–14)
 
 Skills: superpowers/using-superpowers, brainstorming, writing-plans, test-driven-development, systematic-debugging, verification-before-completion; BeautifulRust/rust-best-practices
 
@@ -776,6 +776,65 @@ The Lost Cities:
 0b14f8a  fits
 ```
 
+## Slice 14 — the thirteenth, six-layer third building part (0.1.13)
+
+### The part and its palette as read from the cached jar (source first)
+
+Everything below was read from `ports/_shared/licence-cache/the-lost-cities.jar`
+(sha `666cd25d…`, verified before any edit):
+
+- `data/lostcities/lostcities/parts/building1_3.json`: **2,618 B**, sha256
+  `93cd0a5bac82a1e54b838f70a2e5366db4d4e54f33f087271426050f26ef9974` — measured
+  from the jar bytes, not from the brief. `xsize: 16`, `zsize: 16`, no
+  `refpalette`, **6 slices**, 1,206 non-space cells, every row 16 chars. Exact
+  census: `#` 784, `a` 186, `W` 168, `:` 30, `@` 24, `l` 6, `L` 3, `F` 2, `1` 2,
+  `T` 1. The 168 `W` cells occupy x=1..14, z=1..4 in slices 1..3 (56 per slice),
+  read from the bytes. Embedded byte-identically in
+  `runtime::BUILDING_1_3_PART_JSON` — verified by sha256 in the source **after
+  rustfmt** and again **inside the packed archive**. It is an **escaped** string
+  literal: every brick row begins `"#`, which would close an `r#"..."#` raw
+  string immediately.
+- The part's `refpalette`-less chars are the standard-style groups that
+  `styles/standard.json` selects together. Nine of the ten chars (`#`, `a`,
+  `@`, `:`, `l`, `L`, `F`, `1`, `T`) are already carried verbatim in
+  `runtime::BUILDING_1_2_PALETTE_JSON` (the building groups plus the two
+  `palettes/default.json` entries `Q`/`:`). The one new char is `W`, copied from
+  the jar's `palettes/common.json`: `{"char": "W", "block": "minecraft:water"}`
+  (field names, order and values verbatim; only insignificant whitespace
+  normalised to the compact style of every other carried entry). The merged
+  `runtime::BUILDING_1_3_PALETTE_JSON` is those 14 entries. No block id or char
+  was invented. Water is placed by no other decoded part, so it is the clean
+  in-game differential.
+
+No new decoder form, SDK API or manifest key: `variant`, `frompalette`, weighted
+`blocks` and generic multi-layer bounds already exist. `lib.rs` lays the part at
+y=176 (`BUILDING13_BASE_Y`, spanning y=176..181 above the large stair at
+y=164..170) and unions its block ids into the same one-time `block_key` request.
+
+### Red verbatim
+
+`evidence/the_lost_cities/building13-test-red.log`, before the part or its
+palette existed: three `error[E0425]: cannot find value` — *"cannot find value
+`BUILDING_1_3_PART_JSON` in this scope"* (twice, at the six-layer shape assertion
+and at the id resolver, each with rustc's *similarly named constant
+`BUILDING_1_2_PART_JSON`* hint) and *"cannot find value
+`BUILDING_1_3_PALETTE_JSON` in this scope"* (with the `BUILDING_1_2_PALETTE_JSON`
+hint) — `error: could not compile 'the_lost_cities' (lib test) due to 3 previous
+errors`, build-slot exit **101**. The two new tests then passed green:
+**33 passed / 0 failed** (up from 31), including
+`building1_3_tests::building1_3_chars_resolve_to_the_jar_water_id`, which pins
+the artefact's 168 `W` / 30 `:` / 186 `a` counts and the exact `minecraft:water`
+id, and asserts none of the first twelve decoded parts writes water.
+
+### Both fits lines on the delivered 0.1.13 sha
+
+```
+The Lost Cities:
+0a875da  made for
+The Lost Cities:
+0b14f8a  fits
+```
+
 ## Gaps / blocked symbols (measured, not guessed)
 
 - **`configured-feature-not-registered`** — the two carried `worldgen/feature/*.json`
@@ -800,10 +859,10 @@ The Lost Cities:
   `data/lostcities/lostcities/*.json` files (private
   `parts`/`buildings`/`palettes`/`multibuildings`/… schema; the pin's
   `mod_content.rs` worldgen bundle names only vanilla kinds), the port writes a
-  clean-room decoder and decodes **twelve parts** (`street_straight`,
+  clean-room decoder and decodes **thirteen parts** (`street_straight`,
   `building1_1`, `rails_horizontal`, `rails_bend`, `rails_3split`, `rails_down2`, `rails_down1`, `building1_2`, `center00_1`,
-  `shopping_open01_1`, `stairsnormal`, `stairsbig`) plus their
-  palette/variant entries. The **other 196 parts**, 38 buildings,
+  `shopping_open01_1`, `stairsnormal`, `stairsbig`, `building1_3`) plus their
+  palette/variant entries. The **other 195 parts**, 38 buildings,
   31 palettes, 15 multibuildings, 12 variants, 6 scattered and all
   `citystyles`/`styles`/`worldstyles` are still blocked — no decoder was written
   for them.
@@ -813,7 +872,7 @@ The Lost Cities:
   be an invented structure, so none is registered.
 - **Not in the artefact:** no item, block, model, recipe, advancement, biome or
   structure files (census above).
-- **Deferred:** the remaining 198 parts, spheres/rail dungeons, the config
+- **Deferred:** the remaining 197 parts, spheres/rail dungeons, the config
   GUI/18 GUI textures, the editor/commands/network classes.
 
 ## Upstream defects fixed
@@ -841,7 +900,7 @@ The Lost Cities:
 | language file (`en_us.json`) | carried | verbatim, data contract; no in-game text assertion (the key is a generator name, not surfaced by the pin) |
 | custom features (2) + biome modifiers (2) | `blocked(configured-feature-not-registered)` | 0 API matches for a feature/placement registrar; not packed |
 | vanilla terrain replacement / city mixins | `blocked(level_reset:R11)` | `surface.json` 0 matches; R11 refuses the manifest key; only the mod's own level is generated, not vanilla's |
-| 322 internal generator JSON files | 12 parts decoded / 196 `blocked(no-city-data-decoder)` | clean-room decoder for `street_straight`, the six-layer `building1_1`, the six-layer `rails_horizontal`, the six-layer `rails_bend`, the six-layer `rails_3split`, the eighteen-layer `rails_down2`, the twelve-layer `rails_down1`, the six-layer `building1_2`, the six-layer `center00_1`, the six-layer `shopping_open01_1`, the seven-layer 6x11 `stairsnormal` and the seven-layer 6x12 `stairsbig`, with `variant`/`frompalette`/weighted/multi-layer support; the other 196 parts and all buildings/palettes/multibuildings have no decoder; not packed |
+| 322 internal generator JSON files | 13 parts decoded / 195 `blocked(no-city-data-decoder)` | clean-room decoder for `street_straight`, the six-layer `building1_1`, the six-layer `rails_horizontal`, the six-layer `rails_bend`, the six-layer `rails_3split`, the eighteen-layer `rails_down2`, the twelve-layer `rails_down1`, the six-layer `building1_2`, the six-layer `center00_1`, the six-layer `shopping_open01_1`, the seven-layer 6x11 `stairsnormal`, the seven-layer 6x12 `stairsbig` and the six-layer `building1_3`, with `variant`/`frompalette`/weighted/multi-layer support; the other 195 parts and all buildings/palettes/multibuildings have no decoder; not packed |
 | horizontal rail line (`parts/rails_horizontal.json` + `palettes/rails.json`) | **tested** | 45 east-west rails + 3 powered rails decoded from the artefact's ids; laid at y=54; in-game fill-replace of `minecraft:rail` at y=50..64 → **48 blocks**, vanilla-noise Overworld → **0**, `RAILS_SELFTEST=1` → `EXIT:1` |
 | rail bend (`parts/rails_bend.json` + `palettes/rails.json`) | **tested** | 9 north_south + 2 powered north_south + 1 north_west + 1 south_west + 14 east_west + 2 powered east_west rails decoded from the artefact's ids; laid at y=36; in-game fill-replace of `minecraft:rail[shape=north_south]` at y=30..44 → **10 blocks** (9 in-chunk + 1 from the inclusive 17×17 window), vanilla-noise Overworld → **0**, `BEND_SELFTEST=1` → `EXIT:1` |
 | three-way rail split (`parts/rails_3split.json` + `palettes/rails.json`) | **tested** | 1 north_east + 1 south_east + 9 north_south + 2 powered north_south + 26 east_west + 4 powered east_west rails decoded from the artefact's ids (byte-identical part, sha `b0c8bd61…`); laid at y=18; in-game fill-replace of `minecraft:rail[shape=north_east]` at y=12..26 → **1 block**, vanilla-noise Overworld → **0**, `SPLIT_SELFTEST=1` → `EXIT:1` |
@@ -852,14 +911,15 @@ The Lost Cities:
 | six-layer shopping-open front (`parts/shopping_open01_1.json` + merged palette) | **tested** | 12 `w` cobblestone_walls decoded from the artefact's verbatim `palettes/default.json` entry (2,697-byte part, sha `c16f5ff…`, byte-identical raw literal with a private `meta` key the decoder ignores); laid at y=140..145; in-game fill-replace of `minecraft:cobblestone_wall` at y=136..150 → **18 blocks** (12 in-part plus neighbours in the inclusive 17×17 window), vanilla-noise Overworld → **0**, `SHOPPING1_SELFTEST=1` → `EXIT:1` |
 | seven-layer stone stair (`parts/stairsnormal.json` + verbatim palette entries) | **tested** | 24 `/` stone_stairs + 12 `_` bottom slabs decoded from the artefact's verbatim `palettes/default.json` entries (1,484-byte part, sha `c6d17e44…`, byte-identical raw literal with a private `meta` key the decoder ignores; `x` resolves through the jar stonebrick variant); laid at y=152..158; in-game fill-replace of `minecraft:stone_stairs` at y=152..158 → **28 blocks** (24 in-part plus neighbours in the inclusive 17×17 window), vanilla-noise Overworld → **0**, `STAIRS_SELFTEST=1` → `EXIT:1` |
 | seven-layer large stone stair (`parts/stairsbig.json` + the same verbatim palette entries) | **tested** | 36 `/` stone_stairs + 12 `_` bottom slabs decoded from the artefact's bytes against the already-carried `STAIRSNORMAL_PALETTE_JSON` (1,596-byte part, sha `ae9dc82a…`, byte-identical raw literal with a private `meta` key the decoder ignores); laid at y=164..170, the disjoint band above the earlier stair; in-game fill-replace of `minecraft:stone_stairs` at y=164..170 → **42 blocks** (36 in-part plus neighbours in the inclusive 17×17 window), vanilla-noise Overworld → **0**, `STAIRSBIG_SELFTEST=1` → `EXIT:1` |
+| third six-layer building (`parts/building1_3.json` + merged palette) | **tested** | 168 `W` `minecraft:water` + 30 `:` iron_bars + 186 `a` glass decoded from the artefact's ids (2,618-byte part, sha `93cd0a5b…`, byte-identical escaped literal with every brick row beginning `"#`; one `W`→water entry copied verbatim from `palettes/common.json` into the carried building palette); laid at y=176..181; in-game fill-replace of `minecraft:water` at y=176..181 → **168 blocks**, vanilla-noise Overworld → **0**, `BUILDING13_SELFTEST=1` → `EXIT:1` |
 | structure types assembled in Java | `blocked(no-structure-type-for-cities)` | no carried structure JSON for a jigsaw; none invented |
 | 5 legacy `.lang` files, 18 GUI textures, Java classes, editor/commands/GUI | not ported (out of tier) | no carried art; no equivalent hook or screen at this pin |
 | items/blocks/models/recipes/advancements/biomes | not in artefact | census above |
 
-## Verification (fresh, 2026-11-24, version 0.1.12)
+## Verification (fresh, 2026-11-24, version 0.1.13)
 
-Pin `0a875da…`, mixins `e59da909…`, package **`the_lost_cities.hmod` 41,367 B,
-SHA-256 `d8ce8f41fa661c5af889f66dc6af7d46ccd32a054f686cc3181a55c3a9ed4749`,
+Pin `0a875da…`, mixins `e59da909…`, package **`the_lost_cities.hmod` 42,792 B,
+SHA-256 `f1082558eb462ed18323ff456904d0307b24ed323d928663dda7cda596f55f41`,
 17 entries**. Full table in [`VALIDATION.md`](VALIDATION.md).
 
 - `tools/carry.py --check` green against the final tree (9 carried, 2 loot tables
@@ -874,13 +934,14 @@ SHA-256 `d8ce8f41fa661c5af889f66dc6af7d46ccd32a054f686cc3181a55c3a9ed4749`,
   `BUILDING_1_2_PART_JSON`/`BUILDING_1_2_PALETTE_JSON`, slice 10's 3 unresolved
   `CENTER00_1_PART_JSON`/`CENTER00_1_PALETTE_JSON`, slice 11's 3 unresolved
   `SHOPPING_OPEN01_1_PART_JSON`/`SHOPPING_OPEN01_1_PALETTE_JSON`, slice 12's
-  3 unresolved `STAIRSNORMAL_PART_JSON`/`STAIRSNORMAL_PALETTE_JSON` and slice
-  13's 2 unresolved `STAIRSBIG_PART_JSON` symbols above. Final suite:
-  **31 passed / 0 failed**; `cargo clippy --all-targets -- -D warnings` clean
-  (0 warnings); `rustfmt --check` clean. `sdk-test.log` regenerated for 0.1.12
-  **after** the final build; the 0.1.11 log retired to `retired-0.1.11/`.
-- `cargo horizon-mod check` on the package: *0.1.12,
-  native-1/0a875da…, 41,367 bytes, sha d8ce8f41…*. No new API item or SDK
+  3 unresolved `STAIRSNORMAL_PART_JSON`/`STAIRSNORMAL_PALETTE_JSON`, slice
+  13's 2 unresolved `STAIRSBIG_PART_JSON` and slice 14's 3 unresolved
+  `BUILDING_1_3_PART_JSON`/`BUILDING_1_3_PALETTE_JSON` symbols above. Final
+  suite: **33 passed / 0 failed**; `cargo clippy --all-targets -- -D warnings`
+  clean (0 warnings); `rustfmt --check` clean. `sdk-test.log` regenerated for
+  0.1.13 **after** the final build; the 0.1.12 log retired to `retired-0.1.12/`.
+- `cargo horizon-mod check` on the package: *0.1.13,
+  native-1/0a875da…, 42,792 bytes, sha f1082558…*. No new API item or SDK
   surface was needed (132 API items).
 - `fits --build 0a875da`: **`made for`**. `fits --build 0b14f8a`: **`fits`** —
   the chunk-generator registrar and `DimensionSettings` exist in both cached
@@ -888,25 +949,22 @@ SHA-256 `d8ce8f41fa661c5af889f66dc6af7d46ccd32a054f686cc3181a55c3a9ed4749`,
   green line is honest. No local type or variant named `Block`/`Item` was
   introduced (the false-fail trap).
 - Launcher native build: **`Compiling the_lost_cities (1 of 1)`**, tag
-  `native-0a875da-c7278b6a0130`; `native-mods.json` names **0.1.12** (checked
+  `native-0a875da-41b649dac223`; `native-mods.json` names **0.1.13** (checked
   before the legs, so a concurrent build's prune cannot make the legs test a
-  stale mod). Before the build the installed `native-*` tags carried no
-  the_lost_cities entry, and after it exactly one did (0.1.12); no exit 10 from
-  a concurrent native build occurred.
+  stale mod). Before the build the one installed `native-*` tag carrying
+  the_lost_cities (0.1.12, `native-0a875da-c7278b6a0130`) was moved aside to
+  `stale-tags/`; after it exactly one did (0.1.13); no exit 10 from a concurrent
+  native build occurred.
 - `verify-sdk-package.py the_lost_cities` → **1/1** (incl. "package matches the
   tree" — README/manifest/Cargo/src edited before the final build, and the
-  1,596-byte large-stair part verified byte-identically inside the packed
+  2,618-byte building1_3 part verified byte-identically inside the packed
   archive); `check-e2e-logs.py the_lost_cities-e2e --strict` →
-  `logs=16 ok=16 missing-exit=0 bad-exit=0`;
+  `logs=17 ok=17 missing-exit=0 bad-exit=0`;
   `check-skills.py --notes ports/the_lost_cities --strict` → PASS;
   `tools/carry.py --check` → 9 carried; `check-recipe-types.py`/`check-manifest-deps.py`
-  clean. All 16 legs were re-run against 0.1.12 with `E2E_TMP` taken from
-  `launcher-game.sh env` (`/home/adlf/.cache/horizon-e2e/scratch`, not `/tmp`).
-  Three legs (selftest/city-selftest/building-selftest) and two more
-  (split-selftest/down2-selftest) first died at `the game did not become ready`
-  or at a mid-leg connection under four concurrent `W1-*` e2e slots; each was
-  re-run in-turn with `E2E_CTL_TIMEOUT=180/240` until it reached its intended
-  `FAIL:` verdict, and only those genuine logs are retained.
+  clean. All 17 legs were run against 0.1.13 with `E2E_TMP` taken from
+  `launcher-game.sh env` (`/home/adlf/.cache/horizon-e2e/scratch`, not `/tmp`),
+  each blocking in its own slot until `EXIT:`; no leg needed a re-run.
 
 ### In-game `ctl` transcript (The End + lostcity, seed 20261105, offscreen, creative)
 
@@ -967,22 +1025,27 @@ ctl command "execute in lostcities:lostcity run fill 0 164 0 16 170 16 minecraft
    -> {"chat":["Successfully filled 42 block(s)"],"ok":true}    # large stair's / char at y=164..170 (36 in-part)
 ctl command "fill 0 164 0 16 170 16 minecraft:air replace minecraft:stone_stairs"  # Overworld console
    -> {"chat":["No blocks were filled"],"ok":true}              # vanilla-noise control = 0
+ctl command "execute in lostcities:lostcity run fill 0 176 0 16 181 16 minecraft:air replace minecraft:water"
+   -> {"chat":["Successfully filled 168 block(s)"],"ok":true}   # third building's W char at y=176..181
+ctl command "fill 0 176 0 16 181 16 minecraft:air replace minecraft:water"  # Overworld console
+   -> {"chat":["No blocks were filled"],"ok":true}              # vanilla-noise control = 0
 ctl command "execute if block 50 80 50 #lostcities:notbreakable"
    -> {"chat":["Test passed"],"ok":true}
 ctl command "execute if block 50 80 50 #lostcities:no_such_tag"
    -> "Unknown block tag 'lostcities:no_such_tag'"
-ctl command "loot give @p loot lostcities:chests/lostcitychest"  -> Dropped 3 [Diamond]
-ctl command "loot give @p loot lostcities:chests/raildungeonchest" -> Dropped 4 items
+ctl command "loot give @p loot lostcities:chests/lostcitychest"  -> Dropped 4 items
+ctl command "loot give @p loot lostcities:chests/raildungeonchest" -> Dropped 3 items
 ctl command "loot give @p loot lostcities:chests/no_such_table"
    -> "Can't find element '…' in registry 'minecraft:loot_table'"
-PASS: the lostcity dimension answered, all twelve decoded parts authored their own blocks
+PASS: the lostcity dimension answered, all thirteen decoded parts authored their own blocks
       in it (136 slabs at y=90, 4 bookshelves at y=72, 48 east_west rails at y=54..59,
       10 north_south rails at y=36..41, 1 north_east rail at y=18..23, 21
       ascending_east rails at y=4..21, 30 iron bars at y=100..111, 3 quartz
       blocks at y=116..121, 12 quartz stairs at y=128..133, 18 cobblestone
-      walls at y=140..145, 28 stone stairs at y=152..158 and 42 stone stairs
-      at y=164..170 — each 0 on vanilla noise), #lostcities:notbreakable matched
-      bedrock, and both carried loot tables yielded items
+      walls at y=140..145, 28 stone stairs at y=152..158, 42 stone stairs
+      at y=164..170 and 168 water blocks at y=176..181 — each 0 on vanilla
+      noise), #lostcities:notbreakable matched bedrock, and both carried loot
+      tables yielded items
 EXIT:0
 ```
 
@@ -1014,46 +1077,52 @@ assertion expected 0` + `EXIT:1`; `STAIRS_SELFTEST=1` ends
 `FAIL: STAIRS_SELFTEST: the part authored 28 stone stair(s); the inverted
 assertion expected 0` + `EXIT:1`; `STAIRSBIG_SELFTEST=1` ends
 `FAIL: STAIRSBIG_SELFTEST: the part authored 42 stone stair(s); the inverted
+assertion expected 0` + `EXIT:1`; `BUILDING13_SELFTEST=1` ends
+`FAIL: BUILDING13_SELFTEST: the part authored 168 water block(s); the inverted
 assertion expected 0` + `EXIT:1`. The pre-fix loot counterfactual
 (`Dropped 0 items`) is preserved in `the_lost_cities/loot-probe.log`.
-Logs: `ports/_shared/evidence/the_lost_cities-e2e/e2e{,-control,-selftest,-tag-selftest,-city-selftest,-building-selftest,-rails-selftest,-bend-selftest,-split-selftest,-down2-selftest,-down1-selftest,-building12-selftest,-center001-selftest,-shopping1-selftest,-stairs-selftest,-stairsbig-selftest}.log`;
+Logs: `ports/_shared/evidence/the_lost_cities-e2e/e2e{,-control,-selftest,-tag-selftest,-city-selftest,-building-selftest,-rails-selftest,-bend-selftest,-split-selftest,-down2-selftest,-down1-selftest,-building12-selftest,-center001-selftest,-shopping1-selftest,-stairs-selftest,-stairsbig-selftest,-building13-selftest}.log`;
 the 0.1.2 logs are retired to `retired-0.1.2/`.
 
 ## Next slice
 
-**Family:** decode the next standard-style building part,
-`parts/building1_3.json`, whose `W` char adds a genuinely new block id. Measured
-from the cached jar before this proposal (sha `666cd25d…`, verified with
-`unzip -p`): **2,618 B**, sha256
-`93cd0a5bac82a1e54b838f70a2e5366db4d4e54f33f087271426050f26ef9974`; `xsize: 16`,
-`zsize: 16`, no `refpalette`, **6 slices**, 1,206 non-space cells. Exact census:
-`#` 784, `a` 186, `W` 168, `:` 30, `@` 24, `l` 6, `L` 3, `F` 2, `1` 2, `T` 1.
-The 168 `W` cells occupy x=1..14, z=1 in slices 1..3 (56 per slice), verified
-from the bytes. `W` is **absent** from every carried palette: the jar's
-`palettes/common.json` says `W` → `minecraft:water`, so the agent must copy that
-one entry verbatim into a new merged building palette (the other chars reuse
-`BUILDING_PALETTE_JSON` and the stonebrick variant). No id or char may be
-invented; the part bytes must be embedded byte-identically and their sha
-re-verified after rustfmt and inside the packed archive.
+**Family:** decode the next standard-style city-centre part,
+`parts/center00_2.json`, whose `C` char adds a genuinely new block id — a chest.
+Measured from the cached jar before this proposal (sha `666cd25d…`, verified
+with `unzip -p`): **2,618 B**, sha256
+`3fdc948a024ae6100518f23c434137f27462b597a003f00cfd2e47ba9b99349e`; `xsize: 16`,
+`zsize: 16`, no `refpalette`, **6 slices**, 771 non-space cells. Exact census:
+`#` 420, `Q` 107, `S` 97, `a` 126, `)` 12, `1` 5, `C` 2, `4` 1, `T` 1. The two
+`C` cells are at (x,y,z) (3,1,11) and (4,1,11); the one `4` cell at (7,3,11) —
+read from the bytes. `C` is **absent** from every carried palette: the jar's
+`palettes/common.json` says `C` → `minecraft:chest[facing=north]` with a
+`loot: chestloot` field (the decoder ignores `loot` exactly as it ignores `mob`).
+The `4` → `minecraft:spawner` (`mob: hardmobs`) entry of the same `common.json`
+file shares the already-placed spawner id. The agent must copy the one new `C`
+entry verbatim into a new merged centre palette based on
+`CENTER00_1_PALETTE_JSON` (which already carries `#`/`a`/`Q`/`S`/`)`/`1`/`T`
+from the standard groups); no id or char may be invented. The part bytes must be
+embedded byte-identically (escaped literal — brick rows begin `"#`) and their
+sha re-verified after rustfmt and inside the packed archive.
 
-**Gap line:** the coverage table above, *"12 parts decoded / 196
-`blocked(no-city-data-decoder)` … the other 196 parts and all buildings/
-palettes/multibuildings have no decoder"*. The new slice moves the count to 13 / 195.
+**Gap line:** the coverage table above, *"13 parts decoded / 195
+`blocked(no-city-data-decoder)` … the other 195 parts and all buildings/
+palettes/multibuildings have no decoder"*. The new slice moves the count to 14 / 194.
 
 **Tier fit:** `deep` worldgen; the registrar/`ChunkAccess` surface and the
-generic `variant`/`frompalette`/multi-layer decoder are proven by slices 2–13.
+generic `variant`/`frompalette`/multi-layer decoder are proven by slices 2–14.
 One more 16x16 six-layer part needs no new decoder form, SDK API, renderer or
-manifest key. Place it at y=176..181, the next sealed band above `stairsbig`
-(y=164..170) inside the dimension's 256 height. Red first: a `building1_3_tests`
-module with a 6-layer shape assertion and a `W`/water id assertion against
-missing `BUILDING_1_3_PART_JSON`/`BUILDING_1_3_PALETTE_JSON` must fail to compile.
+manifest key. Place it at y=188..193, the next sealed band above building1_3
+(y=176..181) inside the dimension's 256 height. Red first: a `center00_2_tests`
+module with a 6-layer shape assertion and a `C`/`minecraft:chest[facing=north]`
+id assertion against missing `CENTER00_2_PART_JSON`/`CENTER00_2_PALETTE_JSON`
+must fail to compile.
 
 **Concrete `ctl` assertion:** run
-`ctl command "execute in lostcities:lostcity run fill 0 176 0 16 181 16 minecraft:air replace minecraft:water"`
-and assert a parsed count `> 0` (168 `W` cells, plus neighbours in the inclusive
-17×17 window), the same fill on the vanilla-noise Overworld answers
-`No blocks were filled` (the agent must measure this at the same y band — if
-natural water occurs there, fall back to `center00_2`'s `C` chest instead and
-record why), and `BUILDING13_SELFTEST=1` inverts the count and ends `EXIT:1`.
-All sixteen existing legs stay green
-(`check-e2e-logs.py the_lost_cities-e2e --strict` → 17/17 logs).
+`ctl command "execute in lostcities:lostcity run fill 0 188 0 16 193 16 minecraft:air replace minecraft:chest"`
+and assert a parsed count `> 0` (2 `C` cells, plus the inclusive 17×17 fill
+window), the same fill on the vanilla-noise Overworld answers
+`No blocks were filled`, and `CENTER002_SELFTEST=1` inverts the count and ends
+`EXIT:1`. A parsed `facing=north` read-back of the chest state is the honest
+assertion if the fill window makes the count ambiguous. All seventeen existing
+legs stay green (`check-e2e-logs.py the_lost_cities-e2e --strict` → 18/18 logs).
