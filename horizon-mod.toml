@@ -1,10 +1,12 @@
 id = "the_lost_cities"
 name = "The Lost Cities"
-version = "0.1.0"
-description = """Generate cities all over the world. This first slice carries The Lost Cities'
-block tags, chest loot tables and language file, and registers the lostcities:lostcity
-dimension from the jar's dimension_type values. City terrain generation is not yet
-expressible: the pin has no configured-feature registrar and R11 refuses a level reset."""
+version = "0.1.1"
+description = """Generate cities all over the world. This slice registers the lostcities:lostcity
+dimension from the jar's dimension_type values with a deterministic city chunk generator:
+one jar part and its palette are decoded by a clean-room Rust decoder and laid across the
+level. Block tags, chest loot tables and the language file are carried as before. The other
+207 parts and Java-assembled structures remain blocked: the pin has no configured-feature
+registrar and R11 refuses a level reset."""
 authors = ["McJty (upstream, MIT)", "AdLf0208 (port)"]
 api = "0.2"
 side = "both"

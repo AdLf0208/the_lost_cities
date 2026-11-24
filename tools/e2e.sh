@@ -11,6 +11,7 @@
 #   GAME=$CONTROL -> FAIL EXIT:1  (the unmodded game knows neither the dimension nor the tag)
 #   SELFTEST=1    -> FAIL EXIT:1  (inverted dimension assertion)
 #   TAG_SELFTEST=1-> FAIL EXIT:1  (inverted tag assertion)
+#   CITY_SELFTEST=1 -> FAIL EXIT:1 (inverted generator-authored block count)
 set -euo pipefail
 export LC_ALL=C
 
@@ -23,6 +24,7 @@ SOCK=${SOCK:-/tmp/opencode/the_lost_cities-e2e.sock}
 E2E_TMP=${E2E_TMP:-/tmp/opencode}
 SELFTEST=${SELFTEST:-0}
 TAG_SELFTEST=${TAG_SELFTEST:-0}
+CITY_SELFTEST=${CITY_SELFTEST:-0}
 
 [ -n "$CTL" ] && [ -n "$GAME" ] || { echo "missing CTL/GAME: eval \"\$(ports/tools/launcher-game.sh env the_lost_cities)\"" >&2; exit 1; }
 [ -x "$CTL" ] || { echo "missing horizon-ctl: $CTL" >&2; exit 1; }
@@ -109,6 +111,36 @@ block_chat=$(echo "$block_reply" | jq -r '.chat[0] // ""' 2>/dev/null || echo ""
 echo "dimension block reply: $block_chat"
 [ "$SELFTEST" = 1 ] || grep -q 'Successfully filled 1 block' <<<"$block_chat" \
     || fail "the dimension level did not hold the written stone: $block_reply"
+
+# Slice 2: the dimension's own chunk generator lays the decoded jar part. The
+# assertion replaces the exact block the part's palette resolves to
+# (`minecraft:smooth_stone_slab[type=double]`, see palettes/default.json); the
+# brief's illustrative `minecraft:stone` is not in any jar palette, so using it
+# would invent content. The same fill on the vanilla-noise Overworld is the
+# control: natural terrain has no smooth stone slabs there, so its count is 0.
+say "deterministic city generator authors blocks in its own dimension"
+city_reply=$(lc "fill 0 60 0 16 90 16 minecraft:air replace minecraft:smooth_stone_slab" 2>&1 || true)
+city_chat=$(echo "$city_reply" | jq -r '.chat[0] // ""' 2>/dev/null || echo "")
+echo "city generator fill: $(echo "$city_reply" | jq -c . 2>/dev/null | head -c 180)"
+city_count=$(echo "$city_chat" | grep -oE 'Successfully filled [0-9]+ block' | grep -oE '[0-9]+' || echo 0)
+city_count=${city_count:-0}
+echo "generator-authored slab count: $city_count"
+vanilla_reply=$(ctl command "fill 0 60 0 16 90 16 minecraft:air replace minecraft:smooth_stone_slab" 2>&1 || true)
+vanilla_chat=$(echo "$vanilla_reply" | jq -r '.chat[0] // ""' 2>/dev/null || echo "")
+echo "vanilla-noise control fill: $(echo "$vanilla_reply" | jq -c . 2>/dev/null | head -c 180)"
+vanilla_count=$(echo "$vanilla_chat" | grep -oE 'Successfully filled [0-9]+ block' | grep -oE '[0-9]+' || echo 0)
+vanilla_count=${vanilla_count:-0}
+echo "vanilla-noise slab count: $vanilla_count"
+if [ "$CITY_SELFTEST" = 1 ]; then
+    [ "$city_count" -eq 0 ] \
+        || fail "CITY_SELFTEST: the generator authored $city_count slab(s); the inverted assertion expected 0"
+    echo "CITY_SELFTEST: no generator-authored blocks (unexpected)"
+else
+    [ "$city_count" -gt 0 ] \
+        || fail "the chunk generator authored no city slabs: $city_reply"
+    [ "$vanilla_count" -eq 0 ] \
+        || fail "the vanilla-noise control unexpectedly had $vanilla_count slab(s): $vanilla_reply"
+fi
 
 say "carried block tag #lostcities:notbreakable matches bedrock"
 end "setblock 50 80 50 minecraft:bedrock" >/dev/null
