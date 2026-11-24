@@ -9,7 +9,8 @@ Java 26.3), pinned to SDK `0a875da91dbb0fdcb7ba8c42c11341aa229af51a` and
 horizon-mixins `e59da9094f0c2fdda6c627fe9eff22dec6a906f0`. It is a first
 publication at version **0.1.0**; the city-generator slice shipped as **0.1.1**, the
 second multi-layer building part as **0.1.2**, the horizontal rail line as **0.1.3**,
-the rail bend as **0.1.4** and the three-way rail split as **0.1.5**.
+the rail bend as **0.1.4**, the three-way rail split as **0.1.5** and the
+eighteen-layer rail descent as **0.1.6**.
 
 ## What this version implements
 
@@ -68,12 +69,23 @@ the rail bend as **0.1.4** and the three-way rail split as **0.1.5**.
    fill-replaces `rail[shape=north_east]` at y=12..26, where vanilla noise fills
    nothing. No new decoder form, SDK API or manifest key was needed.
 
+- **A sixth, eighteen-layer rail descent** (0.1.6): `parts/rails_down2.json`
+   (16x16, **18 slices**, `refpalette: "rails"`, embedded byte-identically from
+   the cached jar, sha256 `f2f6eba…`) is decoded with the same verbatim
+   `palettes/rails.json` entries and laid at y=4. Its `j`/`i` chars resolve to
+   `minecraft:rail[shape=ascending_east]` and
+   `minecraft:powered_rail[powered=true,shape=ascending_east]` — shapes none of
+   the other five decoded parts writes. The in-game assertion fill-replaces
+   `rail[shape=ascending_east]` at y=0..24, where vanilla noise fills nothing.
+   The decoder's layer bound is generic, so no new decoder form, SDK API or
+   manifest key was needed.
+
 ## What it does **not** implement
 
-- **The other 203 parts, 38 buildings, 31 palettes, 15 multibuildings, the
+- **The other 202 parts, 38 buildings, 31 palettes, 15 multibuildings, the
   spheres/rail dungeons and Java-assembled structures** — still
   `blocked(no-city-data-decoder)` / `blocked(no-structure-type-for-cities)`:
-  this port decodes exactly five parts and the palette entries they use.
+  this port decodes exactly six parts and the palette entries they use.
 - **Replacing vanilla terrain in the Overworld** — `blocked(level_reset:R11)`:
   the Java mod's mixins replace vanilla levels; the pin has no `levels_reset`
   surface and R11 refuses the manifest key. This port generates cities only in

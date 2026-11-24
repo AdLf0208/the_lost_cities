@@ -16,6 +16,7 @@
 #   RAILS_SELFTEST=1 -> FAIL EXIT:1 (inverted rail count of the horizontal rail line)
 #   BEND_SELFTEST=1  -> FAIL EXIT:1 (inverted north_south rail count of the bend)
 #   SPLIT_SELFTEST=1 -> FAIL EXIT:1 (inverted north_east rail count of the 3split)
+#   DOWN2_SELFTEST=1 -> FAIL EXIT:1 (inverted ascending_east rail count of the descent)
 set -euo pipefail
 export LC_ALL=C
 
@@ -33,6 +34,7 @@ BUILDING_SELFTEST=${BUILDING_SELFTEST:-0}
 RAILS_SELFTEST=${RAILS_SELFTEST:-0}
 BEND_SELFTEST=${BEND_SELFTEST:-0}
 SPLIT_SELFTEST=${SPLIT_SELFTEST:-0}
+DOWN2_SELFTEST=${DOWN2_SELFTEST:-0}
 
 [ -n "$CTL" ] && [ -n "$GAME" ] || { echo "missing CTL/GAME: eval \"\$(ports/tools/launcher-game.sh env the_lost_cities)\"" >&2; exit 1; }
 [ -x "$CTL" ] || { echo "missing horizon-ctl: $CTL" >&2; exit 1; }
@@ -269,6 +271,37 @@ else
         || fail "the vanilla-noise control unexpectedly had $vanilla_split_count north_east rail(s): $vanilla_split_reply"
 fi
 
+# Slice 7: the sixth, eighteen-layer rail descent is laid at DOWN2_BASE_Y=4.
+# Its `j` char resolves to `minecraft:rail[shape=ascending_east]` in
+# palettes/rails.json — a shape none of the other five decoded parts writes
+# (they use east_west, north_south, north_west, south_west, north_east and
+# south_east). So an ascending_east count at y=0..24 can only come from this
+# part. The same fill on the vanilla-noise Overworld must report `No blocks
+# were filled`; DOWN2_SELFTEST inverts it.
+say "eighteen-layer rail descent authors ascending_east rails at the sixth Y"
+down2_reply=$(lc "fill 0 0 0 16 24 16 minecraft:air replace minecraft:rail[shape=ascending_east]" 2>&1 || true)
+down2_chat=$(echo "$down2_reply" | jq -r '.chat[0] // ""' 2>/dev/null || echo "")
+echo "ascending_east rail descent fill: $(echo "$down2_reply" | jq -c . 2>/dev/null | head -c 180)"
+down2_count=$(echo "$down2_chat" | grep -oE 'Successfully filled [0-9]+ block' | grep -oE '[0-9]+' || echo 0)
+down2_count=${down2_count:-0}
+echo "descent-authored ascending_east rail count: $down2_count"
+vanilla_down2_reply=$(ctl command "fill 0 0 0 16 24 16 minecraft:air replace minecraft:rail[shape=ascending_east]" 2>&1 || true)
+vanilla_down2_chat=$(echo "$vanilla_down2_reply" | jq -r '.chat[0] // ""' 2>/dev/null || echo "")
+echo "vanilla-noise ascending_east rail control: $(echo "$vanilla_down2_reply" | jq -c . 2>/dev/null | head -c 180)"
+vanilla_down2_count=$(echo "$vanilla_down2_chat" | grep -oE 'Successfully filled [0-9]+ block' | grep -oE '[0-9]+' || echo 0)
+vanilla_down2_count=${vanilla_down2_count:-0}
+echo "vanilla-noise ascending_east rail count: $vanilla_down2_count"
+if [ "$DOWN2_SELFTEST" = 1 ]; then
+    [ "$down2_count" -eq 0 ] \
+        || fail "DOWN2_SELFTEST: the descent authored $down2_count ascending_east rail(s); the inverted assertion expected 0"
+    echo "DOWN2_SELFTEST: no descent-authored ascending_east rails (unexpected)"
+else
+    [ "$down2_count" -gt 0 ] \
+        || fail "the chunk generator authored no ascending_east rails: $down2_reply"
+    [ "$vanilla_down2_count" -eq 0 ] \
+        || fail "the vanilla-noise control unexpectedly had $vanilla_down2_count ascending_east rail(s): $vanilla_down2_reply"
+fi
+
 say "carried block tag #lostcities:notbreakable matches bedrock"
 end "setblock 50 80 50 minecraft:bedrock" >/dev/null
 ctl wait 5
@@ -297,12 +330,12 @@ echo "inventory before loot: $inv_before"
 loot_reply=$(ctl command "loot give @p loot lostcities:chests/lostcitychest" 2>&1 || true)
 loot_chat=$(echo "$loot_reply" | jq -r '.chat[0] // ""' 2>/dev/null || echo "")
 echo "lostcitychest: $loot_chat"
-grep -qE 'Dropped [1-9][0-9]* items' <<<"$loot_chat" \
+grep -qE 'Dropped [1-9][0-9]* (items|\[)' <<<"$loot_chat" \
     || fail "the carried city chest yielded no items (the 1.21.1 entry shape defect): $loot_reply"
 loot2_reply=$(ctl command "loot give @p loot lostcities:chests/raildungeonchest" 2>&1 || true)
 loot2_chat=$(echo "$loot2_reply" | jq -r '.chat[0] // ""' 2>/dev/null || echo "")
 echo "raildungeonchest: $loot2_chat"
-grep -qE 'Dropped [1-9][0-9]* items' <<<"$loot2_chat" \
+grep -qE 'Dropped [1-9][0-9]* (items|\[)' <<<"$loot2_chat" \
     || fail "the carried rail dungeon chest yielded no items: $loot2_reply"
 ctl wait 3 >/dev/null
 inv_after=$(ctl inventory 2>/dev/null | jq -r '[.slots[]? | select(.id != null)] | length' 2>/dev/null || echo 0)
@@ -318,4 +351,4 @@ echo "tags=$(find "$PORT/data/lostcities/tags" -name '*.json' | wc -l) " \
      "loot=$(find "$PORT/data/lostcities/loot_table" -name '*.json' | wc -l) " \
      "lang=$(find "$PORT/assets/lostcities/lang" -name '*.json' | wc -l)"
 
-echo "PASS: the lostcity dimension answered, all five decoded parts authored their own blocks in it (slabs, bookshelves, east_west rails, the bend's north_south rails and the split's north_east rails), #lostcities:notbreakable matched bedrock, and both carried loot tables yielded items"
+echo "PASS: the lostcity dimension answered, all six decoded parts authored their own blocks in it (slabs, bookshelves, east_west rails, the bend's north_south rails, the split's north_east rails and the descent's ascending_east rails), #lostcities:notbreakable matched bedrock, and both carried loot tables yielded items"

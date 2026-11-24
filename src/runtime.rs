@@ -1057,6 +1057,348 @@ pub const RAILS_3SPLIT_PART_JSON: &str = r#"{
   ]
 }"#;
 
+/// `parts/rails_down2.json` from the cached jar, verbatim (7,779 B, sha256
+/// `f2f6ebabe2ae71dc6c094496de0b90ebda97415ecc619b7c7b8c78161e65be89`):
+/// 16x16, **eighteen** slices, `refpalette: "rails"`. Its exact non-space chars
+/// are `y` 504, `~` 420, `j` 21, `i` 15, `f` 12, `g` 6 (978 cells). `j` and `i`
+/// are the `rail[shape=ascending_east]` and
+/// `powered_rail[powered=true,shape=ascending_east]` entries of
+/// `palettes/rails.json`, two shapes none of the first five decoded parts
+/// writes. The bytes below are copied straight from the artefact, checked
+/// against its sha; the palette/variant entries are the same verbatim tables
+/// the earlier rail parts use. No id or char was invented.
+pub const RAILS_DOWN2_PART_JSON: &str = r#"{
+  "xsize": 16,
+  "zsize": 16,
+  "refpalette": "rails",
+  "slices": [
+    [
+      "                ",
+      "                ",
+      "                ",
+      "yy              ",
+      "yy              ",
+      "yy              ",
+      "yyy             ",
+      "yy              ",
+      "yyy             ",
+      "yy              ",
+      "yy              ",
+      "yy              ",
+      "                ",
+      "                ",
+      "                ",
+      "                "
+    ],
+    [
+      "                ",
+      "                ",
+      "                ",
+      "yyy             ",
+      "yyy             ",
+      "fiy             ",
+      "yyg             ",
+      "fiy             ",
+      "yyg             ",
+      "fiy             ",
+      "yyy             ",
+      "yyy             ",
+      "                ",
+      "                ",
+      "                ",
+      "                "
+    ],
+    [
+      "                ",
+      "                ",
+      "                ",
+      "yyyy            ",
+      "~~yy            ",
+      "~~iy            ",
+      "~~yy            ",
+      "~~iy            ",
+      "~~yy            ",
+      "~~iy            ",
+      "~~yy            ",
+      "yyyy            ",
+      "                ",
+      "                ",
+      "                ",
+      "                "
+    ],
+    [
+      "                ",
+      "                ",
+      "                ",
+      "yyyyy           ",
+      "~~~yy           ",
+      "~~~jy           ",
+      "~~~yy           ",
+      "~~~jy           ",
+      "~~~yy           ",
+      "~~~jy           ",
+      "~~~yy           ",
+      "yyyyy           ",
+      "                ",
+      "                ",
+      "                ",
+      "                "
+    ],
+    [
+      "                ",
+      "                ",
+      "                ",
+      "yyyyyy          ",
+      "~~~~yy          ",
+      "~~~~jy          ",
+      "~~~~yy          ",
+      "~~~~jy          ",
+      "~~~~yy          ",
+      "~~~~jy          ",
+      "~~~~yy          ",
+      "yyyyyy          ",
+      "                ",
+      "                ",
+      "                ",
+      "                "
+    ],
+    [
+      "                ",
+      "                ",
+      "                ",
+      "yyyyyyy         ",
+      "y~~~~yy         ",
+      "y~~~~jy         ",
+      "y~~~~yy         ",
+      "y~~~~jy         ",
+      "y~~~~yy         ",
+      "y~~~~jy         ",
+      "y~~~~yy         ",
+      "yyyyyyy         ",
+      "                ",
+      "                ",
+      "                ",
+      "                "
+    ],
+    [
+      "                ",
+      "                ",
+      "                ",
+      " yyyyyyy        ",
+      " y~~~~yy        ",
+      " y~~~~jy        ",
+      " y~~~~yy        ",
+      " y~~~~jy        ",
+      " y~~~~yy        ",
+      " y~~~~jy        ",
+      " y~~~~yy        ",
+      " yyyyyyy        ",
+      "                ",
+      "                ",
+      "                ",
+      "                "
+    ],
+    [
+      "                ",
+      "                ",
+      "                ",
+      "  yyyyyyy       ",
+      "  y~~~~yy       ",
+      "  y~~~~iy       ",
+      "  y~~~~yyy      ",
+      "  y~~~~iy       ",
+      "  y~~~~yyy      ",
+      "  y~~~~iy       ",
+      "  y~~~~yy       ",
+      "  yyyyyyy       ",
+      "                ",
+      "                ",
+      "                ",
+      "                "
+    ],
+    [
+      "                ",
+      "                ",
+      "                ",
+      "   yyyyyyy      ",
+      "   y~~~~yy      ",
+      "   y~~~~iy      ",
+      "   y~~~~yg      ",
+      "   y~~~~iy      ",
+      "   y~~~~yg      ",
+      "   y~~~~iy      ",
+      "   y~~~~yy      ",
+      "   yyyyyyy      ",
+      "                ",
+      "                ",
+      "                ",
+      "                "
+    ],
+    [
+      "                ",
+      "                ",
+      "                ",
+      "    yyyyyyy     ",
+      "    y~~~~yy     ",
+      "    y~~~~iy     ",
+      "    y~~~~yy     ",
+      "    y~~~~iy     ",
+      "    y~~~~yy     ",
+      "    y~~~~iy     ",
+      "    y~~~~yy     ",
+      "    yyyyyyy     ",
+      "                ",
+      "                ",
+      "                ",
+      "                "
+    ],
+    [
+      "                ",
+      "                ",
+      "                ",
+      "     yyyyyyy    ",
+      "     y~~~~yy    ",
+      "     y~~~~jy    ",
+      "     y~~~~yy    ",
+      "     y~~~~jy    ",
+      "     y~~~~yy    ",
+      "     y~~~~jy    ",
+      "     y~~~~yy    ",
+      "     yyyyyyy    ",
+      "                ",
+      "                ",
+      "                ",
+      "                "
+    ],
+    [
+      "                ",
+      "                ",
+      "                ",
+      "      yyyyyyy   ",
+      "      y~~~~yy   ",
+      "      y~~~~jy   ",
+      "      y~~~~yy y ",
+      "      y~~~~jy   ",
+      "      y~~~~yy y ",
+      "      y~~~~jy   ",
+      "      y~~~~yy   ",
+      "      yyyyyyy   ",
+      "                ",
+      "                ",
+      "                ",
+      "                "
+    ],
+    [
+      "                ",
+      "                ",
+      "                ",
+      "       yyyyyyyyy",
+      "       y~~~~yyyy",
+      "       y~~~~jyyy",
+      "       y~~~~yygy",
+      "       y~~~~jyyy",
+      "       y~~~~yygy",
+      "       y~~~~jyyy",
+      "       y~~~~yyyy",
+      "       yyyyyyyyy",
+      "                ",
+      "                ",
+      "                ",
+      "                "
+    ],
+    [
+      "                ",
+      "                ",
+      "                ",
+      "        yyyyyyyy",
+      "        y~~~~yyy",
+      "        y~~~~fff",
+      "        y~~~~yyy",
+      "        y~~~~fff",
+      "        y~~~~yyy",
+      "        y~~~~fff",
+      "        y~~~~yyy",
+      "        yyyyyyyy",
+      "                ",
+      "                ",
+      "                ",
+      "                "
+    ],
+    [
+      "                ",
+      "                ",
+      "                ",
+      "         yyyyyyy",
+      "         y~~~~~~",
+      "         y~~~~~~",
+      "         y~~~~~~",
+      "         y~~~~~~",
+      "         y~~~~~~",
+      "         y~~~~~~",
+      "         y~~~~~~",
+      "         yyyyyyy",
+      "                ",
+      "                ",
+      "                ",
+      "                "
+    ],
+    [
+      "                ",
+      "                ",
+      "                ",
+      "          yyyyyy",
+      "          y~~~~~",
+      "          y~~~~~",
+      "          y~~~~~",
+      "          y~~~~~",
+      "          y~~~~~",
+      "          y~~~~~",
+      "          y~~~~~",
+      "          yyyyyy",
+      "                ",
+      "                ",
+      "                ",
+      "                "
+    ],
+    [
+      "                ",
+      "                ",
+      "                ",
+      "           yyyyy",
+      "           y~~~~",
+      "           y~~~~",
+      "           y~~~~",
+      "           y~~~~",
+      "           y~~~~",
+      "           y~~~~",
+      "           y~~~~",
+      "           yyyyy",
+      "                ",
+      "                ",
+      "                ",
+      "                "
+    ],
+    [
+      "                ",
+      "                ",
+      "                ",
+      "            yyyy",
+      "            yyyy",
+      "            yyyy",
+      "            yyyy",
+      "            yyyy",
+      "            yyyy",
+      "            yyyy",
+      "            yyyy",
+      "            yyyy",
+      "                ",
+      "                ",
+      "                ",
+      "                "
+    ]
+  ]
+}"#;
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1617,5 +1959,136 @@ mod split_tests {
             !has_east_shape(&bend),
             "the bend must not write an east-facing rail"
         );
+    }
+}
+
+/// Slice 7: the sixth part, the eighteen-layer rail descent. These tests are
+/// written before the part data exists so the gap is proved red first:
+/// `RAILS_DOWN2_PART_JSON` is unresolved until the part is carried verbatim
+/// from the cached jar. Every id and count below is read from the artefact —
+/// in particular `j` = `rail[shape=ascending_east]` and `i` =
+/// `powered_rail[powered=true,shape=ascending_east]` from `palettes/rails.json`,
+/// two shapes none of the first five decoded parts writes.
+#[cfg(test)]
+mod down2_tests {
+    use super::*;
+
+    /// The jar's `parts/rails_down2.json` is 16x16 with eighteen slices, all
+    /// rows the declared width — the same bound check as the other parts, just
+    /// a taller stack spanning y=4..21 when laid at the sixth Y.
+    #[test]
+    fn embedded_down2_part_has_eighteen_16x16_layers() {
+        let part =
+            Part::from_json(&parse_json(RAILS_DOWN2_PART_JSON).expect("jar down2 part parses"))
+                .expect("jar down2 part decodes");
+        assert_eq!(part.xsize, 16, "jar xsize");
+        assert_eq!(part.zsize, 16, "jar zsize");
+        assert_eq!(part.slices.len(), 18, "the descent has eighteen slices");
+        for (y, layer) in part.slices.iter().enumerate() {
+            assert_eq!(layer.len(), 16, "slice {y} has 16 rows");
+            for (z, row) in layer.iter().enumerate() {
+                assert_eq!(row.chars().count(), 16, "slice {y} row {z} is 16 chars");
+            }
+        }
+    }
+
+    /// The descent's `j` and `i` chars resolve to the exact ascending_east rail
+    /// ids of `palettes/rails.json` — the two shapes the in-game fill assertion
+    /// detects, and which no other decoded part writes. Every count is the
+    /// artefact's per-part census, not the whole filled window.
+    #[test]
+    fn down2_chars_resolve_to_the_jar_ascending_rail_shapes() {
+        let variants = VariantTable::from_files(&[("stonebrick", STONEBRICK_VARIANT_JSON)])
+            .expect("the jar's stonebrick variant decodes");
+        let placements =
+            decode_city_with_variants(RAILS_DOWN2_PART_JSON, RAILS_PALETTE_JSON, &variants)
+                .expect("the embedded jar down2 part and merged palette decode");
+
+        let cell = |dx: usize, dy: usize, dz: usize| -> (String, Vec<(String, String)>) {
+            let p = placements
+                .iter()
+                .find(|p| p.dx == dx && p.dy == dy && p.dz == dz)
+                .expect("a down2 cell at the expected coordinate");
+            (p.block.clone(), p.properties.clone())
+        };
+        let (id, props) = cell(3, 3, 5);
+        assert_eq!(id, "minecraft:rail", "the j char is a rail");
+        assert_eq!(
+            props,
+            vec![("shape".to_string(), "ascending_east".to_string())],
+            "the j char is palettes/rails.json ascending_east rail"
+        );
+        let (id, props) = cell(1, 1, 5);
+        assert_eq!(id, "minecraft:powered_rail", "the i char is a powered rail");
+        assert_eq!(
+            props,
+            vec![
+                ("powered".to_string(), "true".to_string()),
+                ("shape".to_string(), "ascending_east".to_string()),
+            ],
+            "the i char is palettes/rails.json powered ascending_east rail"
+        );
+
+        // Exact per-part census of the artefact's 978 non-space cells: 21 j,
+        // 15 i, 12 f and 6 g. The y/~/space entries are already pinned by the
+        // earlier parts' tests through the same variant/palette tables.
+        let count = |block: &str, shape: &str| {
+            placements
+                .iter()
+                .filter(|p| {
+                    p.block == block && p.properties.iter().any(|(k, v)| k == "shape" && v == shape)
+                })
+                .count()
+        };
+        assert_eq!(
+            count("minecraft:rail", "ascending_east"),
+            21,
+            "twenty-one j cells"
+        );
+        assert_eq!(
+            count("minecraft:powered_rail", "ascending_east"),
+            15,
+            "fifteen i cells"
+        );
+        assert_eq!(
+            count("minecraft:powered_rail", "east_west"),
+            12,
+            "twelve f cells"
+        );
+
+        // Differential: none of the first five decoded parts writes either
+        // ascending_east shape, so an in-game ascending_east rail count can
+        // only come from this part.
+        let has_ascending_east = |ps: &[Placement]| {
+            ps.iter().any(|p| {
+                p.properties
+                    .iter()
+                    .any(|(k, v)| k == "shape" && v == "ascending_east")
+            })
+        };
+        let street = decode_city(STREET_PART_JSON, STREET_PALETTE_JSON)
+            .expect("the embedded street part decodes");
+        let building =
+            decode_city_with_variants(BUILDING_PART_JSON, BUILDING_PALETTE_JSON, &variants)
+                .expect("the embedded building part decodes");
+        let horizontal = decode_city_with_variants(RAILS_PART_JSON, RAILS_PALETTE_JSON, &variants)
+            .expect("the embedded horizontal rail part decodes");
+        let bend = decode_city_with_variants(RAILS_BEND_PART_JSON, RAILS_PALETTE_JSON, &variants)
+            .expect("the embedded rail bend part decodes");
+        let split =
+            decode_city_with_variants(RAILS_3SPLIT_PART_JSON, RAILS_PALETTE_JSON, &variants)
+                .expect("the embedded rail split part decodes");
+        for (name, ps) in [
+            ("street", &street),
+            ("building", &building),
+            ("horizontal line", &horizontal),
+            ("bend", &bend),
+            ("split", &split),
+        ] {
+            assert!(
+                !has_ascending_east(ps),
+                "the {name} must not write an ascending_east rail"
+            );
+        }
     }
 }
